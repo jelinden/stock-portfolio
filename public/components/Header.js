@@ -1,8 +1,6 @@
 import React from 'react';
 import { Redirect, Link } from 'react-router-dom';
 import axios from 'axios';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 
 class Header extends React.Component {
 
