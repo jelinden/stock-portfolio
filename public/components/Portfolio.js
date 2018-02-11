@@ -20,6 +20,7 @@ class Portfolio extends React.Component {
     this.convertTimestamp = this.convertTimestamp.bind(this);
     this.portfolio = this.portfolio.bind(this);
     this.removeStock = this.removeStock.bind(this);
+    this.numberFormat = this.numberFormat.bind(this);
   }
 
   handleChange(date) {
@@ -55,6 +56,11 @@ class Portfolio extends React.Component {
         console.log('removed ' + symbol);
       });
     };
+  }
+
+  numberFormat(n) {
+    var parts = n.toString().split(".");
+    return parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ") + (parts[1] ? "." + parts[1] : "");
   }
 
   componentDidMount() {
@@ -113,12 +119,12 @@ class Portfolio extends React.Component {
                       <td>{item.symbol}</td>
                       <td class="right">{item.latestPrice}</td>
                       <td class="right">{this.convertTimestamp(item.latestUpdate)}</td>
-                      <td class="right">{item.latestPrice?(((item.latestPrice-item.close)/item.close)*100).toFixed(2):''}%</td>
+                      <td class="right">{item.latestPrice?this.numberFormat((((item.latestPrice-item.close)/item.close)*100).toFixed(2)):''}%</td>
                       <td class="right">{item.amount}</td>
-                      <td class="right">{(item.price).toFixed(2)}</td>
-                      <td class="right">{item.latestPrice?(item.latestPrice*item.amount).toFixed(2):''}</td>
+                      <td class="right">{this.numberFormat((item.price).toFixed(2))}</td>
+                      <td class="right">{(item.latestPrice?this.numberFormat((item.latestPrice*item.amount).toFixed(2)):'')}</td>
                       <td class="right">{item.latestPrice?(((item.latestPrice-(item.price/item.amount))/(item.price/item.amount))*100).toFixed(2):''}%</td>
-                      <td class="right">{item.close}</td>
+                      <td class="right">{this.numberFormat(item.close)}</td>
                       <td class="right">{this.convertTimestamp(item.closeTime)}</td>
                       <td class="right">{item.peRatio?(item.peRatio).toFixed(2):''}</td>
                       <td class="right"><a href="#" onClick={this.removeStock(item.symbol)}>(<span className="red delete"></span>)</a></td>
