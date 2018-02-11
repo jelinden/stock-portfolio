@@ -4,7 +4,6 @@ import Home from './Home'
 import Signup from './Signup'
 import Login from './Login'
 import Verify from './Verify'
-import Test from './Test'
 import Portfolio from './Portfolio'
 
 const Main = () => (
