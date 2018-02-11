@@ -106,6 +106,7 @@ class Portfolio extends React.Component {
                   <th>Remove</th>
               </tr>
             </thead>
+            <tbody>
                 {this.state.stocks ? this.state.stocks.map((item, index) => (
                     <tr>
                       <td>{item.companyName}</td>
@@ -123,23 +124,24 @@ class Portfolio extends React.Component {
                       <td class="right"><a href="#" onClick={this.removeStock(item.symbol)}>(<span className="red delete"></span>)</a></td>
                     </tr>
                 )):''}
-                <tfoot>
-                  <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th class="right">{(this.state.stocks !== 'undefined'?this.state.total:'').toFixed(2)}</th>
-                    <th class="right">{(this.state.stocks !== 'undefined'?this.state.currentTotal:'').toFixed(2)}</th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </tfoot>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th class="right">{(this.state.stocks !== 'undefined'?this.state.total:'').toFixed(2)}</th>
+                  <th class="right">{(this.state.stocks !== 'undefined'?this.state.currentTotal:'').toFixed(2)}</th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </tfoot>
             </table>
           </div>
           <div id="addstock">
