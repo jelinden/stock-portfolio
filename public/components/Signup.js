@@ -19,7 +19,7 @@ class Signup extends React.Component {
                 <label for="email">Email</label>
                 <input id="email" type="text" name="email" placeholder="my@email.com"/>
                 <label for="password">Password</label>
-                <input id="password" type="password" name="password" placeholder=""/>
+                <input id="password" type="password" name="password" placeholder="Over 8 characters"/>
                 <button type="submit" className="pure-button pure-button-primary">Signup</button>
               </form>
             </div>
