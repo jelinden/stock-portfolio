@@ -39,7 +39,10 @@ class Header extends React.Component {
     if (!this.state.user) {
       return null;
     }
-    if (!this.state.loggedin && location.pathname.indexOf('login') === -1 && location.pathname.indexOf('signup') === -1) {
+    if (!this.state.loggedin && 
+      location.pathname.indexOf('login') === -1 && 
+      location.pathname.indexOf('signup') === -1 && 
+      location.pathname.indexOf('verify') === -1) {
       return (
         <Redirect to={'/login'}/>
       )

@@ -29,7 +29,7 @@ class Login extends React.Component {
                 <label htmlFor="emailLogin">Email</label>
                 <input id="emailLogin" type="text" name="email" placeholder="my@email.com"/>
                 <label htmlFor="passwordLogin">Password</label>
-                <input id="passwordLogin" type="password" name="password" placeholder=""/>
+                <input id="passwordLogin" type="password" name="password" placeholder="Over 8 characters"/>
                 <button type="submit" className="pure-button pure-button-primary">Login</button>
             </form>
             </div>

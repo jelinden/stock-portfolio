@@ -51,31 +51,44 @@ func Signup(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	checkUsername := checkInput(username)
 	checkEmail := checkInput(emailParam)
 	checkPassword := checkInput(password)
-	if !checkEmail && !checkPassword && !checkUsername && util.ValidateEmail(emailParam) && len(password) > 8 {
-		if db.GetUser(emailParam).ID == "" {
-			user := domain.User{
-				Username:                username,
-				Password:                util.HashPassword([]byte(password), []byte(emailParam)),
-				Email:                   emailParam,
-				CreateDate:              time.Now().UTC().Format(time.RFC3339),
-				ModifyDate:              time.Now().UTC().Format(time.RFC3339),
-				EmailVerificationString: util.ShaHashString(emailParam),
-				ID:       util.GetID(),
-				RoleName: domain.Normal,
-			}
-			db.SaveUser(user)
-			email.SendVerificationEmail(emailParam, user.EmailVerificationString, config.Config.FromEmail, config.Config.EmailSendingPasswd)
-			w.Header().Add("Location", "/verify")
-		} else {
-			w.Header().Add("Location", "/login?emailused=true")
-		}
-		w.WriteHeader(302)
-		w.Write(nil)
-	} else {
-		w.Header().Add("Location", "/signup?charactervalidation=failed")
-		w.WriteHeader(302)
-		w.Write(nil)
+	if checkEmail || !util.ValidateEmail(emailParam) {
+		validationFailed(w, "email")
+		return
 	}
+	if checkPassword || len(password) < 8 {
+		validationFailed(w, "credentials")
+		return
+	}
+	if checkUsername {
+		validationFailed(w, "credentials")
+		return
+	}
+	if db.GetUser(emailParam).ID == "" {
+		user := domain.User{
+			Username:                username,
+			Password:                util.HashPassword([]byte(password), []byte(emailParam)),
+			Email:                   emailParam,
+			CreateDate:              time.Now().UTC().Format(time.RFC3339),
+			ModifyDate:              time.Now().UTC().Format(time.RFC3339),
+			EmailVerificationString: util.ShaHashString(emailParam),
+			ID:       util.GetID(),
+			RoleName: domain.Normal,
+		}
+		db.SaveUser(user)
+		email.SendVerificationEmail(emailParam, user.EmailVerificationString, config.Config.FromEmail, config.Config.EmailSendingPasswd)
+		w.Header().Add("Location", "/verify")
+	} else {
+		w.Header().Add("Location", "/login?emailused=true")
+	}
+	w.WriteHeader(302)
+	w.Write(nil)
+	return
+}
+
+func validationFailed(w http.ResponseWriter, msg string) {
+	w.Header().Add("Location", "/signup?validation="+msg)
+	w.WriteHeader(302)
+	w.Write(nil)
 }
 
 func checkInput(input string) bool {
