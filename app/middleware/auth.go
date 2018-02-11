@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/jelinden/go-react-seed/app/domain"
 	"github.com/jelinden/stock-portfolio/app/db"
+	"github.com/jelinden/stock-portfolio/app/domain"
 	"github.com/jelinden/stock-portfolio/app/util"
 	"github.com/julienschmidt/httprouter"
 )
