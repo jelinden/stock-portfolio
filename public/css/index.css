@@ -1,0 +1,193 @@
+html,
+button,
+input,
+select,
+textarea,
+.pure-g [class *= "pure-u"] {
+    font-family: Tahoma, Geneva, sans-serif;
+    color: #2d2d2d;
+    font-weight: 100;
+}
+
+body {
+    background-color: white;
+}
+header {
+    background-color: #1d5d90;
+    color: white;
+}
+header a {
+    color: white;
+}
+.red,
+a.red {
+    color: red;
+}
+.delete:before {
+    content: "\2718";
+    font-size: 14px;
+}
+.pure-button-primary,
+.pure-button-selected,
+a.pure-button-primary,
+a.pure-button-selected {
+    background-color: #1d5d90 !important;
+}
+.floatright {
+    display: inline-block;
+    margin-right: 20px;
+    line-height: 60px;
+}
+.footer {
+    clear: left;
+    margin-left: 20px;
+    margin-bottom: 40px;
+}
+input {
+    color: black;
+    width: 180px !important;
+}
+nav {
+    display: flex !important;
+    justify-content: space-between;
+    width: 100%;
+}
+h1 {
+    font-weight: 100;
+    text-transform: uppercase;
+    font-size: 24px !important;
+}
+
+ul {
+    display: inline-flex;
+    margin-right: 50px;
+    list-style: none;
+}
+
+h2 {
+    font-size: 1.5em;
+}
+
+.portfolio {
+    text-align: left;
+}
+.portfolio td {
+    padding-right: 5px;
+}
+.pure-menu-link:hover,
+.pure-menu-link:focus {
+    background-color: #777;
+}
+a {
+    text-decoration: none;
+    color: #2d2d2d;
+    padding-left: 10px;
+}
+
+.pure-menu-link {
+    color: #2d2d2d;
+}
+
+.pure-menu-item {
+    height: auto !important;
+}
+
+.main {
+    font-size: 14px;
+}
+
+.pure-menu {
+    background-color: black;
+}
+
+.pure-form input[type="text"],
+.pure-form input[type="password"],
+.pure-form input[type="email"],
+.pure-form input[type="url"],
+.pure-form input[type="date"],
+.pure-form input[type="month"],
+.pure-form input[type="time"],
+.pure-form input[type="datetime"],
+.pure-form input[type="datetime-local"],
+.pure-form input[type="week"],
+.pure-form input[type="number"],
+.pure-form input[type="search"],
+.pure-form input[type="tel"],
+.pure-form input[type="color"],
+.pure-form select,
+.pure-form textarea {
+    padding: 0.3em 0.5em !important;
+    color: black;
+}
+
+.login {
+    margin: auto;
+}
+.register {
+    display: inline-block;
+}
+.pure-g {
+    letter-spacing: 0em !important;
+    margin: 0 auto;
+}
+.content {
+    margin-top: 60px;
+}
+.react-datepicker__day-name,
+.react-datepicker__day,
+.react-datepicker__time-name {
+    color: #000;
+    display: inline-block;
+    width: 1.2rem !important;
+    line-height: 1.2rem !important;
+    text-align: center;
+    margin: 0.166rem;
+}
+#addportfolio,
+#portfolios {
+    float: left;
+    margin: 10px;
+}
+#addportfolio {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 40px;
+}
+#addstock {
+    margin: 10px;
+    display: inline-block;
+}
+.link {
+    display: block;
+    margin: 10px;
+    font-weight: bold;
+}
+.headerLink {
+    display: inline-block;
+    margin: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+#portfolios {
+    margin-top: 20px;
+    margin-left: 5px;
+}
+#portfolio {
+    float: left;
+    margin: 10px;
+}
+.pure-table {
+    font-size: 12px;
+}
+.pure-table td,
+.pure-table th {
+    padding: 0.5em !important;
+}
+.right {
+    text-align: right !important;
+}
+tfoot {
+    background-color: #e0e0e0;
+    color: #000;
+}

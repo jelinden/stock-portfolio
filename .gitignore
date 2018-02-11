@@ -1,0 +1,7 @@
+logs/*.log
+build
+*.pid
+stock-portfolio
+node_modules
+ql.db
+.34a8b4c1ad933745146fdbfef3073706ee571625
