@@ -10,9 +10,26 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+var logger *log.Logger
+var logFile *os.File
+
 type Logger interface {
 	Print(val ...interface{})
 	Printf(format string, val ...interface{})
+}
+
+func init() {
+	var err error
+	logFile, err = os.OpenFile("logs/access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	logger = log.New(logFile, "", log.LstdFlags)
+	logger.SetOutput(logFile)
+}
+
+func CloseLogFile() {
+	logFile.Close()
 }
 
 func HttpLogger(fn httprouter.Handle) httprouter.Handle {
@@ -35,13 +52,6 @@ func HttpLogger(fn httprouter.Handle) httprouter.Handle {
 		size := w.Header().Get("Content-Length")
 		code := w.Header().Get("Status-Code")
 
-		f, err := os.OpenFile("logs/access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			log.Fatalf("error opening file: %v", err)
-		}
-		defer f.Close()
-		logger := log.New(f, "", log.LstdFlags)
-		logger.SetOutput(f)
 		logger.Printf("%s %s %s %v %s %v", originIP, method, path, code, stop.Sub(start), size)
 	}
 }

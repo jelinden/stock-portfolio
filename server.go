@@ -113,6 +113,7 @@ func gracefullShutdown() {
 		fmt.Println("Wait for 2 second to finish processing")
 		db.After()
 		db.CloseBolt()
+		middleware.CloseLogFile()
 		time.Sleep(1 * time.Second)
 		os.Exit(0)
 	}()
