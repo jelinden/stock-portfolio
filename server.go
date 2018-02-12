@@ -53,6 +53,7 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	Init()
 	db.Init()
+	db.InitBolt()
 
 	router := httprouter.New()
 	router.RedirectFixedPath = true
@@ -111,7 +112,8 @@ func gracefullShutdown() {
 		fmt.Printf("caught sig: %+v", sig)
 		fmt.Println("Wait for 2 second to finish processing")
 		db.After()
-		time.Sleep(2 * time.Second)
+		db.CloseBolt()
+		time.Sleep(1 * time.Second)
 		os.Exit(0)
 	}()
 }

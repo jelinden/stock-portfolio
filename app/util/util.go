@@ -8,6 +8,7 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"log"
 	"regexp"
@@ -15,6 +16,19 @@ import (
 	"github.com/ventu-io/go-shortid"
 	"golang.org/x/crypto/pbkdf2"
 )
+
+var nonce []byte
+
+var key = []byte("AES256Key-32Characters1234567890")
+
+func init() {
+	n, err := hex.DecodeString("bb8ef84243d2ee95a41c6c57")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt.Println(len(n))
+	nonce = n
+}
 
 func HashPassword(password, salt []byte) string {
 	return base64.URLEncoding.EncodeToString(pbkdf2.Key(password, salt, 4096, sha512.Size, sha512.New))
@@ -40,43 +54,47 @@ func GetID() string {
 	return id
 }
 
-var nonce []byte
-
-var key = []byte("AES256Key-32Characters1234567890")
-
 func Encrypt(text string) string {
-	block, err := aes.NewCipher(key)
+	c, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 
-	nonce = make([]byte, 12)
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err.Error())
-	}
-	aesgcm, err := cipher.NewGCM(block)
+	gcm, err := cipher.NewGCM(c)
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
-	return hex.EncodeToString(aesgcm.Seal(nil, nonce, []byte(text), nil))
+
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		panic(err)
+	}
+
+	return hex.EncodeToString(gcm.Seal(nonce, nonce, []byte(text), nil))
 }
 
 func Decrypt(text string) string {
-	ciphertext, _ := hex.DecodeString(text)
+	dText, _ := hex.DecodeString(text)
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println("aes.NewCipher", err.Error())
 	}
 
-	aesgcm, err := cipher.NewGCM(block)
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		log.Println("cipher.NewGCM", err.Error())
+	}
+
+	nonceSize := gcm.NonceSize()
+	if len(dText) < nonceSize {
+		log.Println("ciphertext too short")
+	}
+
+	nonce, ciphertext := dText[:nonceSize], dText[nonceSize:]
+	decryptedText, err := gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
 		log.Println(err.Error())
 	}
-
-	plaintext, err := aesgcm.Open(nil, nonce, ciphertext, nil)
-	if err != nil {
-		log.Println(err.Error())
-	}
-	return string(plaintext)
+	return string(decryptedText)
 }
