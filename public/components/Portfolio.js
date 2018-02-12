@@ -48,7 +48,7 @@ class Portfolio extends React.Component {
             stocks: result.data.stocks,
             total: total,
             currentTotal: currentTotal,
-            gain: gainTotal > 0 ? '+' + gainTotal : gainTotal < 0 ? '-' +gainTotal : gainTotal
+            gain: gainTotal > 0 ? '+' + gainTotal : gainTotal
           });
         });
   }
