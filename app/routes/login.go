@@ -37,7 +37,8 @@ func Login(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 }
 
 func Logout(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	http.SetCookie(w, &http.Cookie{Name: "login", Value: "", MaxAge: 0})
+	expiration := time.Now().Add(-365 * 24 * time.Hour)
+	http.SetCookie(w, &http.Cookie{Name: "login", Value: "", Expires: expiration})
 	w.Header().Add("Location", "/")
 	w.WriteHeader(302)
 	w.Write(nil)
