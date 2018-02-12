@@ -14,7 +14,8 @@ class Portfolio extends React.Component {
       stocks: null,
       startDate: moment(),
       total: 0,
-      currentTotal: 0
+      currentTotal: 0,
+      gain: ''
     };
     this.handleChange = this.handleChange.bind(this);
     this.convertTimestamp = this.convertTimestamp.bind(this);
@@ -33,16 +34,21 @@ class Portfolio extends React.Component {
         .then(function(result) {
           let total = 0;
           let currentTotal = 0;
+          let gainTotal = 0;
           result.data.stocks.forEach(item => {
             total += item.price;
             if (item.latestPrice) {
               currentTotal += item.latestPrice*item.amount;
             }
           });
+          
+          gainTotal = currentTotal - total;
+          gainTotal = _this.numberFormat((gainTotal).toFixed(2));
           _this.setState({
             stocks: result.data.stocks,
             total: total,
-            currentTotal: currentTotal
+            currentTotal: currentTotal,
+            gain: gainTotal > 0 ? '+' + gainTotal : gainTotal < 0 ? '-' +gainTotal : gainTotal
           });
         });
   }
@@ -108,6 +114,7 @@ class Portfolio extends React.Component {
                   <th>Shares</th>
                   <th>Cost basis</th>
                   <th>Market Value</th>
+                  <th>Gain</th>
                   <th>Gain %</th>
                   <th>Close price</th>
                   <th>Close time</th>
@@ -126,6 +133,7 @@ class Portfolio extends React.Component {
                       <td class="right">{item.amount}</td>
                       <td class="right">{this.numberFormat((item.price).toFixed(2))}</td>
                       <td class="right">{(item.latestPrice?this.numberFormat((item.latestPrice*item.amount).toFixed(2)):'')}</td>
+                      <td class="right">{item.latestPrice?(item.latestPrice*item.amount-item.price).toFixed(2):''}</td>
                       <td class="right">{item.latestPrice?(((item.latestPrice-(item.price/item.amount))/(item.price/item.amount))*100).toFixed(2):''}%</td>
                       <td class="right">{this.numberFormat(item.close)}</td>
                       <td class="right">{this.convertTimestamp(item.closeTime)}</td>
@@ -144,6 +152,7 @@ class Portfolio extends React.Component {
                   <th></th>
                   <th class="right">{(this.state.stocks !== 'undefined'?this.state.total:'').toFixed(2)}</th>
                   <th class="right">{(this.state.stocks !== 'undefined'?this.state.currentTotal:'').toFixed(2)}</th>
+                  <th class="right">{this.state.gain !== 'undefined'?this.state.gain:''}</th>
                   <th></th>
                   <th></th>
                   <th></th>
