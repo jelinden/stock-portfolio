@@ -38,14 +38,13 @@ func PutSession(key string, value string) {
 	})
 }
 
-func GetSession(key string) string {
-	var val string
+func GetSession(key string) (val string) {
 	boltDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketName))
 		val = string(b.Get([]byte(key)))
 		return nil
 	})
-	return val
+	return
 }
 
 func RemoveSession(key string) {

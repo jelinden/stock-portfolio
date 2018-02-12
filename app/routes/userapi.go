@@ -7,7 +7,6 @@ import (
 
 	"github.com/jelinden/stock-portfolio/app/db"
 	"github.com/jelinden/stock-portfolio/app/domain"
-	"github.com/jelinden/stock-portfolio/app/util"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -40,7 +39,7 @@ func getUser(r *http.Request) domain.User {
 	if err == nil && loginCookie != nil {
 		session := db.GetSession(loginCookie.Value)
 		if session != "" {
-			user = db.GetUser(util.Decrypt(session))
+			user = db.GetUser(session)
 		}
 	}
 	return user

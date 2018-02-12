@@ -23,7 +23,7 @@ func Login(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		sessionKey := util.ShaHashString(email)
 		user := db.GetUser(email)
 		if user.ID != "" && user.Password == util.HashPassword([]byte(password), []byte(email)) {
-			db.PutSession(sessionKey, util.Encrypt(email))
+			db.PutSession(sessionKey, email)
 			http.SetCookie(w, &http.Cookie{Name: "login", Value: sessionKey, MaxAge: 2592000})
 			w.Header().Add("Location", "/")
 			w.WriteHeader(302)

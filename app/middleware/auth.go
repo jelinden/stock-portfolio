@@ -5,7 +5,6 @@ import (
 
 	"github.com/jelinden/stock-portfolio/app/db"
 	"github.com/jelinden/stock-portfolio/app/domain"
-	"github.com/jelinden/stock-portfolio/app/util"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -34,7 +33,7 @@ func AdminAuth(fn httprouter.Handle) httprouter.Handle {
 			if loginCookie != nil {
 				session := db.GetSession(loginCookie.Value)
 				if session != "" {
-					if db.GetUser(util.Decrypt(session)).RoleName == domain.Admin {
+					if db.GetUser(session).RoleName == domain.Admin {
 						fn(w, r, ps)
 						return
 					}
