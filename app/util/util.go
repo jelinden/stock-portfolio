@@ -26,7 +26,6 @@ func init() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Println(len(n))
 	nonce = n
 }
 
