@@ -53,6 +53,11 @@ func GetID() string {
 	return id
 }
 
+func IsID(id string) bool {
+	r := regexp.MustCompile(`^[0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]+$`)
+	return r.MatchString(id)
+}
+
 func Encrypt(text string) string {
 	c, err := aes.NewCipher(key)
 	if err != nil {

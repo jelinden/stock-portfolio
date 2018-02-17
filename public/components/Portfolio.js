@@ -22,6 +22,7 @@ class Portfolio extends React.Component {
     this.convertTimestamp = this.convertTimestamp.bind(this);
     this.portfolio = this.portfolio.bind(this);
     this.removeStock = this.removeStock.bind(this);
+    this.getUrlParameter = this.getUrlParameter.bind(this);
     this.numberFormat = this.numberFormat.bind(this);
   }
 
@@ -49,13 +50,12 @@ class Portfolio extends React.Component {
             stocks: result.data.stocks,
             total: total,
             currentTotal: currentTotal,
-            gain: gainTotal > 0 ? '+' + gainTotal : gainTotal
+            gain: gainTotal > 0 ? '+' + gainTotal : gainTotal,
+            failed: false
           });
         })
         .catch(function(error) {
-          _this.setState({
-            failed: true
-          });
+          _this.setState({failed: true});
         });
   }
 
@@ -65,7 +65,12 @@ class Portfolio extends React.Component {
       console.log('removing ' + symbol);
       axios.get("/api/portfolio/remove/"+ _this.props.match.params.id + "/" + symbol, {timeout: 2000})
       .then(function(result) {
-        console.log('removed ' + symbol);
+        if (!result.data.error) {
+          console.log('removed ' + symbol);
+          _this.portfolio();
+        } else {
+          console.log('remove was unsuccessful', result.data.error);
+        }
       });
     };
   }
@@ -105,10 +110,17 @@ class Portfolio extends React.Component {
     return '';
   }
 
+  getUrlParameter(name) {
+    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    let regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    let results = regex.exec(window.location.search);
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+  }
+
   render() {
       return (
         <div className="content">
-          <div className="alert">{this.state.failed?'Connection lost':''}</div>
+          <div className="alert info">{this.state.failed?'Connection lost':''}</div>
           <div id="portfolio">
             <table class="pure-table">
             <thead>
@@ -174,21 +186,26 @@ class Portfolio extends React.Component {
                 <input type="hidden" name="portfolioid" value={this.props.match.params.id}/>
                 <label for="symbol">Stock symbol</label>
                 <input id="symbol" type="text" name="symbol" placeholder="Symbol eg. INTC" />
+                <div className="alert">{this.getUrlParameter('symbolMsg')?'Not a correct Symbol':''}</div>
                 <div>
-                <label for="date">Date</label>
-                <DatePicker id="date"
-                  name="date"
-                  selected={this.state.startDate}
-                  onChange={this.handleChange}
-                />
+                  <label for="date">Date</label>
+                  <DatePicker id="date"
+                    name="date"
+                    selected={this.state.startDate}
+                    onChange={this.handleChange}
+                  />
+                  <div className="alert">{this.getUrlParameter('dateMsg')?'Date was not a date':''}</div>
                 </div>
                 <input type="hidden" name="date" value={this.state.date}/>
                 <label for="price">Price</label>
                 <input id="price" type="text" name="price" placeholder="Price" />
+                <div className="alert">{this.getUrlParameter('priceMsg')?'Price was not a number':''}</div>
                 <label for="amount">Amount</label>
                 <input id="amount" type="text" name="amount" placeholder="How many bought?" />
+                <div className="alert">{this.getUrlParameter('amountMsg')?'Amount was not a number':''}</div>
                 <label for="commission">Commission</label>
                 <input id="commission" type="text" name="commission" />
+                <div className="alert">{this.getUrlParameter('commissionMsg')?'Commission was not a number':''}</div>
                 <button type="submit" className="pure-button pure-button-primary">Add</button>
             </form>
           </div>

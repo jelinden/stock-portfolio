@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/jelinden/stock-portfolio/app/db"
 	"github.com/jelinden/stock-portfolio/app/util"
@@ -14,7 +15,7 @@ func AddPortfolio(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	user := getUser(r)
 	if user.ID != "" {
 		name := r.FormValue("name")
-		if verifyString(name) {
+		if verifyPortfolioName(name) {
 			portfolioid := util.GetID()
 			db.AddPortfolio(portfolioid, user.ID, name)
 		}
@@ -50,4 +51,12 @@ func GetPortfolio(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		}
 	}
 	ok(w, marshalled)
+}
+
+func verifyPortfolioName(v string) bool {
+	re, err := regexp.Compile(`^[a-zA-ZöäåÖÄÅ:?€$\- ]+$`)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	return re.MatchString(v)
 }
