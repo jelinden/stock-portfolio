@@ -56,7 +56,7 @@ class Header extends React.Component {
               {this.state.signup}
               {this.state.loggedin?<a className="headerLink" href="/logout">Logout</a>:''}
             </ul>
-            <div class="floatright">{this.state.loggedin?'Welcome, ' + this.state.user.username:''}</div>
+            <div class="floatright">{this.state.loggedin?'Welcome, ' + this.state.user.username:'Your personal stock portfolio'}</div>
           </nav>
         </header>
       )

@@ -40,6 +40,7 @@ class Login extends React.Component {
                   <input id="passwordLogin" type="password" name="password" placeholder="Over 8 characters"/>
                   <button type="submit" className="pure-button pure-button-primary">Login</button>
               </form>
+              <div>New user? Please <a className="a-link" href="/signup">signup</a>.</div>
               <div className="alert">{this.getUrlParameter('login') === 'failed'?'Login failed':''}</div>
               <div className="success">{this.getUrlParameter('verified') === 'true'?'Verification succeeded, please login':''}</div>
             </div>
