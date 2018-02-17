@@ -15,7 +15,8 @@ class Portfolio extends React.Component {
       startDate: moment(),
       total: 0,
       currentTotal: 0,
-      gain: ''
+      gain: '',
+      failed: false
     };
     this.handleChange = this.handleChange.bind(this);
     this.convertTimestamp = this.convertTimestamp.bind(this);
@@ -49,6 +50,11 @@ class Portfolio extends React.Component {
             total: total,
             currentTotal: currentTotal,
             gain: gainTotal > 0 ? '+' + gainTotal : gainTotal
+          });
+        })
+        .catch(function(error) {
+          _this.setState({
+            failed: true
           });
         });
   }
@@ -101,7 +107,8 @@ class Portfolio extends React.Component {
 
   render() {
       return (
-        <div class="content">
+        <div className="content">
+          <div className="alert">{this.state.failed?'Connection lost':''}</div>
           <div id="portfolio">
             <table class="pure-table">
             <thead>
@@ -127,18 +134,18 @@ class Portfolio extends React.Component {
                     <tr>
                       <td>{item.companyName}</td>
                       <td>{item.symbol}</td>
-                      <td class="right">{item.latestPrice}</td>
-                      <td class="right">{this.convertTimestamp(item.latestUpdate)}</td>
-                      <td class="right">{item.latestPrice?this.numberFormat((((item.latestPrice-item.close)/item.close)*100).toFixed(2)):''}%</td>
-                      <td class="right">{item.amount}</td>
-                      <td class="right">{this.numberFormat((item.price).toFixed(2))}</td>
-                      <td class="right">{(item.latestPrice?this.numberFormat((item.latestPrice*item.amount).toFixed(2)):'')}</td>
-                      <td class="right">{item.latestPrice?(item.latestPrice*item.amount-item.price).toFixed(2):''}</td>
-                      <td class="right">{item.latestPrice?(((item.latestPrice-(item.price/item.amount))/(item.price/item.amount))*100).toFixed(2):''}%</td>
-                      <td class="right">{this.numberFormat(item.close)}</td>
-                      <td class="right">{this.convertTimestamp(item.closeTime)}</td>
-                      <td class="right">{item.peRatio?(item.peRatio).toFixed(2):''}</td>
-                      <td class="right"><a href="#" onClick={this.removeStock(item.symbol)}>(<span className="red delete"></span>)</a></td>
+                      <td className="right">{item.latestPrice}</td>
+                      <td className="right">{this.convertTimestamp(item.latestUpdate)}</td>
+                      <td className="right">{item.latestPrice?this.numberFormat((((item.latestPrice-item.close)/item.close)*100).toFixed(2)):''}%</td>
+                      <td className="right">{item.amount}</td>
+                      <td className="right">{this.numberFormat((item.price).toFixed(2))}</td>
+                      <td className="right">{(item.latestPrice?this.numberFormat((item.latestPrice*item.amount).toFixed(2)):'')}</td>
+                      <td className="right">{item.latestPrice?(item.latestPrice*item.amount-item.price).toFixed(2):''}</td>
+                      <td className="right">{item.latestPrice?(((item.latestPrice-(item.price/item.amount))/(item.price/item.amount))*100).toFixed(2):''}%</td>
+                      <td className="right">{this.numberFormat(item.close)}</td>
+                      <td className="right">{this.convertTimestamp(item.closeTime)}</td>
+                      <td className="right">{item.peRatio?(item.peRatio).toFixed(2):''}</td>
+                      <td className="right"><a href="#" onClick={this.removeStock(item.symbol)}>(<span className="red delete"></span>)</a></td>
                     </tr>
                 )):''}
               </tbody>
@@ -150,8 +157,8 @@ class Portfolio extends React.Component {
                   <th></th>
                   <th></th>
                   <th></th>
-                  <th class="right">{(this.state.stocks !== 'undefined'?this.state.total:'').toFixed(2)}</th>
-                  <th class="right">{(this.state.stocks !== 'undefined'?this.state.currentTotal:'').toFixed(2)}</th>
+                  <th class="right">{this.state.stocks !== 'undefined'?this.numberFormat((this.state.total).toFixed(2)):''}</th>
+                  <th class="right">{this.state.stocks !== 'undefined'?this.numberFormat((this.state.currentTotal).toFixed(2)):''}</th>
                   <th class="right">{this.state.gain !== 'undefined'?this.state.gain:''}</th>
                   <th></th>
                   <th></th>
