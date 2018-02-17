@@ -53,7 +53,7 @@ func RemoveStock(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	if user.ID != "" {
 		symbol := p.ByName("symbol")
 		portfolioid := p.ByName("portfolioid")
-		if verifyString(symbol) {
+		if verifySymbol(symbol) && isPortfolioOwner(user.ID, portfolioid) {
 			err := db.RemoveStock(portfolioid, symbol)
 			if err != nil {
 				log.Println(err.Error())
@@ -66,13 +66,30 @@ func RemoveStock(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	ok(w, []byte(`{"error": "Not logged in"}`))
 }
 
+func isPortfolioOwner(userID, portfolioID string) bool {
+	_, err := strconv.Atoi(portfolioID)
+	if err == nil {
+		p := db.GetPortfolios(userID)
+		for _, item := range p.Portfolios {
+			if item.Portfolioid == portfolioID {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func ok(w http.ResponseWriter, content []byte) {
 	w.Header().Add("Content-Type", "application/json")
 	w.Write(content)
 }
 
 func verifyString(v string) bool {
-	return len(v) > 0
+	re, err := regexp.Compile(`^[a-zA-ZöäåÖÄÅ-:?€$ ]+$`)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	return re.MatchString(v)
 }
 
 func verifySymbol(s string) bool {
