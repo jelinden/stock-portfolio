@@ -79,7 +79,7 @@ func Signup(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		email.SendVerificationEmail(emailParam, user.EmailVerificationString, config.Config.FromEmail, config.Config.EmailSendingPasswd)
 		w.Header().Add("Location", "/verify")
 	} else {
-		w.Header().Add("Location", "/login?emailused=true")
+		w.Header().Add("Location", "/signup?emailused=true")
 	}
 	w.WriteHeader(302)
 	w.Write(nil)

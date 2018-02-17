@@ -194,3 +194,9 @@ tfoot {
 tbody tr:nth-child(odd) {
     background-color: #f5f5f5;
 }
+.alert {
+    color: red;
+}
+.success {
+    color: green;
+}
