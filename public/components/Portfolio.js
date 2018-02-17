@@ -37,24 +37,27 @@ class Portfolio extends React.Component {
           let total = 0;
           let currentTotal = 0;
           let gainTotal = 0;
-          result.data.stocks.forEach(item => {
-            total += item.price;
-            if (item.latestPrice) {
-              currentTotal += item.latestPrice*item.amount;
-            }
-          });
-          
-          gainTotal = currentTotal - total;
-          gainTotal = _this.numberFormat((gainTotal).toFixed(2));
-          _this.setState({
-            stocks: result.data.stocks,
-            total: total,
-            currentTotal: currentTotal,
-            gain: gainTotal > 0 ? '+' + gainTotal : gainTotal,
-            failed: false
-          });
+          if (result.data.stocks) {
+            result.data.stocks.forEach(item => {
+              total += item.price;
+              if (item.latestPrice) {
+                currentTotal += item.latestPrice*item.amount;
+              }
+            });
+            
+            gainTotal = currentTotal - total;
+            gainTotal = _this.numberFormat((gainTotal).toFixed(2));
+            _this.setState({
+              stocks: result.data.stocks,
+              total: total,
+              currentTotal: currentTotal,
+              gain: gainTotal > 0 ? '+' + gainTotal : gainTotal,
+              failed: false
+            });
+          }
         })
         .catch(function(error) {
+          console.log(error);
           _this.setState({failed: true});
         });
   }
