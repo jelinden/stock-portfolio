@@ -107,7 +107,8 @@ class Portfolio extends React.Component {
         min = ('0' + d.getMinutes()).slice(-2),		// Add leading 0.
         time;
 
-      time = dd + '.' + mm + '.' + yyyy + ' ' + h + ':' + min;
+      //time = dd + '.' + mm + '.' + yyyy + ' ' + h + ':' + min;
+      time = dd + '.' + mm + '. ' + h + ':' + min;
       return time;
     }
     return '';
@@ -151,13 +152,15 @@ class Portfolio extends React.Component {
                       <td>{item.symbol}</td>
                       <td className="right">{item.latestPrice}</td>
                       <td className="right">{this.convertTimestamp(item.latestUpdate)}</td>
-                      <td className="right">{item.latestPrice?this.numberFormat((((item.latestPrice-item.close)/item.close)*100).toFixed(2)):''}%</td>
+                      <td className={item.changePercent && item.changePercent > 0?'right green':(item.changePercent < 0?'right red':'right')}>{item.changePercent?this.numberFormat((item.changePercent*100).toFixed(2)):''}%</td>
                       <td className="right">{item.amount}</td>
                       <td className="right">{this.numberFormat((item.price).toFixed(2))}</td>
                       <td className="right">{(item.latestPrice?this.numberFormat((item.latestPrice*item.amount).toFixed(2)):'')}</td>
-                      <td className="right">{item.latestPrice?(item.latestPrice*item.amount-item.price).toFixed(2):''}</td>
-                      <td className="right">{item.latestPrice?(((item.latestPrice-(item.price/item.amount))/(item.price/item.amount))*100).toFixed(2):''}%</td>
-                      <td className="right">{this.numberFormat(item.close)}</td>
+
+                      <td className={item.latestPrice && (item.latestPrice*item.amount-item.price) > 0?'right green':((item.latestPrice*item.amount-item.price) < 0?'right red':'right')}>{item.latestPrice?(item.latestPrice*item.amount-item.price).toFixed(2):''}</td>
+                      <td className={item.latestPrice && (item.latestPrice-(item.price/item.amount)) > 0?'right green':((item.latestPrice-(item.price/item.amount)) < 0?'right red':'right')}>{item.latestPrice?(((item.latestPrice-(item.price/item.amount))/(item.price/item.amount))*100).toFixed(2):''}%</td>
+
+                      <td className="right">{item.close?this.numberFormat((item.close).toFixed(2)):''}</td>
                       <td className="right">{this.convertTimestamp(item.closeTime)}</td>
                       <td className="right">{item.peRatio?(item.peRatio).toFixed(2):''}</td>
                       <td className="right"><a href="#" onClick={this.removeStock(item.symbol)}>(<span className="red delete"></span>)</a></td>

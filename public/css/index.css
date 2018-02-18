@@ -23,6 +23,12 @@ header a {
 a.red {
     color: red;
 }
+.green {
+    color: green;
+}
+.green:before {
+    content: "+";
+}
 .delete:before {
     content: "\2718";
     font-size: 14px;
