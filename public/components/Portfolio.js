@@ -162,7 +162,7 @@ class Portfolio extends React.Component {
                       <td className="right">{this.numberFormat((item.price).toFixed(2))}</td>
                       <td className="right">{(item.latestPrice?this.numberFormat((item.latestPrice*item.amount).toFixed(2)):'')}</td>
                       <td className={item.latestPrice && (item.latestPrice*item.amount-item.price) > 0?'right green':((item.latestPrice*item.amount-item.price) < 0?'right red':'right')}>{item.latestPrice?(item.latestPrice*item.amount-item.price).toFixed(2):''}</td>
-                      <td className={item.latestPrice && (item.latestPrice-(item.price/item.amount)) > 0?'right green':((item.latestPrice-(item.price/item.amount)) < 0?'right red':'right')}>{item.latestPrice?(((item.latestPrice-(item.price/item.amount))/(item.price/item.amount))*100).toFixed(2):''}%</td>
+                      <td className={item.latestPrice && (item.latestPrice-(item.price/item.amount)) > 0?'right green':((item.latestPrice-(item.price/item.amount)) < 0?'right red':'right')}>{item.latestPrice?(((item.latestPrice-(item.price/item.amount))/(item.price/item.amount))*100).toFixed(2)+'%':''}</td>
                       <td className={item.change && item.change > 0?'right green':(item.change < 0?'right red':'right')}>{item.change?this.numberFormat((item.change*item.amount).toFixed(2)):''}</td>
                       <td className="right">{item.close?this.numberFormat((item.close).toFixed(2)):''}</td>
                       <td className="right">{this.convertTimestamp(item.closeTime)}</td>
