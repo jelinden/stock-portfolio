@@ -15,6 +15,7 @@ class Portfolio extends React.Component {
       startDate: moment(),
       total: 0,
       currentTotal: 0,
+      changeTotal: 0,
       gain: '',
       failed: false
     };
@@ -37,21 +38,23 @@ class Portfolio extends React.Component {
           let total = 0;
           let currentTotal = 0;
           let gainTotal = 0;
+          let changeTotal = 0;
           if (result.data.stocks) {
             result.data.stocks.forEach(item => {
               total += item.price;
               if (item.latestPrice) {
                 currentTotal += item.latestPrice*item.amount;
+                changeTotal += item.change*item.amount;
               }
             });
             
             gainTotal = currentTotal - total;
-            gainTotal = _this.numberFormat((gainTotal).toFixed(2));
             _this.setState({
               stocks: result.data.stocks,
               total: total,
               currentTotal: currentTotal,
-              gain: gainTotal > 0 ? '+' + gainTotal : gainTotal,
+              changeTotal: changeTotal,
+              gain: gainTotal,
               failed: false
             });
           }
@@ -140,6 +143,7 @@ class Portfolio extends React.Component {
                   <th>Market Value</th>
                   <th>Gain</th>
                   <th>Gain %</th>
+                  <th>Day's gain</th>
                   <th>Close price</th>
                   <th>Close time</th>
                   <th>P/e ratio</th>
@@ -159,6 +163,7 @@ class Portfolio extends React.Component {
                       <td className="right">{(item.latestPrice?this.numberFormat((item.latestPrice*item.amount).toFixed(2)):'')}</td>
                       <td className={item.latestPrice && (item.latestPrice*item.amount-item.price) > 0?'right green':((item.latestPrice*item.amount-item.price) < 0?'right red':'right')}>{item.latestPrice?(item.latestPrice*item.amount-item.price).toFixed(2):''}</td>
                       <td className={item.latestPrice && (item.latestPrice-(item.price/item.amount)) > 0?'right green':((item.latestPrice-(item.price/item.amount)) < 0?'right red':'right')}>{item.latestPrice?(((item.latestPrice-(item.price/item.amount))/(item.price/item.amount))*100).toFixed(2):''}%</td>
+                      <td className={item.change && item.change > 0?'right green':(item.change < 0?'right red':'right')}>{item.change?this.numberFormat((item.change*item.amount).toFixed(2)):''}</td>
                       <td className="right">{item.close?this.numberFormat((item.close).toFixed(2)):''}</td>
                       <td className="right">{this.convertTimestamp(item.closeTime)}</td>
                       <td className="right">{item.peRatio?(item.peRatio).toFixed(2):''}</td>
@@ -174,10 +179,11 @@ class Portfolio extends React.Component {
                   <th></th>
                   <th></th>
                   <th></th>
-                  <th class="right">{this.state.stocks !== 'undefined'?this.numberFormat((this.state.total).toFixed(2)):''}</th>
-                  <th class="right">{this.state.stocks !== 'undefined'?this.numberFormat((this.state.currentTotal).toFixed(2)):''}</th>
-                  <th class="right">{this.state.gain !== 'undefined'?this.state.gain:''}</th>
+                  <th className="right">{this.state.stocks !== 'undefined'?this.numberFormat((this.state.total).toFixed(2)):''}</th>
+                  <th className="right">{this.state.stocks !== 'undefined'?this.numberFormat((this.state.currentTotal).toFixed(2)):''}</th>
+                  <th className={(this.state.gain && this.state.gain >= 0) ? 'right green' : 'right red'}>{this.state.gain ? this.numberFormat((this.state.gain).toFixed(2)) : ''}</th>
                   <th></th>
+                  <th className={(this.state.changeTotal && this.state.changeTotal >= 0) ? 'right green' : 'right red'}>{this.state.changeTotal ? this.numberFormat((this.state.changeTotal).toFixed(2)) : ''}</th>
                   <th></th>
                   <th></th>
                   <th></th>
