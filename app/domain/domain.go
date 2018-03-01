@@ -50,6 +50,7 @@ type PortfolioStock struct {
 	Close         *float64 `json:"close,omitempty"`
 	CloseTime     *int64   `json:"closeTime,omitempty"`
 	PERatio       *float64 `json:"peRatio,omitempty"`
+	Change        *float64 `json:"change,omitempty"`
 	ChangePercent *float64 `json:"changePercent,omitempty"`
 }
 

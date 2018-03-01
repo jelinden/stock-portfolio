@@ -137,7 +137,8 @@ func GetPortfolio(portfolioid string) domain.PortfolioStocks {
 			quotes.latestUpdate,
 			quotes.close, 
 			quotes.closeTime, 
-			quotes.PERatio, 
+			quotes.PERatio,
+			quotes.change,
 			quotes.changePercent
 		FROM (SELECT portfolioid,
 				symbol,
@@ -168,6 +169,7 @@ func GetPortfolio(portfolioid string) domain.PortfolioStocks {
 			&stock.Close,
 			&stock.CloseTime,
 			&stock.PERatio,
+			&stock.Change,
 			&stock.ChangePercent)
 		if err != nil {
 			log.Println("scanning row failed", err.Error())

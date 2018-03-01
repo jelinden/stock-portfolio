@@ -97,6 +97,7 @@ class Portfolio extends React.Component {
   }
 
   convertTimestamp(timestamp) {
+    //console.log(timestamp, new Date(timestamp));
     if (timestamp !== undefined && timestamp !== '') {
       var d = new Date(timestamp),	// Convert the passed timestamp to milliseconds
         yyyy = d.getFullYear(),
@@ -152,14 +153,12 @@ class Portfolio extends React.Component {
                       <td>{item.symbol}</td>
                       <td className="right">{item.latestPrice}</td>
                       <td className="right">{this.convertTimestamp(item.latestUpdate)}</td>
-                      <td className={item.changePercent && item.changePercent > 0?'right green':(item.changePercent < 0?'right red':'right')}>{item.changePercent?this.numberFormat((item.changePercent*100).toFixed(2)):''}%</td>
+                      <td className={item.changePercent && item.changePercent > 0?'right green':(item.changePercent < 0?'right red':'right')}>{item.changePercent?this.numberFormat((item.change).toFixed(2)) + ' (' + this.numberFormat((item.changePercent*100).toFixed(2)) + '%)':''}</td>
                       <td className="right">{item.amount}</td>
                       <td className="right">{this.numberFormat((item.price).toFixed(2))}</td>
                       <td className="right">{(item.latestPrice?this.numberFormat((item.latestPrice*item.amount).toFixed(2)):'')}</td>
-
                       <td className={item.latestPrice && (item.latestPrice*item.amount-item.price) > 0?'right green':((item.latestPrice*item.amount-item.price) < 0?'right red':'right')}>{item.latestPrice?(item.latestPrice*item.amount-item.price).toFixed(2):''}</td>
                       <td className={item.latestPrice && (item.latestPrice-(item.price/item.amount)) > 0?'right green':((item.latestPrice-(item.price/item.amount)) < 0?'right red':'right')}>{item.latestPrice?(((item.latestPrice-(item.price/item.amount))/(item.price/item.amount))*100).toFixed(2):''}%</td>
-
                       <td className="right">{item.close?this.numberFormat((item.close).toFixed(2)):''}</td>
                       <td className="right">{this.convertTimestamp(item.closeTime)}</td>
                       <td className="right">{item.peRatio?(item.peRatio).toFixed(2):''}</td>
