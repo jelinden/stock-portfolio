@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Stock portfolio",
   "scripts": {
-    "build-dir": "rm -rf build && mkdir -p build/components && cp -r public/components build && cp public/index.js build && cp public/favicon.ico build && mkdir -p logs",
+    "build-dir": "rm -rf build && mkdir -p build/components && cp -r public/components build && cp public/index.* build && cp public/favicon.ico build && mkdir -p logs",
     "css": "cp -r public/css/* build",
     "babelify": "NODE_ENV=production browserify build/index.js -g browserify-css -o build/bundle.js -t [ babelify --presets [ es2015 react ] ]",
     "browserify": "NODE_ENV=production browserify build/bundle.js -t envify -t uglifyify --outfile build/main.bundle.min.js",
