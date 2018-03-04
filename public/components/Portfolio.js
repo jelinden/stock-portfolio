@@ -278,7 +278,7 @@ class Portfolio extends React.Component {
                         <td className="right">{this.convertTimestamp(item.exDate, true)}</td>
                         <td className="right">{this.convertTimestamp(item.paymentDate, true)}</td>
                         <td className="right">{item.amount}</td>
-                        <td className="right">{this.state.stockMap[item.symbol]*item.amount}</td>
+                        <td className="right">{(this.state.stockMap[item.symbol]*item.amount).toFixed(2)}</td>
                       </tr>
                   )):''}
                 </tbody>
