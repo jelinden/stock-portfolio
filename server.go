@@ -61,6 +61,7 @@ func main() {
 
 	fsAssets := util.JustFilesFilesystem{Fs: http.Dir("build/")}
 
+	//router.Handler("GET", "/build/*name", http.StripPrefix("/build", util.GH(http.FileServer(fsAssets))))
 	router.Handler("GET", "/js/*.js", http.StripPrefix("/js", util.GH(http.FileServer(fsAssets))))
 	router.Handler("GET", "/css/*.css", http.StripPrefix("/css", util.GH(http.FileServer(fsAssets))))
 	router.Handler("GET", "/favicon.ico", util.GH(http.FileServer(fsAssets)))
@@ -81,13 +82,14 @@ func main() {
 	router.Handle("GET", "/api/portfolio/get/:id", middleware.HttpLogger(middleware.Auth(util.MakeGzipHandler(routes.GetPortfolio))))
 	router.Handle("POST", "/api/portfolio/add", middleware.HttpLogger(middleware.Auth(util.MakeGzipHandler(routes.AddStock))))
 	router.Handle("GET", "/api/portfolio/remove/:portfolioid/:symbol", middleware.HttpLogger(middleware.Auth(util.MakeGzipHandler(routes.RemoveStock))))
+	router.Handle("GET", "/api/dividends", middleware.HttpLogger(middleware.Auth(util.MakeGzipHandler(routes.GetDividend))))
 
 	gracefullShutdown()
 	log.Println("starting server at port 3300")
 	log.Fatal(http.ListenAndServe(":3300", router))
 }
 
-var fsPublic = util.JustFilesFilesystem{Fs: http.Dir("public/")}
+var fsPublic = util.JustFilesFilesystem{Fs: http.Dir("build/")}
 
 func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	f, err := fsPublic.Open("index.html")

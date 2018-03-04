@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"log"
+	"reflect"
 	"time"
 
 	"github.com/cznic/ql"
@@ -74,7 +75,9 @@ CREATE TABLE IF NOT EXISTS dividend (
 	amount float64,
 	type string
 );
-CREATE INDEX IF NOT EXISTS divSymbolIndex ON dividend (symbol);`
+CREATE INDEX IF NOT EXISTS divSymbolIndex ON dividend (symbol);
+CREATE UNIQUE INDEX IF NOT EXISTS divSymbolPaymentIndex ON dividend (paymentDate, symbol, type);
+CREATE INDEX IF NOT EXISTS divPaymentDateIndex ON dividend (paymentDate);`
 
 func Init() {
 	var err error
@@ -86,6 +89,7 @@ func Init() {
 	log.Println("db file", dbFileName, "opened")
 	populateDatabase()
 	go doEvery(time.Second*60, getQuotes)
+	go doEvery(time.Hour*1, getDividends)
 }
 
 func populateDatabase() {
@@ -129,6 +133,53 @@ func execRow(command string, args ...interface{}) domain.User {
 		log.Println(err)
 	}
 	return user
+}
+
+func getQuery(query string, args ...interface{}) []map[string]interface{} {
+	//log.Println(query, args)
+	rows, err := db.Query(query, args...)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	defer rows.Close()
+	columns, _ := rows.Columns()
+	var values = make([]interface{}, len(columns))
+	var vals []map[string]interface{}
+	for i := range values {
+		var temp interface{}
+		values[i] = &temp
+	}
+
+	for rows.Next() {
+		m := make(map[string]interface{})
+		err := rows.Scan(values...)
+		if err != nil {
+			log.Println(err)
+		}
+		for i, colName := range columns {
+			var rawValue = *(values[i].(*interface{}))
+			var rawType = reflect.TypeOf(rawValue)
+
+			if rawType.Name() != "float64" && rawType.Name() != "int64" && rawValue != nil {
+				rawValue = uint8ToString(rawValue.([]uint8))
+			}
+			m[colName] = rawValue
+		}
+		vals = append(vals, m)
+	}
+	if vals != nil && vals[0] != nil {
+		return vals
+	}
+	return nil
+}
+
+func uint8ToString(val []uint8) string {
+	var valString = ""
+	for _, item := range val {
+		valString = valString + string(item)
+	}
+	return valString
 }
 
 func queryUser(command string, args ...interface{}) domain.User {
@@ -196,9 +247,9 @@ func queryPortfolioSymbols() []string {
 func getQuotes() {
 	quotes := service.GetQuotes(GetPortfolioSymbols()...)
 	if len(quotes) > 0 {
-		log.Println("got quotes", quotes[0].CompanyName)
+		log.Printf("got %v quotes\n", len(quotes))
+		SaveQuotes(quotes)
 	}
-	SaveQuotes(quotes)
 }
 
 func doEvery(d time.Duration, f func()) {
@@ -213,4 +264,12 @@ func After() {
 	if err != nil {
 		log.Println("closing db connection error", err.Error())
 	}
+}
+
+type History struct {
+	Date  int
+	Open  float64
+	High  float64
+	Low   float64
+	Close float64
 }

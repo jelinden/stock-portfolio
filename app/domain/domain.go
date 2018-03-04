@@ -34,7 +34,8 @@ func (e CustomError) Error() string {
 }
 
 type PortfolioStocks struct {
-	Stocks []PortfolioStock `json:"stocks,omitempty"`
+	Stocks        []PortfolioStock `json:"stocks,omitempty"`
+	PortfolioName string           `json:"portfolioName"`
 }
 
 type PortfolioStock struct {

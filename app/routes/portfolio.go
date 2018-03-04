@@ -54,7 +54,7 @@ func GetPortfolio(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 }
 
 func verifyPortfolioName(v string) bool {
-	re, err := regexp.Compile(`^[a-zA-ZöäåÖÄÅ:?€$\- ]+$`)
+	re, err := regexp.Compile(`^[a-zA-ZöäåÖÄÅ0-9:?€$\- ]+$`)
 	if err != nil {
 		log.Println(err.Error())
 	}

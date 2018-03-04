@@ -128,6 +128,7 @@ func GetPortfolios(userid string) domain.Portfolios {
 func GetPortfolio(portfolioid string) domain.PortfolioStocks {
 	rows, err := db.Query(`SELECT 
 			p.portfolioid,
+			po.name,
 			quotes.companyName,
 			p.symbol,
 			p.price,
@@ -140,7 +141,8 @@ func GetPortfolio(portfolioid string) domain.PortfolioStocks {
 			quotes.PERatio,
 			quotes.change,
 			quotes.changePercent
-		FROM (SELECT portfolioid,
+		FROM portfolio AS po,
+			(SELECT portfolioid,
 				symbol,
 				sum(price*float64(amount)) as price,
 				sum(commission) as commission,
@@ -149,6 +151,7 @@ func GetPortfolio(portfolioid string) domain.PortfolioStocks {
 				GROUP BY symbol, portfolioid) AS p
 			LEFT JOIN quotes on p.symbol = quotes.symbol 
 		WHERE p.portfolioid LIKE ($1)
+		AND po.portfolioid = p.portfolioid
 		ORDER BY p.symbol ASC;`, portfolioid)
 	if err != nil {
 		log.Printf("failed with '%s'\n", err)
@@ -159,6 +162,7 @@ func GetPortfolio(portfolioid string) domain.PortfolioStocks {
 	for rows.Next() {
 		stock := domain.PortfolioStock{}
 		err := rows.Scan(&stock.Portfolioid,
+			&portfolioStocks.PortfolioName,
 			&stock.CompanyName,
 			&stock.Symbol,
 			&stock.Price,

@@ -4,16 +4,56 @@ import (
 	"encoding/json"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/jelinden/stock-portfolio/app/util"
 )
 
 func GetQuotes(symbols ...string) []Quote {
-	quoteData := util.Get(`https://api.iextrading.com/1.0/stock/market/batch?symbols=`+strings.Join(symbols, ",")+`&types=quote`, 5)
+	quoteData := util.Get(`https://api.iextrading.com/1.0/stock/market/batch?symbols=`+strings.Join(symbols, ",")+`&types=quote`, 8)
 	if quoteData == nil {
 		return []Quote{}
 	}
 	return MarshalQuotes(quoteData)
+}
+
+func GetDividends(symbols ...string) []Dividend {
+	dividends := []Dividend{}
+	for _, symbol := range symbols {
+		if div := getStockDividends(symbol); div != nil {
+			dividends = append(dividends, div...)
+		}
+		time.Sleep(1200 * time.Millisecond)
+	}
+	return dividends
+}
+
+func getStockDividends(symbol string) []Dividend {
+	rawDividend := []rawDividend{}
+	dividend := util.Get(`https://api.iextrading.com/1.0/stock/`+symbol+`/dividends/5y`, 8)
+	err := json.Unmarshal(dividend, &rawDividend)
+	if err != nil {
+		log.Println("Getting dividends for", symbol, "failed")
+		return nil
+	}
+	dividends := []Dividend{}
+	for i := range rawDividend {
+		div := Dividend{Symbol: symbol}
+		div.Amount = rawDividend[i].Amount
+		div.Type = rawDividend[i].Type
+		exDate, err := time.Parse("2006-01-02", rawDividend[i].ExDate)
+		if err != nil {
+			log.Println("err")
+		}
+		paymentDate, err := time.Parse("2006-01-02", rawDividend[i].PaymentDate)
+		if err != nil {
+			log.Println("err")
+		}
+		div.ExDate = exDate.Unix() * 1000
+		div.PaymentDate = paymentDate.Unix() * 1000
+		dividends = append(dividends, div)
+	}
+	return dividends
 }
 
 func MarshalQuotes(q []byte) []Quote {
@@ -51,10 +91,18 @@ type Quote struct {
 	PERatio       float64 `json:"peRatio"`
 }
 
+type rawDividend struct {
+	Symbol      string  `json:"symbol"`
+	ExDate      string  `json:"exDate"`
+	PaymentDate string  `json:"paymentDate"`
+	Amount      float64 `json:"amount"`
+	Type        string  `json:"type"`
+}
+
 type Dividend struct {
 	Symbol      string  `json:"symbol"`
-	ExDate      int     `json:"exDate"`
-	PaymentDate int     `json:"paymentDate"`
+	ExDate      int64   `json:"exDate"`
+	PaymentDate int64   `json:"paymentDate"`
 	Amount      float64 `json:"amount"`
 	Type        string  `json:"type"`
 }

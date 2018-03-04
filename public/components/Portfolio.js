@@ -12,12 +12,15 @@ class Portfolio extends React.Component {
     super(props);
     this.state = { 
       stocks: null,
+      portfolioName: null,
       startDate: moment(),
       total: 0,
       currentTotal: 0,
       changeTotal: 0,
       gain: '',
-      failed: false
+      failed: false,
+      symbols: null,
+      dividendData: null
     };
     this.handleChange = this.handleChange.bind(this);
     this.convertTimestamp = this.convertTimestamp.bind(this);
@@ -25,6 +28,7 @@ class Portfolio extends React.Component {
     this.removeStock = this.removeStock.bind(this);
     this.getUrlParameter = this.getUrlParameter.bind(this);
     this.numberFormat = this.numberFormat.bind(this);
+    this.dividends = this.dividends.bind(this);
   }
 
   handleChange(date) {
@@ -33,12 +37,13 @@ class Portfolio extends React.Component {
 
   portfolio() {
     var _this = this;
-    axios.get("/api/portfolio/get/" + _this.props.match.params.id, {timeout: 2000})
+    axios.get("/api/portfolio/get/" + _this.props.match.params.id, {timeout: 3000})
         .then(function(result) {
           let total = 0;
           let currentTotal = 0;
           let gainTotal = 0;
           let changeTotal = 0;
+          let symbols = "";
           if (result.data.stocks) {
             result.data.stocks.forEach(item => {
               total += item.price;
@@ -46,16 +51,23 @@ class Portfolio extends React.Component {
                 currentTotal += item.latestPrice*item.amount;
                 changeTotal += item.change*item.amount;
               }
+              if (symbols === "") {
+                symbols += item.symbol;
+              } else {
+                symbols += "," + item.symbol;
+              }
             });
             
             gainTotal = currentTotal - total;
             _this.setState({
               stocks: result.data.stocks,
+              portfolioName: result.data.portfolioName,
               total: total,
               currentTotal: currentTotal,
               changeTotal: changeTotal,
               gain: gainTotal,
-              failed: false
+              failed: false,
+              symbols: symbols
             });
           }
         })
@@ -65,11 +77,22 @@ class Portfolio extends React.Component {
         });
   }
 
+  dividends(symbols) {
+    var _this = this;
+    axios.get("/api/dividends?symbols=" + symbols, {timeout: 3000})
+        .then(function(result) {
+          if (result.data) {
+            _this.setState({dividendData: result.data});
+          }
+
+    });
+}
+
   removeStock(symbol) {
     var _this = this;
     return function (e) {
       console.log('removing ' + symbol);
-      axios.get("/api/portfolio/remove/"+ _this.props.match.params.id + "/" + symbol, {timeout: 2000})
+      axios.get("/api/portfolio/remove/"+ _this.props.match.params.id + "/" + symbol, {timeout: 3000})
       .then(function(result) {
         if (!result.data.error) {
           console.log('removed ' + symbol);
@@ -92,14 +115,15 @@ class Portfolio extends React.Component {
   componentDidMount() {
     var _this = this;
     _this.portfolio();
-    _this.interval = setInterval(_this.portfolio, 10000);
+    setTimeout(function() { _this.dividends(_this.state.symbols); }, 1200);
+    _this.interval = setInterval(_this.portfolio, 30000);
   }
 
   componentWillUnmount() {
     clearInterval(this.interval);
   }
 
-  convertTimestamp(timestamp) {
+  convertTimestamp(timestamp, full) {
     //console.log(timestamp, new Date(timestamp));
     if (timestamp !== undefined && timestamp !== '') {
       var d = new Date(timestamp),	// Convert the passed timestamp to milliseconds
@@ -110,9 +134,12 @@ class Portfolio extends React.Component {
         h = hh,
         min = ('0' + d.getMinutes()).slice(-2),		// Add leading 0.
         time;
-
-      //time = dd + '.' + mm + '.' + yyyy + ' ' + h + ':' + min;
-      time = dd + '.' + mm + '. ' + h + ':' + min;
+        
+      if (full) {
+        time = dd + '.' + mm + '.' + yyyy ;
+      } else {
+        time = dd + '.' + mm + '. ' + h + ':' + min;
+      }
       return time;
     }
     return '';
@@ -130,70 +157,76 @@ class Portfolio extends React.Component {
         <div className="content">
           <div className="alert info">{this.state.failed?'Connection lost':''}</div>
           <div id="portfolio">
-            <table class="pure-table">
-            <thead>
-              <tr>
-                  <th>Name</th>
-                  <th>Symbol</th>
-                  <th>Last price</th>
-                  <th>Time</th>
-                  <th>Change</th>
-                  <th>Shares</th>
-                  <th>Cost basis</th>
-                  <th>Market Value</th>
-                  <th>Gain</th>
-                  <th>Gain %</th>
-                  <th>Day's gain</th>
-                  <th>Close price</th>
-                  <th>Close time</th>
-                  <th>P/e ratio</th>
-                  <th>Remove</th>
-              </tr>
-            </thead>
-            <tbody>
-                {this.state.stocks ? this.state.stocks.map((item, index) => (
-                    <tr>
-                      <td>{item.companyName}</td>
-                      <td>{item.symbol}</td>
-                      <td className="right">{item.latestPrice}</td>
-                      <td className="right">{this.convertTimestamp(item.latestUpdate)}</td>
-                      <td className={item.changePercent && item.changePercent > 0?'right green':(item.changePercent < 0?'right red':'right')}>{item.changePercent?this.numberFormat((item.change).toFixed(2)) + ' (' + this.numberFormat((item.changePercent*100).toFixed(2)) + '%)':''}</td>
-                      <td className="right">{item.amount}</td>
-                      <td className="right">{this.numberFormat((item.price).toFixed(2))}</td>
-                      <td className="right">{(item.latestPrice?this.numberFormat((item.latestPrice*item.amount).toFixed(2)):'')}</td>
-                      <td className={item.latestPrice && (item.latestPrice*item.amount-item.price) > 0?'right green':((item.latestPrice*item.amount-item.price) < 0?'right red':'right')}>{item.latestPrice?(item.latestPrice*item.amount-item.price).toFixed(2):''}</td>
-                      <td className={item.latestPrice && (item.latestPrice-(item.price/item.amount)) > 0?'right green':((item.latestPrice-(item.price/item.amount)) < 0?'right red':'right')}>{item.latestPrice?(((item.latestPrice-(item.price/item.amount))/(item.price/item.amount))*100).toFixed(2)+'%':''}</td>
-                      <td className={item.change && item.change > 0?'right green':(item.change < 0?'right red':'right')}>{item.change?this.numberFormat((item.change*item.amount).toFixed(2)):''}</td>
-                      <td className="right">{item.close?this.numberFormat((item.close).toFixed(2)):''}</td>
-                      <td className="right">{this.convertTimestamp(item.closeTime)}</td>
-                      <td className="right">{item.peRatio?(item.peRatio).toFixed(2):''}</td>
-                      <td className="right"><a href="#" onClick={this.removeStock(item.symbol)}>(<span className="red delete"></span>)</a></td>
-                    </tr>
-                )):''}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th></th>
-                  <th></th>
-                  <th></th>
-                  <th></th>
-                  <th></th>
-                  <th></th>
-                  <th className="right">{this.state.stocks !== 'undefined'?this.numberFormat((this.state.total).toFixed(2)):''}</th>
-                  <th className="right">{this.state.stocks !== 'undefined'?this.numberFormat((this.state.currentTotal).toFixed(2)):''}</th>
-                  <th className={(this.state.gain && this.state.gain >= 0) ? 'right green' : 'right red'}>{this.state.gain ? this.numberFormat((this.state.gain).toFixed(2)) : ''}</th>
-                  <th></th>
-                  <th className={(this.state.changeTotal && this.state.changeTotal >= 0) ? 'right green' : 'right red'}>{this.state.changeTotal ? this.numberFormat((this.state.changeTotal).toFixed(2)) : ''}</th>
-                  <th></th>
-                  <th></th>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </tfoot>
-            </table>
+            <h1>{this.state.portfolioName?this.state.portfolioName:''}</h1>
+            <div>
+              <table class="pure-table">
+                <thead>
+                  <tr>
+                      <th>Name</th>
+                      <th>Symbol</th>
+                      <th>Last price</th>
+                      <th>Time</th>
+                      <th>Change</th>
+                      <th>Shares</th>
+                      <th>Cost basis</th>
+                      <th>Market Value</th>
+                      <th>Gain</th>
+                      <th>Gain %</th>
+                      <th>Day's gain</th>
+                      <th>Close price</th>
+                      <th>Close time</th>
+                      <th>P/e ratio</th>
+                      <th>Remove</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {this.state.stocks ? this.state.stocks.map((item, index) => (
+                        <tr>
+                          <td>{item.companyName}</td>
+                          <td>{item.symbol}</td>
+                          <td className="right">{item.latestPrice}</td>
+                          <td className="right">{this.convertTimestamp(item.latestUpdate)}</td>
+                          <td className={item.changePercent && item.changePercent > 0?'right green':(item.changePercent < 0?'right red':'right')}>{item.changePercent?this.numberFormat((item.change).toFixed(2)) + ' (' + this.numberFormat((item.changePercent*100).toFixed(2)) + '%)':''}</td>
+                          <td className="right">{item.amount}</td>
+                          <td className="right">{this.numberFormat((item.price).toFixed(2))}</td>
+                          <td className="right">{(item.latestPrice?this.numberFormat((item.latestPrice*item.amount).toFixed(2)):'')}</td>
+                          <td className={item.latestPrice && (item.latestPrice*item.amount-item.price) > 0?'right green':((item.latestPrice*item.amount-item.price) < 0?'right red':'right')}>{item.latestPrice?(item.latestPrice*item.amount-item.price).toFixed(2):''}</td>
+                          <td className={item.latestPrice && (item.latestPrice-(item.price/item.amount)) > 0?'right green':((item.latestPrice-(item.price/item.amount)) < 0?'right red':'right')}>{item.latestPrice?(((item.latestPrice-(item.price/item.amount))/(item.price/item.amount))*100).toFixed(2)+'%':''}</td>
+                          <td className={item.change && item.change > 0?'right green':(item.change < 0?'right red':'right')}>{item.change?this.numberFormat((item.change*item.amount).toFixed(2)):''}</td>
+                          <td className="right">{item.close?this.numberFormat((item.close).toFixed(2)):''}</td>
+                          <td className="right">{this.convertTimestamp(item.closeTime)}</td>
+                          <td className="right">{item.peRatio?(item.peRatio).toFixed(2):''}</td>
+                          <td className="right"><a href="#" onClick={this.removeStock(item.symbol)}>(<span className="red delete"></span>)</a></td>
+                        </tr>
+                    )):''}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th className="right">{this.state.stocks !== 'undefined'?this.numberFormat((this.state.total).toFixed(2)):''}</th>
+                    <th className="right">{this.state.stocks !== 'undefined'?this.numberFormat((this.state.currentTotal).toFixed(2)):''}</th>
+                    <th className={(this.state.gain && this.state.gain >= 0) ? 'right green' : 'right red'}>{this.state.gain ? this.numberFormat((this.state.gain).toFixed(2)) : ''}</th>
+                    <th></th>
+                    <th className={(this.state.changeTotal && this.state.changeTotal >= 0) ? 'right green' : 'right red'}>{this.state.changeTotal ? this.numberFormat((this.state.changeTotal).toFixed(2)) : ''}</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div class="footer">Data provided for free by IEX. <a href="https://iextrading.com/api-exhibit-a">iextrading.com/api-exhibit-a</a></div>
           </div>
+
           <div id="addstock">
             <form method="POST" action="/api/portfolio/add" className="pure-form pure-form-stacked">
+                <h2>Add stock</h2>
                 <input type="hidden" name="portfolioid" value={this.props.match.params.id}/>
                 <label for="symbol">Stock symbol</label>
                 <input id="symbol" type="text" name="symbol" placeholder="Symbol eg. INTC" />
@@ -219,9 +252,44 @@ class Portfolio extends React.Component {
                 <div className="alert">{this.getUrlParameter('commissionMsg')?'Commission was not a number':''}</div>
                 <button type="submit" className="pure-button pure-button-primary">Add</button>
             </form>
+            <div id="dividends">
+            <h2>Latest dividend</h2>
+            <div>
+              <table class="pure-table">
+                <thead>
+                  <tr>
+                      <th>Symbol</th>
+                      <th>Type</th>
+                      <th>Ex date</th>
+                      <th>Payment date</th>
+                      <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.dividendData ? this.state.dividendData.map((item, index) => (
+                      <tr>
+                        <td>{item.symbol}</td>
+                        <td className="right">{item.type}</td>
+                        <td className="right">{this.convertTimestamp(item.exDate, true)}</td>
+                        <td className="right">{this.convertTimestamp(item.paymentDate, true)}</td>
+                        <td className="right">{item.amount}</td>
+                      </tr>
+                  )):''}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           </div>
-          <div class="footer">Data provided for free by IEX. <a href="https://iextrading.com/api-exhibit-a">iextrading.com/api-exhibit-a</a></div>
         </div>
+      </div>
       )
   }
 }

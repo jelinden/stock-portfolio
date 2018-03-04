@@ -105,7 +105,7 @@ func ok(w http.ResponseWriter, content []byte) {
 }
 
 func verifySymbol(s string) bool {
-	re, err := regexp.Compile(`^[a-zA-ZöäåÖÄÅ ]+$`)
+	re, err := regexp.Compile(`^[a-zA-ZöäåÖÄÅ, ]+$`)
 	if err != nil {
 		log.Println(err.Error())
 	}
