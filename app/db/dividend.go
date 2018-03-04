@@ -2,6 +2,7 @@ package db
 
 import (
 	"log"
+	"reflect"
 
 	"github.com/jelinden/stock-portfolio/app/service"
 )
@@ -10,6 +11,9 @@ func GetDividend(symbols string) []service.Dividend {
 	m := getQuery(`select symbol, max(paymentDate) as maxPaymentDate from dividend where symbol in (` + symbols + `) group by symbol order by maxPaymentDate desc`)
 	var divs = []service.Dividend{}
 	for i := range m {
+		if reflect.TypeOf(m[i]["symbol"]).String() == "int64" {
+			return []service.Dividend{}
+		}
 		symbol := m[i]["symbol"].(string)
 		maxPaymentDate := m[i]["maxPaymentDate"].(int64)
 

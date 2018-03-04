@@ -161,7 +161,7 @@ func getQuery(query string, args ...interface{}) []map[string]interface{} {
 			var rawValue = *(values[i].(*interface{}))
 			var rawType = reflect.TypeOf(rawValue)
 
-			if rawType.Name() != "float64" && rawType.Name() != "int64" && rawValue != nil {
+			if rawValue != nil && rawType.Name() != "float64" && rawType.Name() != "int64" {
 				rawValue = uint8ToString(rawValue.([]uint8))
 			}
 			m[colName] = rawValue
