@@ -7,7 +7,7 @@ import (
 )
 
 func GetDividend(symbols string) []service.Dividend {
-	m := getQuery(`select symbol, max(paymentDate) as maxPaymentDate from dividend where symbol in (` + symbols + `) group by symbol`)
+	m := getQuery(`select symbol, max(paymentDate) as maxPaymentDate from dividend where symbol in (` + symbols + `) group by symbol order by maxPaymentDate desc`)
 	var divs = []service.Dividend{}
 	for i := range m {
 		symbol := m[i]["symbol"].(string)

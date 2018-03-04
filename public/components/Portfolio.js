@@ -20,7 +20,8 @@ class Portfolio extends React.Component {
       gain: '',
       failed: false,
       symbols: null,
-      dividendData: null
+      dividendData: null,
+      stockMap: null
     };
     this.handleChange = this.handleChange.bind(this);
     this.convertTimestamp = this.convertTimestamp.bind(this);
@@ -44,6 +45,7 @@ class Portfolio extends React.Component {
           let gainTotal = 0;
           let changeTotal = 0;
           let symbols = "";
+          let stockMap = [];
           if (result.data.stocks) {
             result.data.stocks.forEach(item => {
               total += item.price;
@@ -56,11 +58,13 @@ class Portfolio extends React.Component {
               } else {
                 symbols += "," + item.symbol;
               }
+              stockMap[item.symbol] = item.amount;
             });
             
             gainTotal = currentTotal - total;
             _this.setState({
               stocks: result.data.stocks,
+              stockMap: stockMap,
               portfolioName: result.data.portfolioName,
               total: total,
               currentTotal: currentTotal,
@@ -263,6 +267,7 @@ class Portfolio extends React.Component {
                       <th>Ex date</th>
                       <th>Payment date</th>
                       <th>Amount</th>
+                      <th>Total</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -273,11 +278,13 @@ class Portfolio extends React.Component {
                         <td className="right">{this.convertTimestamp(item.exDate, true)}</td>
                         <td className="right">{this.convertTimestamp(item.paymentDate, true)}</td>
                         <td className="right">{item.amount}</td>
+                        <td className="right">{this.state.stockMap[item.symbol]*item.amount}</td>
                       </tr>
                   )):''}
                 </tbody>
                 <tfoot>
                   <tr>
+                    <th></th>
                     <th></th>
                     <th></th>
                     <th></th>
