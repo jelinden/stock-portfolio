@@ -101,18 +101,30 @@ func populateDatabase() {
 
 func exec(command string, args ...interface{}) error {
 	//log.Println(command, args)
-	defer recoverFrom()
-	_, err := db.Exec(command, args...)
+
+	tx, err := db.Begin()
+	defer recoverFrom(tx)
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec(command, args...)
 	if err != nil {
 		log.Println("failed executing", command, err)
+		tx.Rollback()
 		return err
+	}
+	log.Println("commit")
+	err = tx.Commit()
+	if err != nil {
+		log.Println("commit msg", err)
 	}
 	return err
 }
 
-func recoverFrom() {
+func recoverFrom(tx *sql.Tx) {
 	if r := recover(); r != nil {
 		log.Println("recovered from ", r)
+		tx.Commit()
 	}
 }
 
