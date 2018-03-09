@@ -89,7 +89,7 @@ func Init() {
 	log.Println("db file", dbFileName, "opened")
 	populateDatabase()
 	go doEvery(time.Second*60, getQuotes)
-	go doEvery(time.Minute*3, getDividends)
+	go doEvery(time.Hour*3, getDividends)
 }
 
 func populateDatabase() {
@@ -113,7 +113,6 @@ func exec(command string, args ...interface{}) error {
 		tx.Rollback()
 		return err
 	}
-	log.Println("commit")
 	err = tx.Commit()
 	if err != nil {
 		log.Println("commit msg", err)
