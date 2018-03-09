@@ -44,10 +44,12 @@ func getStockDividends(symbol string) []Dividend {
 		exDate, err := time.Parse("2006-01-02", rawDividend[i].ExDate)
 		if err != nil {
 			log.Println("err")
+			return nil
 		}
 		paymentDate, err := time.Parse("2006-01-02", rawDividend[i].PaymentDate)
 		if err != nil {
 			log.Println("err")
+			return nil
 		}
 		div.ExDate = exDate.Unix() * 1000
 		div.PaymentDate = paymentDate.Unix() * 1000

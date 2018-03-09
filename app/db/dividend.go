@@ -57,7 +57,7 @@ func saveDividends(dividends []service.Dividend) {
 			item.Symbol, item.Type, item.PaymentDate)
 
 		if div == nil {
-			log.Println("saving", item.Symbol, item.Amount, item.Type, "to database")
+			log.Println("saving", item.Symbol, item.Amount, item.Type, item.PaymentDate, item.ExDate, "to database")
 			err := exec("insert into dividend (symbol, amount, type, paymentDate, exDate) values ($1, $2, $3, $4, $5)",
 				item.Symbol, item.Amount, item.Type, item.PaymentDate, item.ExDate)
 			if err != nil {
