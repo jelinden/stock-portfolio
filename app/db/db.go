@@ -101,6 +101,7 @@ func populateDatabase() {
 
 func exec(command string, args ...interface{}) error {
 	//log.Println(command, args)
+	defer recoverFrom()
 	tx, err := db.Begin()
 	if err != nil {
 		return err
@@ -113,6 +114,12 @@ func exec(command string, args ...interface{}) error {
 	}
 	err = tx.Commit()
 	return err
+}
+
+func recoverFrom() {
+	if r := recover(); r != nil {
+		log.Println("recovered from ", r)
+	}
 }
 
 func execRow(command string, args ...interface{}) domain.User {
