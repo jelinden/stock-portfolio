@@ -43,6 +43,7 @@ func GetDividend(symbols string) []service.Dividend {
 }
 
 func saveDividends(dividends []service.Dividend) {
+	defer recoverFrom()
 	for _, item := range dividends {
 		div := getQuery(`select 
 							symbol, 
@@ -64,6 +65,12 @@ func saveDividends(dividends []service.Dividend) {
 				log.Println(err)
 			}
 		}
+	}
+}
+
+func recoverFrom() {
+	if r := recover(); r != nil {
+		log.Println("recovered from ", r)
 	}
 }
 

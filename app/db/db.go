@@ -89,7 +89,7 @@ func Init() {
 	log.Println("db file", dbFileName, "opened")
 	populateDatabase()
 	go doEvery(time.Second*60, getQuotes)
-	go doEvery(time.Hour*1, getDividends)
+	go doEvery(time.Minute*1, getDividends)
 }
 
 func populateDatabase() {
