@@ -89,7 +89,7 @@ func Init() {
 	log.Println("db file", dbFileName, "opened")
 	populateDatabase()
 	go doEvery(time.Second*60, getQuotes)
-	go doEvery(time.Minute*1, getDividends)
+	go doEvery(time.Minute*3, getDividends)
 }
 
 func populateDatabase() {
@@ -102,17 +102,11 @@ func populateDatabase() {
 func exec(command string, args ...interface{}) error {
 	//log.Println(command, args)
 	defer recoverFrom()
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-	_, err = tx.Exec(command, args...)
+	_, err := db.Exec(command, args...)
 	if err != nil {
 		log.Println("failed executing", command, err)
-		tx.Rollback()
 		return err
 	}
-	err = tx.Commit()
 	return err
 }
 
