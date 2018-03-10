@@ -2,7 +2,20 @@
 
 A simple stock portfolio.
 
-https://jelinden.fi/blog/your-own-little-stock-portfolio/u8srts3zg
+![](https://raw.githubusercontent.com/jelinden/stock-portfolio/master/portfolio-example.png)
+
+Blog: https://jelinden.fi/blog/your-own-little-stock-portfolio/u8srts3zg
 
 https://portfolio.jelinden.fi
 
+# Run
+
+npm run build && go build && ./stock-portfolio
+
+## Development stack
+
+Fontend: Reactjs
+
+Backend: Golang, http router github.com/julienschmidt/httprouter
+
+Database: Embedded github.com/cznic/ql
