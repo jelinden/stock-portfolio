@@ -107,8 +107,7 @@ func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 func gracefullShutdown() {
 	var gracefulStop = make(chan os.Signal)
-	signal.Notify(gracefulStop, syscall.SIGTERM)
-	signal.Notify(gracefulStop, syscall.SIGINT)
+	signal.Notify(gracefulStop, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
 	go func() {
 		sig := <-gracefulStop
 		fmt.Printf("caught sig: %+v", sig)
