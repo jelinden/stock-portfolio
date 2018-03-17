@@ -112,11 +112,11 @@ func gracefullShutdown() {
 	go func() {
 		sig := <-gracefulStop
 		fmt.Printf("caught sig: %+v", sig)
-		fmt.Println("Wait for 2 second to finish processing")
+		fmt.Println("Wait for 3 second to finish processing")
 		db.After()
 		db.CloseBolt()
 		middleware.CloseLogFile()
-		time.Sleep(1 * time.Second)
+		time.Sleep(3 * time.Second)
 		os.Exit(0)
 	}()
 }

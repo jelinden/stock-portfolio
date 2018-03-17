@@ -89,7 +89,7 @@ func Init() {
 	log.Println("db file", dbFileName, "opened")
 	populateDatabase()
 	go doEvery(time.Second*60, getQuotes)
-	go doEvery(time.Hour*3, getDividends)
+	go doEvery(time.Minute*180, getDividends)
 }
 
 func populateDatabase() {
@@ -123,7 +123,7 @@ func exec(command string, args ...interface{}) error {
 func recoverFrom(tx *sql.Tx) {
 	if r := recover(); r != nil {
 		log.Println("recovered from ", r)
-		tx.Commit()
+		tx.Rollback()
 	}
 }
 
@@ -276,6 +276,7 @@ func After() {
 	if err != nil {
 		log.Println("closing db connection error", err.Error())
 	}
+	log.Println("db connection closed")
 }
 
 type History struct {
