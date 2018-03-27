@@ -230,3 +230,11 @@ tbody tr:nth-child(odd) {
     min-width: 300px;
     text-align: left;
 }
+.flex {
+    display: flex;
+    flex-wrap: wrap;
+}
+.flex-item {
+    width: 100%;
+    flex-grow: 1;
+}
