@@ -48,8 +48,8 @@ class Header extends React.Component {
       )
     } else {
       return (
-        <header>
-          <nav>
+        <header className="flex">
+          <nav className="flex-item">
             <ul>
               <li><Link className="headerLink" to='/'>Home</Link></li>
               {this.state.login}
