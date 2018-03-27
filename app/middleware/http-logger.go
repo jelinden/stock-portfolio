@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
@@ -36,10 +37,7 @@ func HttpLogger(fn httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		req := r
 
-		originIP, _, _ := net.SplitHostPort(req.RemoteAddr)
-		if originIP == "" {
-			originIP = req.Header.Get("X-Forwarded-For")
-		}
+		originIP := getRemoteAddr(req)
 
 		start := time.Now()
 		fn(w, r, ps)
@@ -54,4 +52,59 @@ func HttpLogger(fn httprouter.Handle) httprouter.Handle {
 
 		logger.Printf("%s %s %s %v %s %v", originIP, method, path, code, stop.Sub(start), size)
 	}
+}
+
+func getRemoteAddr(r *http.Request) string {
+	if xffh := r.Header.Get("X-Forwarded-For"); xffh != "" {
+		if xip := parse(xffh); xip != "" {
+			return xip
+		}
+	}
+	return r.RemoteAddr
+}
+
+func parse(ipList string) string {
+	for _, ip := range strings.Split(ipList, ",") {
+		ip = strings.TrimSpace(ip)
+		if IP := net.ParseIP(ip); IP != nil && isPublicIP(IP) {
+			return ip
+		}
+	}
+	return ""
+}
+
+func isPublicIP(ip net.IP) bool {
+	if !ip.IsGlobalUnicast() {
+		return false
+	}
+	return !ipInMasks(ip, privateMasks)
+}
+
+func ipInMasks(ip net.IP, masks []net.IPNet) bool {
+	for _, mask := range masks {
+		if mask.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
+
+var privateMasks, _ = toMasks([]string{
+	"127.0.0.0/8",
+	"10.0.0.0/8",
+	"172.16.0.0/12",
+	"192.168.0.0/16",
+	"fc00::/7",
+})
+
+func toMasks(ips []string) (masks []net.IPNet, err error) {
+	for _, cidr := range ips {
+		var network *net.IPNet
+		_, network, err = net.ParseCIDR(cidr)
+		if err != nil {
+			return
+		}
+		masks = append(masks, *network)
+	}
+	return
 }
