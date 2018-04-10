@@ -17,7 +17,8 @@ class Portfolio extends React.Component {
       total: 0,
       currentTotal: 0,
       changeTotal: 0,
-      itemTotal: '',
+      itemTotal: 0,
+      currentItemTotal: 0,
       gain: '',
       failed: false,
       symbols: null,
@@ -43,6 +44,7 @@ class Portfolio extends React.Component {
         .then(function(result) {
           let total = 0;
           let itemTotal = 0;
+          let currentItemTotal = 0;
           let currentTotal = 0;
           let gainTotal = 0;
           let changeTotal = 0;
@@ -54,6 +56,7 @@ class Portfolio extends React.Component {
               if (item.latestPrice) {
                 currentTotal += item.latestPrice*item.amount;
                 itemTotal += item.change;
+                currentItemTotal += item.latestPrice
                 changeTotal += item.change*item.amount;
               }
               if (symbols === "") {
@@ -73,6 +76,7 @@ class Portfolio extends React.Component {
               currentTotal: currentTotal,
               changeTotal: changeTotal,
               itemTotal: itemTotal,
+              currentItemTotal: currentItemTotal,
               gain: gainTotal,
               failed: false,
               symbols: symbols
@@ -214,7 +218,7 @@ class Portfolio extends React.Component {
                     <th></th>
                     <th></th>
                     <th></th>
-                    <th className={this.state.itemTotal && this.state.itemTotal > 0?'right green':(this.state.itemTotal < 0?'right red':'right')}>{this.state.itemTotal !== 'undefined'?this.numberFormat((this.state.itemTotal/this.state.currentTotal*100).toFixed(2)) + ' %':''}</th>
+                    <th className={this.state.itemTotal && this.state.itemTotal > 0?'right green':(this.state.itemTotal < 0?'right red':'right')}>{this.state.itemTotal !== 'undefined'?this.numberFormat((this.state.itemTotal/this.state.currentItemTotal*100).toFixed(2)) + ' %':''}</th>
                     <th></th>
                     <th className="right">{this.state.stocks !== 'undefined'?this.numberFormat((this.state.total).toFixed(2)):''}</th>
                     <th className="right">{this.state.stocks !== 'undefined'?this.numberFormat((this.state.currentTotal).toFixed(2)):''}</th>
