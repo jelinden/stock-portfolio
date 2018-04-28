@@ -166,12 +166,12 @@ class Portfolio extends React.Component {
 
   render() {
       return (
-        <div className="content">
+        <div className="content pure-g">
           <div className="alert info">{this.state.failed?'Connection lost':''}</div>
-          <div id="portfolio">
+          <div id="portfolio" className="pure-u-1">
             <h1>{this.state.portfolioName?this.state.portfolioName:''}</h1>
-            <div>
-              <table class="pure-table">
+            <div className="scrolling-wrapper-flexbox">
+              <table className="pure-table">
                 <thead>
                   <tr>
                       <th>Name</th>
@@ -233,7 +233,7 @@ class Portfolio extends React.Component {
                 </tfoot>
               </table>
             </div>
-            <div class="footer">Data provided for free by IEX. <a href="https://iextrading.com/api-exhibit-a">iextrading.com/api-exhibit-a</a></div>
+            <div className="footer">Data provided for free by IEX. <a href="https://iextrading.com/api-exhibit-a">iextrading.com/api-exhibit-a</a></div>
           </div>
 
           <div id="addstock">
@@ -264,7 +264,9 @@ class Portfolio extends React.Component {
                 <div className="alert">{this.getUrlParameter('commissionMsg')?'Commission was not a number':''}</div>
                 <button type="submit" className="pure-button pure-button-primary">Add</button>
             </form>
-            <div id="dividends">
+        </div>
+        
+        <div id="dividends">
             <h2>Latest dividend</h2>
             <div>
               <table class="pure-table">
@@ -303,7 +305,6 @@ class Portfolio extends React.Component {
               </table>
             </div>
           </div>
-        </div>
       </div>
       )
   }

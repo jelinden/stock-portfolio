@@ -3,14 +3,22 @@ button,
 input,
 select,
 textarea,
-.pure-g [class *= "pure-u"] {
+.pure-g [class*="pure-u"] {
     font-family: Tahoma, Geneva, sans-serif;
     color: #2d2d2d;
     font-weight: 100;
 }
+body,
 html {
+    margin: 0;
+    padding: 0;
     width: 100%;
-    display: inline-block;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+* {
+    box-sizing: inherit;
 }
 body {
     background-color: white;
@@ -45,7 +53,10 @@ a.pure-button-selected {
 .floatright {
     display: inline-block;
     margin-right: 20px;
-    line-height: 60px;
+    margin-left: 60px;
+    right: 0px;
+    text-align: center;
+    line-height: 30px;
 }
 .footer {
     clear: left;
@@ -143,8 +154,8 @@ a {
     margin: 0 auto;
 }
 .content {
-    width: 100%;
     margin-top: 60px;
+    width: 100%;
 }
 .react-datepicker__day-name,
 .react-datepicker__day,
@@ -168,7 +179,8 @@ a {
     margin-right: 40px;
 }
 #addstock {
-    margin: 10px;
+    padding: 10px;
+    padding-right: 30px;
     display: inline-flex;
     clear: left;
 }
@@ -189,7 +201,7 @@ a {
 }
 #portfolio {
     float: left;
-    margin: 10px;
+    padding: 5px;
 }
 .pure-table {
     font-size: 12px;
@@ -224,7 +236,6 @@ tbody tr:nth-child(odd) {
 }
 #dividends {
     display: inline-block;
-    margin-left: 30px;
     margin-top: 0px;
     margin-bottom: 50px;
     padding-top: 0px;
@@ -240,4 +251,20 @@ tbody tr:nth-child(odd) {
 .flex-item {
     width: 100%;
     flex-grow: 1;
+}
+.scrolling-wrapper {
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+.scrolling-wrapper-flexbox {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+.scrolling-wrapper table {
+    display: inline-block;
+}
+table {
+    flex: 0 0 auto;
 }
