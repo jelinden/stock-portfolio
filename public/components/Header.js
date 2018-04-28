@@ -17,8 +17,8 @@ class Header extends React.Component {
         .then(function(result) {
           if (result.data.error) {
             _this.setState({
-              signup: <li><Link className="headerLink" to='/signup'>Signup</Link></li>,
-              login: <li><Link className="headerLink" to='/login'>Login</Link></li>
+              signup: <li className="pure-menu-item"><Link className="pure-menu-link" to='/signup'>Signup</Link></li>,
+              login: <li className="pure-menu-item"><Link className="pure-menu-link" to='/login'>Login</Link></li>
             });
           }
           _this.setState({
@@ -48,16 +48,17 @@ class Header extends React.Component {
       )
     } else {
       return (
-        <header className="flex">
-          <nav className="flex-item">
-            <ul>
-              <li><Link className="headerLink" to='/'>Home</Link></li>
+        <header className="header">
+          <div className="pure-menu pure-menu-horizontal pure-menu-scrollable">
+            <Link className="pure-menu-link pure-menu-heading" to='/'>Home</Link>
+            <ul className="pure-menu-list">
               {this.state.login}
               {this.state.signup}
-              {this.state.loggedin?<a className="headerLink" href="/logout">Logout</a>:''}
+              {this.state.loggedin?<li className="pure-menu-item"><a className="pure-menu-link" href="/logout">Logout</a></li>:''}
+              <li className="pure-menu-item"><div class="floatright">{this.state.loggedin?'Welcome, ' + this.state.user.username:'Your personal stock portfolio'}</div></li>
             </ul>
-            <div class="floatright">{this.state.loggedin?'Welcome, ' + this.state.user.username:'Your personal stock portfolio'}</div>
-          </nav>
+            
+          </div>
         </header>
       )
     }
