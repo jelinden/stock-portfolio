@@ -9,8 +9,10 @@ import (
 	"github.com/jelinden/stock-portfolio/app/util"
 )
 
+const httpTimeout = 8 // seconds
+
 func GetQuotes(symbols ...string) []Quote {
-	quoteData := util.Get(`https://api.iextrading.com/1.0/stock/market/batch?symbols=`+strings.Join(symbols, ",")+`&types=quote`, 8)
+	quoteData := util.Get(`https://api.iextrading.com/1.0/stock/market/batch?symbols=`+strings.Join(symbols, ",")+`&types=quote`, httpTimeout)
 	if quoteData == nil {
 		return []Quote{}
 	}
@@ -30,7 +32,7 @@ func GetDividends(symbols ...string) []Dividend {
 
 func getStockDividends(symbol string) []Dividend {
 	rawDividend := []rawDividend{}
-	dividend := util.Get(`https://api.iextrading.com/1.0/stock/`+symbol+`/dividends/5y`, 8)
+	dividend := util.Get(`https://api.iextrading.com/1.0/stock/`+symbol+`/dividends/5y`, httpTimeout)
 	err := json.Unmarshal(dividend, &rawDividend)
 	if err != nil {
 		log.Println("Getting dividends for", symbol, "failed")
@@ -108,20 +110,3 @@ type Dividend struct {
 	Amount      float64 `json:"amount"`
 	Type        string  `json:"type"`
 }
-
-// https://api.iextrading.com/1.0/stock/OHI/dividends/5y
-/*
-[
-	{
-		exDate: "2018-01-30",
-		paymentDate: "2018-02-15",
-		recordDate: "2018-01-31",
-		declaredDate: "2018-01-16",
-		amount: 0.66,
-		flag: "FI",
-		type: "Dividend income",
-		qualified: "",
-		indicated: ""
-	},
-*/
-// https://api.iextrading.com/1.0/stock/market/batch?symbols=bns,xom,adp,ohi&types=quote
