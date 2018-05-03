@@ -128,7 +128,7 @@ class Portfolio extends React.Component {
     var _this = this;
     _this.portfolio();
     setTimeout(function() { _this.dividends(_this.state.symbols); }, 1200);
-    _this.interval = setInterval(_this.portfolio, 30000);
+    _this.interval = setInterval(_this.portfolio, 10000);
   }
 
   componentWillUnmount() {
