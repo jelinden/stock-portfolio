@@ -88,7 +88,7 @@ func Init() {
 	}
 	log.Println("db file", dbFileName, "opened")
 	populateDatabase()
-	go doEvery(time.Second*60, getQuotes)
+	go doEvery(time.Second*20, getQuotes)
 	go doEvery(time.Minute*180, getDividends)
 }
 
@@ -100,8 +100,6 @@ func populateDatabase() {
 }
 
 func exec(command string, args ...interface{}) error {
-	//log.Println(command, args)
-
 	tx, err := db.Begin()
 	defer recoverFrom(tx)
 	if err != nil {
