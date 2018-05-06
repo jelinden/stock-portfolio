@@ -84,6 +84,8 @@ func main() {
 	router.Handle("GET", "/api/portfolio/remove/:portfolioid/:symbol", middleware.HttpLogger(middleware.Auth(util.MakeGzipHandler(routes.RemoveStock))))
 	router.Handle("GET", "/api/dividends", middleware.HttpLogger(middleware.Auth(util.MakeGzipHandler(routes.GetDividend))))
 
+	router.Handle("GET", "/health", middleware.HttpLogger(middleware.AdminAuth(util.MakeGzipHandler(routes.Health))))
+
 	gracefullShutdown()
 	log.Println("starting server at port 3300")
 	log.Fatal(http.ListenAndServe(":3300", router))
