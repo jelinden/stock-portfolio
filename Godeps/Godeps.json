@@ -1,0 +1,131 @@
+{
+	"ImportPath": "github.com/jelinden/stock-portfolio",
+	"GoVersion": "go1.10",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "github.com/StackExchange/wmi",
+			"Comment": "1.0.0-2-gcdffdb3",
+			"Rev": "cdffdb33acae0e14efff2628f9bae377b597840e"
+		},
+		{
+			"ImportPath": "github.com/boltdb/bolt",
+			"Comment": "v1.2.1",
+			"Rev": "dfb21201d9270c1082d5fb0f07f500311ff72f18"
+		},
+		{
+			"ImportPath": "github.com/cznic/b",
+			"Rev": "35e9bbe41f07452a183c517a5fc5f3c9f45eaa0f"
+		},
+		{
+			"ImportPath": "github.com/cznic/fileutil",
+			"Rev": "6a051e75936f623600b67c2b1116b6b6c0ffb936"
+		},
+		{
+			"ImportPath": "github.com/cznic/golex/lex",
+			"Rev": "4ab7c5e190e49208c823ce8ec803aa39e6a4b31a"
+		},
+		{
+			"ImportPath": "github.com/cznic/internal/buffer",
+			"Comment": "1.0.0-4-g4747030",
+			"Rev": "4747030f7cf2f4c0a01512b00cd68734b167ac3b"
+		},
+		{
+			"ImportPath": "github.com/cznic/internal/file",
+			"Comment": "1.0.0-4-g4747030",
+			"Rev": "4747030f7cf2f4c0a01512b00cd68734b167ac3b"
+		},
+		{
+			"ImportPath": "github.com/cznic/internal/slice",
+			"Comment": "1.0.0-4-g4747030",
+			"Rev": "4747030f7cf2f4c0a01512b00cd68734b167ac3b"
+		},
+		{
+			"ImportPath": "github.com/cznic/lldb",
+			"Comment": "v1.1.0",
+			"Rev": "bea8611dd5c407f3c5eab9f9c68e887a27dc6f0e"
+		},
+		{
+			"ImportPath": "github.com/cznic/mathutil",
+			"Rev": "7764e6a2216aaa02c36f75aad62538d39c2962c2"
+		},
+		{
+			"ImportPath": "github.com/cznic/ql",
+			"Comment": "v1.1.0-64-geccf3e9",
+			"Rev": "eccf3e9caa43fab70d7ddfdee5c3fb73fc76c2a1"
+		},
+		{
+			"ImportPath": "github.com/cznic/ql/vendored/github.com/camlistore/go4/lock",
+			"Comment": "v1.1.0-64-geccf3e9",
+			"Rev": "eccf3e9caa43fab70d7ddfdee5c3fb73fc76c2a1"
+		},
+		{
+			"ImportPath": "github.com/cznic/sortutil",
+			"Rev": "4c7342852e65c2088c981288f2c5610d10b9f7f4"
+		},
+		{
+			"ImportPath": "github.com/cznic/strutil",
+			"Rev": "529a34b1c186b483642a7a230c67521d9aa4b0fb"
+		},
+		{
+			"ImportPath": "github.com/cznic/zappy",
+			"Rev": "2533cb5b45cc6c07421468ce262899ddc9d53fb7"
+		},
+		{
+			"ImportPath": "github.com/edsrzf/mmap-go",
+			"Rev": "0bce6a6887123b67a60366d2c9fe2dfb74289d2e"
+		},
+		{
+			"ImportPath": "github.com/go-ole/go-ole",
+			"Comment": "v1.2.1-4-ga1ec82a",
+			"Rev": "a1ec82a652ebc7e784d7df887cfb31061aeabbcc"
+		},
+		{
+			"ImportPath": "github.com/go-ole/go-ole/oleutil",
+			"Comment": "v1.2.1-4-ga1ec82a",
+			"Rev": "a1ec82a652ebc7e784d7df887cfb31061aeabbcc"
+		},
+		{
+			"ImportPath": "github.com/julienschmidt/httprouter",
+			"Comment": "v1.1-29-g77366a4",
+			"Rev": "77366a47451a56bb3ba682481eed85b64fea14e8"
+		},
+		{
+			"ImportPath": "github.com/shirou/gopsutil/cpu",
+			"Comment": "v2.18.04-5-g57f370e",
+			"Rev": "57f370e13068146efe1cb7129f79e5d51da8a242"
+		},
+		{
+			"ImportPath": "github.com/shirou/gopsutil/disk",
+			"Comment": "v2.18.04-5-g57f370e",
+			"Rev": "57f370e13068146efe1cb7129f79e5d51da8a242"
+		},
+		{
+			"ImportPath": "github.com/shirou/gopsutil/internal/common",
+			"Comment": "v2.18.04-5-g57f370e",
+			"Rev": "57f370e13068146efe1cb7129f79e5d51da8a242"
+		},
+		{
+			"ImportPath": "github.com/shirou/gopsutil/mem",
+			"Comment": "v2.18.04-5-g57f370e",
+			"Rev": "57f370e13068146efe1cb7129f79e5d51da8a242"
+		},
+		{
+			"ImportPath": "github.com/ventu-io/go-shortid",
+			"Comment": "v1.0-7-g935de67",
+			"Rev": "935de6796a71e222e8a8a141ead882d70b6ba6d0"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/pbkdf2",
+			"Rev": "459e26527287adbc2adcc5d0d49abff9a5f315a7"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "d4feaf1a7e61e1d9e79e6c4e76c6349e9cab0a03"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows",
+			"Rev": "d4feaf1a7e61e1d9e79e6c4e76c6349e9cab0a03"
+		}
+	]
+}
