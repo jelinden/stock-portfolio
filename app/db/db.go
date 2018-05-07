@@ -9,6 +9,7 @@ import (
 	"github.com/cznic/ql"
 	"github.com/jelinden/stock-portfolio/app/domain"
 	"github.com/jelinden/stock-portfolio/app/service"
+	"github.com/jelinden/stock-portfolio/app/util"
 )
 
 const dbFileName = "./ql.db"
@@ -88,8 +89,8 @@ func Init() {
 	}
 	log.Println("db file", dbFileName, "opened")
 	populateDatabase()
-	go doEvery(time.Second*20, getQuotes)
-	go doEvery(time.Minute*180, getDividends)
+	go util.DoEvery(time.Second*20, getQuotes)
+	go util.DoEvery(time.Minute*180, getDividends)
 }
 
 func populateDatabase() {
@@ -259,12 +260,6 @@ func getQuotes() {
 	if len(quotes) > 0 {
 		log.Printf("got %v quotes\n", len(quotes))
 		SaveQuotes(quotes)
-	}
-}
-
-func doEvery(d time.Duration, f func()) {
-	for range time.Tick(d) {
-		f()
 	}
 }
 

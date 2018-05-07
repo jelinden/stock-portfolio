@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"regexp"
+	"time"
 
 	"github.com/ventu-io/go-shortid"
 	"golang.org/x/crypto/pbkdf2"
@@ -101,4 +102,10 @@ func Decrypt(text string) string {
 		log.Println(err.Error())
 	}
 	return string(decryptedText)
+}
+
+func DoEvery(d time.Duration, f func()) {
+	for range time.Tick(d) {
+		f()
+	}
 }
