@@ -8,6 +8,7 @@ textarea,
     color: #2d2d2d;
     font-weight: 100;
 }
+
 body,
 html {
     margin: 0;
@@ -20,36 +21,45 @@ html {
 * {
     box-sizing: inherit;
 }
+
 body {
     background-color: white;
 }
+
 header {
     background-color: #1d5d90;
     color: white;
 }
+
 header a {
     color: white;
 }
+
 .red,
 a.red {
     color: red;
 }
+
 .green {
     color: green;
 }
+
 .green:before {
     content: "+";
 }
+
 .delete:before {
     content: "\2718";
     font-size: 14px;
 }
+
 .pure-button-primary,
 .pure-button-selected,
 a.pure-button-primary,
 a.pure-button-selected {
     background-color: #1d5d90 !important;
 }
+
 .floatright {
     display: inline-block;
     margin-right: 20px;
@@ -58,20 +68,24 @@ a.pure-button-selected {
     text-align: center;
     line-height: 30px;
 }
+
 .footer {
     clear: left;
     margin-left: 20px;
     margin-bottom: 10px;
 }
+
 input {
     color: black;
     width: 180px !important;
 }
+
 nav {
     display: flex !important;
     justify-content: space-between;
     width: 100%;
 }
+
 h1 {
     font-weight: 100;
     text-transform: uppercase;
@@ -91,13 +105,16 @@ h2 {
 .portfolio {
     text-align: left;
 }
+
 .portfolio td {
     padding-right: 5px;
 }
+
 .pure-menu-link:hover,
 .pure-menu-link:focus {
     background-color: #777;
 }
+
 a {
     text-decoration: none;
     color: #2d2d2d;
@@ -146,17 +163,21 @@ a {
 .login {
     margin: auto;
 }
+
 .register {
     display: inline-block;
 }
+
 .pure-g {
     letter-spacing: 0em !important;
     margin: 0 auto;
 }
+
 .content {
     margin-top: 60px;
     width: 100%;
 }
+
 .react-datepicker__day-name,
 .react-datepicker__day,
 .react-datepicker__time-name {
@@ -167,42 +188,51 @@ a {
     text-align: center;
     margin: 0.166rem;
 }
+
 #addportfolio,
 #portfolios {
     float: left;
     margin: 10px;
 }
+
 #addportfolio {
     margin-top: 20px;
     margin-bottom: 20px;
     margin-left: 20px;
     margin-right: 40px;
 }
+
 #addstock {
     padding: 10px;
     padding-right: 30px;
     display: inline-flex;
     clear: left;
 }
+
 .link {
     display: block;
     margin: 10px;
     font-weight: bold;
 }
+
 .headerLink {
     display: inline-block;
     margin: 10px;
     font-weight: bold;
     text-transform: uppercase;
 }
+
 #portfolios {
     margin-top: 20px;
     margin-left: 5px;
 }
-#portfolio {
+
+#portfolio,
+#health {
     float: left;
     padding: 5px;
 }
+
 .pure-table {
     font-size: 12px;
 }
@@ -212,28 +242,36 @@ a {
     padding-top: 0.4em !important;
     padding-bottom: 0.4em !important;
 }
+
 .pure-table td {
     padding: 0.3em !important;
 }
+
 .right {
     text-align: right !important;
 }
+
 tfoot {
     background-color: #e0e0e0;
     color: #000;
 }
+
 tbody tr:nth-child(odd) {
     background-color: #f5f5f5;
 }
+
 .alert {
     color: red;
 }
+
 .success {
     color: green;
 }
+
 .info {
     margin-left: 12px;
 }
+
 #dividends {
     display: inline-block;
     margin-top: 0px;
@@ -244,27 +282,33 @@ tbody tr:nth-child(odd) {
     min-width: 300px;
     text-align: left;
 }
+
 .flex {
     display: flex;
     flex-wrap: wrap;
 }
+
 .flex-item {
     width: 100%;
     flex-grow: 1;
 }
+
 .scrolling-wrapper {
     overflow-x: scroll;
     overflow-y: hidden;
     white-space: nowrap;
 }
+
 .scrolling-wrapper-flexbox {
     display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
 }
+
 .scrolling-wrapper table {
     display: inline-block;
 }
+
 table {
     flex: 0 0 auto;
 }

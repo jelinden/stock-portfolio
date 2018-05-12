@@ -74,6 +74,7 @@ func main() {
 	router.Handle("POST", "/signup", middleware.HttpLogger(routes.Signup))
 	router.Handle("GET", "/verify", middleware.HttpLogger(index))
 	router.Handle("GET", "/verify/:verifystring", middleware.HttpLogger(routes.Verify))
+	router.Handle("GET", "/health", middleware.AdminAuth(middleware.HttpLogger(index)))
 
 	router.Handle("GET", "/api/user", middleware.HttpLogger(middleware.Auth(util.MakeGzipHandler(routes.UserJSON))))
 	router.Handle("GET", "/api/allusers", middleware.HttpLogger(middleware.AdminAuth(util.MakeGzipHandler(routes.AllUsers))))
@@ -84,7 +85,7 @@ func main() {
 	router.Handle("GET", "/api/portfolio/remove/:portfolioid/:symbol", middleware.HttpLogger(middleware.Auth(util.MakeGzipHandler(routes.RemoveStock))))
 	router.Handle("GET", "/api/dividends", middleware.HttpLogger(middleware.Auth(util.MakeGzipHandler(routes.GetDividend))))
 
-	router.Handle("GET", "/health", middleware.HttpLogger(middleware.AdminAuth(util.MakeGzipHandler(routes.Health))))
+	router.Handle("GET", "/api/health", middleware.HttpLogger(middleware.AdminAuth(util.MakeGzipHandler(routes.Health))))
 
 	gracefullShutdown()
 	log.Println("starting server at port 3300")
