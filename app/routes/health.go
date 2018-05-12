@@ -14,7 +14,7 @@ import (
 )
 
 type SystemHealth struct {
-	MemUsedPercent float64
+	MemUsedPercent []float64
 	CPUTotal       float64
 	DiskUsage      float64
 }
@@ -23,6 +23,7 @@ var health SystemHealth
 
 func init() {
 	go util.DoEvery(time.Second*5, getHealth)
+	go util.DoEvery(time.Minute, getMemory)
 }
 
 func Health(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -36,9 +37,21 @@ func Health(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 }
 
 func getHealth() {
-	v, _ := mem.VirtualMemory()
 	c, _ := cpu.Percent(time.Second, false)
 	d, _ := disk.Usage("/")
 
-	health = SystemHealth{MemUsedPercent: v.UsedPercent, CPUTotal: c[0], DiskUsage: d.UsedPercent}
+	health.CPUTotal = c[0]
+	health.DiskUsage = d.UsedPercent
+}
+
+func getMemory() {
+	v, _ := mem.VirtualMemory()
+	mem := health.MemUsedPercent
+	if len(mem) == 61 {
+		copy := mem[1:]
+		copy = append(copy, v.UsedPercent)
+		health.MemUsedPercent = copy
+	} else {
+		health.MemUsedPercent = append(mem, v.UsedPercent)
+	}
 }
