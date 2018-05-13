@@ -83,11 +83,11 @@ class Health extends React.Component {
         return (
             <div>
                 <div id="health">
-                    <h1>System memory usage</h1>
+                    <h1>System memory usage %</h1>
                     <Bar data={this.state.memchartData} options={this.options(100, 10)} width="350" height="180" />
                 </div>
                 <div id="health">
-                    <h1>Program memory allocation</h1>
+                    <h1>Program memory allocation MiB</h1>
                     <Bar
                         data={this.state.memAllocData}
                         options={this.options(
