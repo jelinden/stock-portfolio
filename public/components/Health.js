@@ -67,10 +67,18 @@ class Health extends React.Component {
         if (this.state.health === null) {
             return null;
         }
+        const steps = 10;
+        const max = 100;
+        var options = {
+            scaleOverride: true,
+            scaleSteps: steps,
+            scaleStepWidth: Math.ceil(max / steps),
+            scaleStartValue: 0
+        };
         return (
             <div id="health">
                 <h1>Memory usage</h1>
-                <Bar data={this.state.health} width="350" height="180" />
+                <Bar data={this.state.health} options={options} width="350" height="180" />
             </div>
         );
     }
