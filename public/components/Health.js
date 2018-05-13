@@ -4,7 +4,7 @@ import axios from "axios";
 
 import { Bar } from "react-chartjs";
 
-function healthChartData(dataSet) {
+function healthChartData(dataSet, title) {
     var labels = [];
     dataSet.forEach(function(elem, i) {
         labels.push("");
@@ -13,7 +13,7 @@ function healthChartData(dataSet) {
         labels: labels,
         datasets: [
             {
-                label: "Memory usage",
+                label: title,
                 fillColor: "#F7464A",
                 strokeColor: "#f85e62",
                 highlightFill: "#FF5A5E",
@@ -28,10 +28,12 @@ class Health extends React.Component {
     constructor() {
         super();
         this.state = {
-            health: null,
+            memchartData: null,
+            memAllocData: null,
             failed: false
         };
         this.getHealth = this.getHealth.bind(this);
+        this.options = this.options.bind(this);
     }
 
     componentDidMount() {
@@ -53,7 +55,8 @@ class Health extends React.Component {
             })
             .then(function(result) {
                 _this.setState({
-                    health: healthChartData(result.data.MemUsedPercent)
+                    memchartData: healthChartData(result.data.MemUsedPercent, "Memory usage"),
+                    memAllocData: healthChartData(result.data.ProgramMemUsage, "Memory usage")
                 });
             })
             .catch(function(error) {
@@ -63,22 +66,43 @@ class Health extends React.Component {
             });
     }
 
-    render() {
-        if (this.state.health === null) {
-            return null;
-        }
-        const steps = 10;
-        const max = 100;
+    options(max, steps) {
         var options = {
             scaleOverride: true,
             scaleSteps: steps,
             scaleStepWidth: Math.ceil(max / steps),
             scaleStartValue: 0
         };
+        return options;
+    }
+
+    render() {
+        if (this.state.memchartData === null) {
+            return null;
+        }
         return (
-            <div id="health">
-                <h1>Memory usage</h1>
-                <Bar data={this.state.health} options={options} width="350" height="180" />
+            <div>
+                <div id="health">
+                    <h1>System memory usage</h1>
+                    <Bar data={this.state.memchartData} options={this.options(100, 10)} width="350" height="180" />
+                </div>
+                <div id="health">
+                    <h1>Program memory allocation</h1>
+                    <Bar
+                        data={this.state.memAllocData}
+                        options={this.options(
+                            Math.max.apply(
+                                Math,
+                                this.state.memAllocData.datasets[0].data.map(function(m) {
+                                    return Math.floor(m) + 1;
+                                })
+                            ),
+                            6
+                        )}
+                        width="350"
+                        height="180"
+                    />
+                </div>
             </div>
         );
     }
