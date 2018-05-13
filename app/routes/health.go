@@ -27,6 +27,8 @@ func init() {
 	go util.DoEvery(time.Second*5, getHealth)
 	go util.DoEvery(time.Minute, getMemory)
 	go util.DoEvery(time.Minute, programMemUsage)
+	getMemory()
+	programMemUsage()
 }
 
 func Health(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
