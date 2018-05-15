@@ -14,32 +14,27 @@ type SystemHealth struct {
 	MemUsedPercent  []float64
 	ProgramMemUsage []uint64
 	CPUTotal        []float64
-	DiskUsage       float64
+	DiskUsage       []float64
 }
 
 var Health SystemHealth
 
 func init() {
-	go util.DoEvery(time.Second*5, getHealth)
+	go util.DoEvery(time.Minute, getDiskUsage)
 	go util.DoEvery(time.Minute, getMemory)
 	go util.DoEvery(time.Minute, programMemUsage)
 	go util.DoEvery(time.Minute, getCPUTotal)
 	go getMemory()
 	go programMemUsage()
 	go getCPUTotal()
-}
-
-func getHealth() {
-	d, _ := disk.Usage("/")
-	Health.DiskUsage = d.UsedPercent
+	go getDiskUsage()
 }
 
 func getMemory() {
 	v, _ := mem.VirtualMemory()
 	mem := Health.MemUsedPercent
 	if len(mem) == 60 {
-		copy := mem[1:]
-		copy = append(copy, v.UsedPercent)
+		copy := append(mem[1:], v.UsedPercent)
 		Health.MemUsedPercent = copy
 	} else {
 		Health.MemUsedPercent = append(mem, v.UsedPercent)
@@ -52,8 +47,7 @@ func programMemUsage() {
 	alloc := bToMb(m.Alloc)
 	programMem := Health.ProgramMemUsage
 	if len(programMem) == 60 {
-		copy := programMem[1:]
-		copy = append(copy, alloc)
+		copy := append(programMem[1:], alloc)
 		Health.ProgramMemUsage = copy
 	} else {
 		Health.ProgramMemUsage = append(programMem, alloc)
@@ -64,11 +58,22 @@ func getCPUTotal() {
 	c, _ := cpu.Percent(time.Second, false)
 	cpuTotals := Health.CPUTotal
 	if len(cpuTotals) == 60 {
-		copy := cpuTotals[1:]
-		copy = append(copy, c[0])
+		copy := append(cpuTotals[1:], c[0])
 		Health.CPUTotal = copy
 	} else {
 		Health.CPUTotal = append(cpuTotals, c[0])
+	}
+}
+
+func getDiskUsage() {
+	d, _ := disk.Usage("/")
+	diskUsage := d.UsedPercent
+	usage := Health.DiskUsage
+	if len(usage) == 60 {
+		copy := append(usage[1:], diskUsage)
+		Health.DiskUsage = copy
+	} else {
+		Health.DiskUsage = append(usage, diskUsage)
 	}
 }
 
