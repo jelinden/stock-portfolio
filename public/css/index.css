@@ -233,6 +233,10 @@ a {
     padding: 5px;
 }
 
+#health {
+    margin-left: 10px;
+}
+
 .pure-table {
     font-size: 12px;
 }

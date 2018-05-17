@@ -2,11 +2,12 @@ import React from "react";
 import { withRouter, Link } from "react-router-dom";
 import axios from "axios";
 
-import { Bar } from "react-chartjs";
+import { Line } from "react-chartjs";
 
 function healthChartData(dataSet, title) {
     var labels = [];
     dataSet.forEach(function(elem, i) {
+        dataSet[i] = Math.floor(elem * 100) / 100;
         labels.push("");
     });
     return {
@@ -14,10 +15,20 @@ function healthChartData(dataSet, title) {
         datasets: [
             {
                 label: title,
-                fillColor: "#F7464A",
-                strokeColor: "#f85e62",
-                highlightFill: "#FF5A5E",
-                highlightStroke: "#f85e62",
+                bezierCurve: false,
+                fillColor: "rgba(0,0,0,0)",
+                strokeColor: "#F7464A",
+                pointDot: false,
+                datasetFill: false,
+                pointColor: "rgba(0,0,0,0)",
+                pointStrokeColor: "rgba(0,0,0,0)",
+                pointHighlightFill: "rgba(0,0,0,0)",
+                pointHighlightStroke: "rgba(0,0,0,0)",
+
+                //fillColor: "#F7464A",
+                //strokeColor: "#f85e62",
+                //highlightFill: "#FF5A5E",
+                //highlightStroke: "#f85e62",
                 data: dataSet
             }
         ]
@@ -31,6 +42,7 @@ class Health extends React.Component {
             memchartData: null,
             memAllocData: null,
             cpuTotals: null,
+            diskUsage: null,
             failed: false
         };
         this.getHealth = this.getHealth.bind(this);
@@ -58,7 +70,8 @@ class Health extends React.Component {
                 _this.setState({
                     memchartData: healthChartData(result.data.MemUsedPercent, "Memory usage"),
                     memAllocData: healthChartData(result.data.ProgramMemUsage, "Program memory usage"),
-                    cpuTotals: healthChartData(result.data.CPUTotal, "CPU totals")
+                    cpuTotals: healthChartData(result.data.CPUTotal, "CPU totals"),
+                    diskUsage: healthChartData(result.data.DiskUsage, "Disk Usage")
                 });
             })
             .catch(function(error) {
@@ -86,15 +99,19 @@ class Health extends React.Component {
             <div>
                 <div id="health">
                     <h1>System memory usage %</h1>
-                    <Bar data={this.state.memchartData} options={this.options(100, 10)} width="350" height="180" />
+                    <Line data={this.state.memchartData} options={this.options(100, 10)} width="350" height="180" />
                 </div>
                 <div id="health">
                     <h1>CPU totals %</h1>
-                    <Bar data={this.state.cpuTotals} options={this.options(100, 10)} width="350" height="180" />
+                    <Line data={this.state.cpuTotals} options={this.options(100, 10)} width="350" height="180" />
+                </div>
+                <div id="health">
+                    <h1>Disk usage %</h1>
+                    <Line data={this.state.diskUsage} options={this.options(100, 10)} width="350" height="180" />
                 </div>
                 <div id="health">
                     <h1>Program memory allocation MiB</h1>
-                    <Bar
+                    <Line
                         data={this.state.memAllocData}
                         options={this.options(
                             Math.max.apply(
