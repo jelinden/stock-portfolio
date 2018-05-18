@@ -24,11 +24,6 @@ function healthChartData(dataSet, title) {
                 pointStrokeColor: "rgba(0,0,0,0)",
                 pointHighlightFill: "rgba(0,0,0,0)",
                 pointHighlightStroke: "rgba(0,0,0,0)",
-
-                //fillColor: "#F7464A",
-                //strokeColor: "#f85e62",
-                //highlightFill: "#FF5A5E",
-                //highlightStroke: "#f85e62",
                 data: dataSet
             }
         ]
@@ -43,6 +38,7 @@ class Health extends React.Component {
             memAllocData: null,
             cpuTotals: null,
             diskUsage: null,
+            requests: null,
             failed: false
         };
         this.getHealth = this.getHealth.bind(this);
@@ -71,7 +67,8 @@ class Health extends React.Component {
                     memchartData: healthChartData(result.data.MemUsedPercent, "Memory usage"),
                     memAllocData: healthChartData(result.data.ProgramMemUsage, "Program memory usage"),
                     cpuTotals: healthChartData(result.data.CPUTotal, "CPU totals"),
-                    diskUsage: healthChartData(result.data.DiskUsage, "Disk Usage")
+                    diskUsage: healthChartData(result.data.DiskUsage, "Disk Usage"),
+                    requests: healthChartData(result.data.Requests, "Requests per minute")
                 });
             })
             .catch(function(error) {
@@ -121,6 +118,23 @@ class Health extends React.Component {
                                 })
                             ),
                             6
+                        )}
+                        width="350"
+                        height="180"
+                    />
+                </div>
+                <div id="health">
+                    <h1>Requests per minute</h1>
+                    <Line
+                        data={this.state.requests}
+                        options={this.options(
+                            Math.max.apply(
+                                Math,
+                                this.state.requests.datasets[0].data.map(function(m) {
+                                    return Math.floor(m) + 1;
+                                })
+                            ),
+                            10
                         )}
                         width="350"
                         height="180"

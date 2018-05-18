@@ -15,8 +15,10 @@ type SystemHealth struct {
 	ProgramMemUsage []uint64
 	CPUTotal        []float64
 	DiskUsage       []float64
+	Requests        []int64
 }
 
+var Requests int64
 var Health SystemHealth
 
 func init() {
@@ -24,10 +26,12 @@ func init() {
 	go util.DoEvery(time.Minute, getMemory)
 	go util.DoEvery(time.Minute, programMemUsage)
 	go util.DoEvery(time.Minute, getCPUTotal)
+	go util.DoEvery(time.Minute, handleRequests)
 	go getMemory()
 	go programMemUsage()
 	go getCPUTotal()
 	go getDiskUsage()
+	go handleRequests()
 }
 
 func getMemory() {
@@ -75,6 +79,17 @@ func getDiskUsage() {
 	} else {
 		Health.DiskUsage = append(usage, diskUsage)
 	}
+}
+
+func handleRequests() {
+	requests := Health.Requests
+	if len(requests) == 60 {
+		copy := append(requests[1:], Requests)
+		Health.Requests = copy
+	} else {
+		Health.Requests = append(requests, Requests)
+	}
+	Requests = 0
 }
 
 func bToMb(b uint64) uint64 {
