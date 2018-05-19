@@ -96,15 +96,15 @@ class Health extends React.Component {
             <div>
                 <div id="health">
                     <h1>System memory usage %</h1>
-                    <Line data={this.state.memchartData} options={this.options(100, 10)} width="350" height="180" />
+                    <Line data={this.state.memchartData} options={this.options(100, 10)} width="350" height="180" redraw />
                 </div>
                 <div id="health">
                     <h1>CPU totals %</h1>
-                    <Line data={this.state.cpuTotals} options={this.options(100, 10)} width="350" height="180" />
+                    <Line data={this.state.cpuTotals} options={this.options(100, 10)} width="350" height="180" redraw />
                 </div>
                 <div id="health">
                     <h1>Disk usage %</h1>
-                    <Line data={this.state.diskUsage} options={this.options(100, 10)} width="350" height="180" />
+                    <Line data={this.state.diskUsage} options={this.options(100, 10)} width="350" height="180" redraw />
                 </div>
                 <div id="health">
                     <h1>Program memory allocation MiB</h1>
@@ -121,6 +121,7 @@ class Health extends React.Component {
                         )}
                         width="350"
                         height="180"
+                        redraw
                     />
                 </div>
                 <div id="health">
