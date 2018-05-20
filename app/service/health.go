@@ -18,6 +18,8 @@ type SystemHealth struct {
 	Requests        []int64
 }
 
+const healthItemLength = 180
+
 var Requests int64
 var Health SystemHealth
 
@@ -37,7 +39,7 @@ func init() {
 func getMemory() {
 	v, _ := mem.VirtualMemory()
 	mem := Health.MemUsedPercent
-	if len(mem) == 60 {
+	if len(mem) == healthItemLength {
 		copy := append(mem[1:], v.UsedPercent)
 		Health.MemUsedPercent = copy
 	} else {
@@ -50,7 +52,7 @@ func programMemUsage() {
 	runtime.ReadMemStats(&m)
 	alloc := bToMb(m.Alloc)
 	programMem := Health.ProgramMemUsage
-	if len(programMem) == 60 {
+	if len(programMem) == healthItemLength {
 		copy := append(programMem[1:], alloc)
 		Health.ProgramMemUsage = copy
 	} else {
@@ -61,7 +63,7 @@ func programMemUsage() {
 func getCPUTotal() {
 	c, _ := cpu.Percent(time.Second, false)
 	cpuTotals := Health.CPUTotal
-	if len(cpuTotals) == 60 {
+	if len(cpuTotals) == healthItemLength {
 		copy := append(cpuTotals[1:], c[0])
 		Health.CPUTotal = copy
 	} else {
@@ -73,7 +75,7 @@ func getDiskUsage() {
 	d, _ := disk.Usage("/")
 	diskUsage := d.UsedPercent
 	usage := Health.DiskUsage
-	if len(usage) == 60 {
+	if len(usage) == healthItemLength {
 		copy := append(usage[1:], diskUsage)
 		Health.DiskUsage = copy
 	} else {
@@ -83,7 +85,7 @@ func getDiskUsage() {
 
 func handleRequests() {
 	requests := Health.Requests
-	if len(requests) == 60 {
+	if len(requests) == healthItemLength {
 		copy := append(requests[1:], Requests)
 		Health.Requests = copy
 	} else {
