@@ -96,15 +96,15 @@ class Health extends React.Component {
             <div>
                 <div id="health">
                     <h1>System memory usage %</h1>
-                    <Line data={this.state.memchartData} options={this.options(100, 10)} width="350" height="180" redraw />
+                    <Line data={this.state.memchartData} options={this.options(100, 10)} width="400" height="180" redraw />
                 </div>
                 <div id="health">
                     <h1>CPU totals %</h1>
-                    <Line data={this.state.cpuTotals} options={this.options(100, 10)} width="350" height="180" redraw />
+                    <Line data={this.state.cpuTotals} options={this.options(100, 10)} width="400" height="180" redraw />
                 </div>
                 <div id="health">
                     <h1>Disk usage %</h1>
-                    <Line data={this.state.diskUsage} options={this.options(100, 10)} width="350" height="180" redraw />
+                    <Line data={this.state.diskUsage} options={this.options(100, 10)} width="400" height="180" redraw />
                 </div>
                 <div id="health">
                     <h1>Program memory allocation MiB</h1>
@@ -119,7 +119,7 @@ class Health extends React.Component {
                             ),
                             6
                         )}
-                        width="350"
+                        width="400"
                         height="180"
                         redraw
                     />
@@ -132,12 +132,12 @@ class Health extends React.Component {
                             Math.max.apply(
                                 Math,
                                 this.state.requests.datasets[0].data.map(function(m) {
-                                    return Math.floor(m) + 1;
+                                    return Math.floor(m) + 5;
                                 })
                             ),
                             10
                         )}
-                        width="350"
+                        width="400"
                         height="180"
                     />
                 </div>
