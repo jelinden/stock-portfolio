@@ -10,9 +10,13 @@ https://portfolio.jelinden.fi
 
 # Run
 
-npm run build && go build && ./stock-portfolio
+`npm run build && go build && ./stock-portfolio`
 
-## Development stack
+# Simple load test
+
+`go test`
+
+# Development stack
 
 Fontend: Reactjs
 
