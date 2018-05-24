@@ -182,3 +182,41 @@ func GetPortfolio(portfolioid string) domain.PortfolioStocks {
 	}
 	return portfolioStocks
 }
+
+func GetTransactions(portfolioid string) domain.PortfolioStocks {
+	rows, err := db.Query(`SELECT
+			p.portfolioid,
+			po.name,
+			quotes.companyName,
+			p.symbol,
+			p.price,
+			p.commission,
+			p.amount
+		FROM portfolio AS po,
+			portfoliostocks p
+			LEFT JOIN quotes on p.symbol = quotes.symbol
+		WHERE p.portfolioid LIKE ($1)
+		AND po.portfolioid = p.portfolioid
+		ORDER BY p.symbol ASC, p.date ASC;`, portfolioid)
+	if err != nil {
+		log.Printf("failed with '%s'\n", err)
+		return domain.PortfolioStocks{}
+	}
+	defer rows.Close()
+	var portfolioStocks domain.PortfolioStocks
+	for rows.Next() {
+		stock := domain.PortfolioStock{}
+		err := rows.Scan(&stock.Portfolioid,
+			&portfolioStocks.PortfolioName,
+			&stock.CompanyName,
+			&stock.Symbol,
+			&stock.Price,
+			&stock.Commission,
+			&stock.Amount)
+		if err != nil {
+			log.Println("scanning row failed", err.Error())
+		}
+		portfolioStocks.Stocks = append(portfolioStocks.Stocks, stock)
+	}
+	return portfolioStocks
+}
