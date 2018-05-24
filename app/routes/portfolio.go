@@ -53,6 +53,20 @@ func GetPortfolio(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	ok(w, marshalled)
 }
 
+func GeTransactions(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var marshalled = []byte(`{"response": "failed"}`)
+	var err error
+	user := getUser(r)
+	if user.ID != "" {
+		portfolio := db.GetTransactions(p.ByName("id"))
+		marshalled, err = json.Marshal(portfolio)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+	ok(w, marshalled)
+}
+
 func verifyPortfolioName(v string) bool {
 	re, err := regexp.Compile(`^[a-zA-ZöäåÖÄÅ0-9:?€$\- ]+$`)
 	if err != nil {
