@@ -184,6 +184,7 @@ func GetPortfolio(portfolioid string) domain.PortfolioStocks {
 }
 
 func GetTransactions(portfolioid string) domain.PortfolioStocks {
+	log.Println("portfolioid", portfolioid)
 	rows, err := db.Query(`SELECT
 			p.portfolioid,
 			po.name,
@@ -191,13 +192,14 @@ func GetTransactions(portfolioid string) domain.PortfolioStocks {
 			p.symbol,
 			p.price,
 			p.commission,
-			p.amount
+			p.amount,
+			p.date
 		FROM portfolio AS po,
-			portfoliostocks p
+			portfoliostocks AS p
 			LEFT JOIN quotes on p.symbol = quotes.symbol
 		WHERE p.portfolioid LIKE ($1)
 		AND po.portfolioid = p.portfolioid
-		ORDER BY p.symbol ASC, p.date ASC;`, portfolioid)
+		ORDER BY p.symbol, p.date ASC;`, portfolioid)
 	if err != nil {
 		log.Printf("failed with '%s'\n", err)
 		return domain.PortfolioStocks{}
@@ -212,7 +214,8 @@ func GetTransactions(portfolioid string) domain.PortfolioStocks {
 			&stock.Symbol,
 			&stock.Price,
 			&stock.Commission,
-			&stock.Amount)
+			&stock.Amount,
+			&stock.Date)
 		if err != nil {
 			log.Println("scanning row failed", err.Error())
 		}
