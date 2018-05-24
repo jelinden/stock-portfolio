@@ -53,7 +53,7 @@ func GetPortfolio(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	ok(w, marshalled)
 }
 
-func GeTransactions(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func GetTransactions(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var marshalled = []byte(`{"response": "failed"}`)
 	var err error
 	user := getUser(r)
