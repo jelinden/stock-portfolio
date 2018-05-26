@@ -69,6 +69,7 @@ func main() {
 	router.Handle("GET", "/login", middleware.HttpLogger(middleware.RequestCounter(index)))
 	router.Handle("GET", "/signup", middleware.HttpLogger(middleware.RequestCounter(index)))
 	router.Handle("GET", "/portfolio/:id", middleware.HttpLogger(middleware.RequestCounter(index)))
+	router.Handle("GET", "/transactions/:id", middleware.HttpLogger(middleware.RequestCounter(index)))
 	router.Handle("POST", "/login", middleware.HttpLogger(middleware.RequestCounter(routes.Login)))
 	router.Handle("GET", "/logout", middleware.HttpLogger(middleware.RequestCounter(routes.Logout)))
 	router.Handle("POST", "/signup", middleware.HttpLogger(middleware.RequestCounter(routes.Signup)))
