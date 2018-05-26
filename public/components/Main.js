@@ -5,6 +5,7 @@ import Signup from "./Signup";
 import Login from "./Login";
 import Verify from "./Verify";
 import Portfolio from "./Portfolio";
+import Transactions from "./Transactions";
 import Health from "./Health";
 
 const Main = () => (
@@ -15,6 +16,7 @@ const Main = () => (
             <Route exact path="/signup" component={Signup} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/verify" component={Verify} />
+            <Route exact path="/transactions/:id" component={Transactions} />
             <Route exact path="/health" component={Health} />
         </Switch>
     </main>
