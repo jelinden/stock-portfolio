@@ -69,22 +69,21 @@ class Portfolio extends React.Component {
                         }
                         stockMap[item.symbol] = item.amount;
                     });
-
-                    gainTotal = currentTotal - total;
-                    _this.setState({
-                        stocks: result.data.stocks,
-                        stockMap: stockMap,
-                        portfolioName: result.data.portfolioName,
-                        total: total,
-                        currentTotal: currentTotal,
-                        changeTotal: changeTotal,
-                        itemTotal: itemTotal,
-                        currentItemTotal: currentItemTotal,
-                        gain: gainTotal,
-                        failed: false,
-                        symbols: symbols
-                    });
                 }
+                gainTotal = currentTotal - total;
+                _this.setState({
+                    stocks: result.data.stocks ? result.data.stocks : [],
+                    stockMap: stockMap,
+                    portfolioName: result.data.portfolioName,
+                    total: total,
+                    currentTotal: currentTotal,
+                    changeTotal: changeTotal,
+                    itemTotal: itemTotal,
+                    currentItemTotal: currentItemTotal,
+                    gain: gainTotal,
+                    failed: false,
+                    symbols: symbols
+                });
             })
             .catch(function(error) {
                 console.log(error);
@@ -94,11 +93,13 @@ class Portfolio extends React.Component {
 
     dividends(symbols) {
         var _this = this;
-        axios.get("/api/dividends?symbols=" + symbols, { timeout: 3000 }).then(function(result) {
-            if (result.data) {
-                _this.setState({ dividendData: result.data });
-            }
-        });
+        if (symbols) {
+            axios.get("/api/dividends?symbols=" + symbols, { timeout: 3000 }).then(function(result) {
+                if (result.data) {
+                    _this.setState({ dividendData: result.data });
+                }
+            });
+        }
     }
 
     removeStock(symbol) {
@@ -168,6 +169,9 @@ class Portfolio extends React.Component {
     }
 
     render() {
+        if (!this.state.stocks) {
+            return null;
+        }
         return (
             <div className="content pure-g">
                 <div className="alert info">{this.state.failed ? "Connection lost" : ""}</div>
@@ -209,8 +213,7 @@ class Portfolio extends React.Component {
                                                           : item.changePercent < 0
                                                               ? "right red"
                                                               : "right"
-                                                  }
-                                              >
+                                                  }>
                                                   {item.changePercent
                                                       ? this.numberFormat(item.change.toFixed(2)) +
                                                         " (" +
@@ -230,8 +233,7 @@ class Portfolio extends React.Component {
                                                           : item.latestPrice * item.amount - item.price < 0
                                                               ? "right red"
                                                               : "right"
-                                                  }
-                                              >
+                                                  }>
                                                   {item.latestPrice ? (item.latestPrice * item.amount - item.price).toFixed(2) : ""}
                                               </td>
                                               <td
@@ -241,8 +243,7 @@ class Portfolio extends React.Component {
                                                           : item.latestPrice - item.price / item.amount < 0
                                                               ? "right red"
                                                               : "right"
-                                                  }
-                                              >
+                                                  }>
                                                   {item.latestPrice
                                                       ? ((item.latestPrice - item.price / item.amount) / (item.price / item.amount) * 100).toFixed(2) + "%"
                                                       : ""}
@@ -258,8 +259,7 @@ class Portfolio extends React.Component {
                                                       href="#"
                                                       onClick={() => {
                                                           this.removeStock(item.symbol);
-                                                      }}
-                                                  >
+                                                      }}>
                                                       (<span className="red delete" />)
                                                   </a>
                                               </td>
@@ -276,8 +276,7 @@ class Portfolio extends React.Component {
                                     <th
                                         className={
                                             this.state.itemTotal && this.state.itemTotal > 0 ? "right green" : this.state.itemTotal < 0 ? "right red" : "right"
-                                        }
-                                    >
+                                        }>
                                         {this.state.itemTotal !== "undefined"
                                             ? this.numberFormat((this.state.itemTotal / this.state.currentItemTotal * 100).toFixed(2)) + " %"
                                             : ""}
