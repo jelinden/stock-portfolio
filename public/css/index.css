@@ -177,8 +177,9 @@ a {
 }
 
 .content {
-    margin-top: 60px;
+    margin-top: 10px;
     width: 100%;
+    margin-left: 10px;
 }
 
 .react-datepicker__day-name,
@@ -318,4 +319,24 @@ tbody tr:nth-child(odd) {
 
 table {
     flex: 0 0 auto;
+}
+
+.headerLinks {
+    background-color: black;
+    border-top: 0;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.055);
+}
+
+.headerLinks>a {
+    color: #aaa;
+    display: block;
+    text-decoration: none;
+}
+
+.headerLinks:hover {
+    background-color: rgb( 40, 44, 47);
+}
+
+.headerLinks:hover>a {
+    color: rgb( 255, 255, 255);
 }
