@@ -1,4 +1,4 @@
-import { Redirect, withRouter } from "react-router-dom";
+import { Redirect, withRouter, Link } from "react-router-dom";
 import React from "react";
 import axios from "axios";
 
@@ -62,6 +62,11 @@ class Transactions extends React.Component {
         }
         return (
             <div className="content pure-g">
+                <div className="headerLinks">
+                    <Link className="pure-menu-link pure-menu-heading" to={"/portfolio/" + this.props.match.params.id}>
+                        Portfolio
+                    </Link>
+                </div>
                 <div className="alert info"> {this.state.failed ? "Connection lost" : ""}</div>
                 <div id="portfolio" className="pure-u-1">
                     <h1> {this.state.portfolioName ? this.state.portfolioName : ""}</h1>
