@@ -28,7 +28,6 @@ class Portfolio extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.convertTimestamp = this.convertTimestamp.bind(this);
         this.portfolio = this.portfolio.bind(this);
-        this.removeStock = this.removeStock.bind(this);
         this.getUrlParameter = this.getUrlParameter.bind(this);
         this.numberFormat = this.numberFormat.bind(this);
         this.dividends = this.dividends.bind(this);
@@ -100,22 +99,6 @@ class Portfolio extends React.Component {
                 }
             });
         }
-    }
-
-    removeStock(symbol) {
-        var _this = this;
-        if (!window.confirm("Are you sure you wish to delete this item?")) {
-            return;
-        }
-        console.log("removing " + symbol);
-        axios.get("/api/portfolio/remove/" + _this.props.match.params.id + "/" + symbol, { timeout: 3000 }).then(function(result) {
-            if (!result.data.error) {
-                console.log("removed " + symbol);
-                _this.portfolio();
-            } else {
-                console.log("remove was unsuccessful", result.data.error);
-            }
-        });
     }
 
     numberFormat(n) {
@@ -200,7 +183,6 @@ class Portfolio extends React.Component {
                                     <th>Close price</th>
                                     <th>Close time</th>
                                     <th>P/e ratio</th>
-                                    <th>Remove</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -259,15 +241,6 @@ class Portfolio extends React.Component {
                                               <td className="right">{item.close ? this.numberFormat(item.close.toFixed(2)) : ""}</td>
                                               <td className="right">{this.convertTimestamp(item.closeTime)}</td>
                                               <td className="right">{item.peRatio ? item.peRatio.toFixed(2) : ""}</td>
-                                              <td className="right">
-                                                  <a
-                                                      href="#"
-                                                      onClick={() => {
-                                                          this.removeStock(item.symbol);
-                                                      }}>
-                                                      (<span className="red delete" />)
-                                                  </a>
-                                              </td>
                                           </tr>
                                       ))
                                     : ""}
@@ -296,7 +269,6 @@ class Portfolio extends React.Component {
                                     <th className={this.state.changeTotal && this.state.changeTotal >= 0 ? "right green" : "right red"}>
                                         {this.state.changeTotal ? this.numberFormat(this.state.changeTotal.toFixed(2)) : ""}
                                     </th>
-                                    <th />
                                     <th />
                                     <th />
                                     <th />
