@@ -40,6 +40,7 @@ CREATE INDEX IF NOT EXISTS portfolioUserIdIndex ON portfolio (userid);
 CREATE UNIQUE INDEX IF NOT EXISTS portfolioIdIndex ON portfolio (portfolioid);
 
 CREATE TABLE IF NOT EXISTS portfoliostocks (
+	transactionid string,
 	portfolioid string,
 	userid string,
 	symbol string,
@@ -48,7 +49,9 @@ CREATE TABLE IF NOT EXISTS portfoliostocks (
 	date string,
 	commission float64
 );
-CREATE INDEX IF NOT EXISTS portfolioStocksUserIdIndex ON portfoliostocks (portfolioid);
+ALTER TABLE portfoliostocks ADD transactionid string;
+CREATE INDEX IF NOT EXISTS portfolioStocksTransactionIdIndex ON portfoliostocks (transactionid, portfolioid);
+CREATE UNIQUE INDEX IF NOT EXISTS transactionIdIndex ON portfoliostocks (transactionid);
 
 CREATE TABLE IF NOT EXISTS instrument (
 	symbol string

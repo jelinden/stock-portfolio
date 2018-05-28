@@ -5,12 +5,14 @@ import (
 
 	"github.com/jelinden/stock-portfolio/app/domain"
 	"github.com/jelinden/stock-portfolio/app/service"
+	"github.com/jelinden/stock-portfolio/app/util"
 )
 
 const symbolQuery = `SELECT distinct symbol FROM portfoliostocks;`
 
 func AddStock(stock domain.PortfolioStock) bool {
-	err := exec(`INSERT INTO portfoliostocks (portfolioid, symbol, amount, price, date, commission) VALUES ($1,$2,$3,$4,$5,$6);`,
+	err := exec(`INSERT INTO portfoliostocks (transactionid, portfolioid, symbol, amount, price, date, commission) VALUES ($1,$2,$3,$4,$5,$6);`,
+		util.GetID(),
 		stock.Portfolioid,
 		stock.Symbol,
 		stock.Amount,
@@ -126,7 +128,7 @@ func GetPortfolios(userid string) domain.Portfolios {
 }
 
 func GetPortfolio(portfolioid string) domain.PortfolioStocks {
-	rows, err := db.Query(`SELECT 
+	rows, err := db.Query(`SELECT
 			p.portfolioid,
 			po.name,
 			quotes.companyName,
@@ -161,7 +163,8 @@ func GetPortfolio(portfolioid string) domain.PortfolioStocks {
 	var portfolioStocks domain.PortfolioStocks
 	for rows.Next() {
 		stock := domain.PortfolioStock{}
-		err := rows.Scan(&stock.Portfolioid,
+		err := rows.Scan(
+			&stock.Portfolioid,
 			&portfolioStocks.PortfolioName,
 			&stock.CompanyName,
 			&stock.Symbol,
@@ -186,6 +189,7 @@ func GetPortfolio(portfolioid string) domain.PortfolioStocks {
 func GetTransactions(portfolioid string) domain.PortfolioStocks {
 	log.Println("portfolioid", portfolioid)
 	rows, err := db.Query(`SELECT
+			p.transactionid,
 			p.portfolioid,
 			po.name,
 			quotes.companyName,
@@ -208,7 +212,9 @@ func GetTransactions(portfolioid string) domain.PortfolioStocks {
 	var portfolioStocks domain.PortfolioStocks
 	for rows.Next() {
 		stock := domain.PortfolioStock{}
-		err := rows.Scan(&stock.Portfolioid,
+		err := rows.Scan(
+			&stock.TransactionID,
+			&stock.Portfolioid,
 			&portfolioStocks.PortfolioName,
 			&stock.CompanyName,
 			&stock.Symbol,

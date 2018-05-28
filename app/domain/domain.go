@@ -39,6 +39,7 @@ type PortfolioStocks struct {
 }
 
 type PortfolioStock struct {
+	TransactionID string   `json:"transactionId,omitempty"`
 	Portfolioid   string   `json:"portfolioid"`
 	Symbol        string   `json:"symbol"`
 	Price         float64  `json:"price"`
