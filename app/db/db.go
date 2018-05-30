@@ -101,6 +101,8 @@ func populateDatabase() {
 	if err != nil {
 		log.Printf("failed creating user table '%s'", err.Error())
 	}
+	vals := getQuery(`select * from portfoliostocks where transactionid is null;`)
+	log.Println(vals)
 }
 
 func exec(command string, args ...interface{}) error {
