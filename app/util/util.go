@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/ventu-io/go-shortid"
@@ -52,6 +53,11 @@ func GetID() string {
 		return ""
 	}
 	return id
+}
+
+func GetTimeBasedID() string {
+	return strconv.FormatInt(time.Now().UnixNano(), 10)
+
 }
 
 func IsID(id string) bool {

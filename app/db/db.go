@@ -102,7 +102,13 @@ func populateDatabase() {
 		log.Printf("failed creating user table '%s'", err.Error())
 	}
 	vals := getQuery(`select * from portfoliostocks where transactionid is null;`)
-	log.Println(vals)
+	for _, item := range vals {
+		log.Println(item["portfolioid"], item["date"], item["symbol"], item["amount"], item["price"], item["transactionid"])
+		// update all transactions to have a transactionid
+		exec(`update portfoliostocks set transactionid = $1 where portfolioid = $2 and date = $3 and amount = $4 and price = $5 and symbol = $6`,
+			util.GetTimeBasedID(), item["portfolioid"], item["date"], item["amount"], item["price"], item["symbol"])
+		time.Sleep(100 * time.Millisecond)
+	}
 }
 
 func exec(command string, args ...interface{}) error {
