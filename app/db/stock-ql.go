@@ -11,8 +11,8 @@ import (
 const symbolQuery = `SELECT distinct symbol FROM portfoliostocks;`
 
 func AddStock(stock domain.PortfolioStock) bool {
-	err := exec(`INSERT INTO portfoliostocks (transactionid, portfolioid, symbol, amount, price, date, commission) VALUES ($1,$2,$3,$4,$5,$6);`,
-		util.GetID(),
+	err := exec(`INSERT INTO portfoliostocks (transactionid, portfolioid, symbol, amount, price, date, commission) VALUES ($1,$2,$3,$4,$5,$6,$7);`,
+		util.GetTimeBasedID(),
 		stock.Portfolioid,
 		stock.Symbol,
 		stock.Amount,
@@ -26,10 +26,11 @@ func AddStock(stock domain.PortfolioStock) bool {
 	return true
 }
 
-func RemoveStock(portfolioid, symbol string) error {
-	err := exec(`DELETE FROM portfoliostocks WHERE portfolioid = $1 AND symbol = $2;`,
+func RemoveStock(portfolioid, symbol, transactionid string) error {
+	err := exec(`DELETE FROM portfoliostocks WHERE portfolioid = $1 AND symbol = $2 AND transactionid = $3;`,
 		portfolioid,
-		symbol)
+		symbol,
+		transactionid)
 	if err != nil {
 		log.Printf("failed with '%s'\n", err.Error())
 		return err
