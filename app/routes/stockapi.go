@@ -67,14 +67,15 @@ func RemoveStock(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	if user.ID != "" {
 		symbol := p.ByName("symbol")
 		portfolioid := p.ByName("portfolioid")
-		if verifySymbol(symbol) && isPortfolioOwner(user.ID, portfolioid) {
-			err := db.RemoveStock(portfolioid, symbol)
+		transactionid := p.ByName("transactionid")
+		if verifySymbol(symbol) && isPortfolioOwner(user.ID, portfolioid) && verifyTransactionID(transactionid) {
+			err := db.RemoveStock(portfolioid, symbol, transactionid)
 			if err != nil {
 				log.Println(err.Error())
 				ok(w, []byte(`{"error": "`+err.Error()+`"}`))
 				return
 			}
-			ok(w, []byte(`{"removed": "`+p.ByName("symbol")+`"}`))
+			ok(w, []byte(`{"removed": "`+symbol+`"}`))
 			return
 		}
 	}
@@ -110,6 +111,14 @@ func verifySymbol(s string) bool {
 		log.Println(err.Error())
 	}
 	return re.MatchString(s)
+}
+
+func verifyTransactionID(id string) bool {
+	re, err := regexp.Compile(`^[0-9]+$`)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	return re.MatchString(id)
 }
 
 func checkAmount(amount string) (*int, bool) {

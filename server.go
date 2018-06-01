@@ -83,7 +83,7 @@ func main() {
 	router.Handle("GET", "/api/portfolios", middleware.HttpLogger(middleware.RequestCounter(middleware.Auth(util.MakeGzipHandler(routes.GetPortfolios)))))
 	router.Handle("GET", "/api/portfolio/get/:id", middleware.HttpLogger(middleware.RequestCounter(middleware.Auth(util.MakeGzipHandler(routes.GetPortfolio)))))
 	router.Handle("POST", "/api/portfolio/add", middleware.HttpLogger(middleware.RequestCounter(middleware.Auth(util.MakeGzipHandler(routes.AddStock)))))
-	router.Handle("GET", "/api/portfolio/remove/:portfolioid/:symbol", middleware.RequestCounter(middleware.HttpLogger(middleware.Auth(util.MakeGzipHandler(routes.RemoveStock)))))
+	router.Handle("GET", "/api/portfolio/remove/:portfolioid/:symbol/:transactionid", middleware.RequestCounter(middleware.HttpLogger(middleware.Auth(util.MakeGzipHandler(routes.RemoveStock)))))
 	router.Handle("GET", "/api/dividends", middleware.HttpLogger(middleware.RequestCounter(middleware.Auth(util.MakeGzipHandler(routes.GetDividend)))))
 	router.Handle("GET", "/api/transactions/:id", middleware.HttpLogger(middleware.RequestCounter(middleware.Auth(util.MakeGzipHandler(routes.GetTransactions)))))
 
