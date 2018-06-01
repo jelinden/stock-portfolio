@@ -32,14 +32,14 @@ class Transactions extends React.Component {
             });
     }
 
-    removeStock(symbol) {
+    removeStock(symbol, transactionId) {
         var _this = this;
         if (!window.confirm("Are you sure you wish to delete this item?")) {
             return;
         }
         console.log("removing " + symbol);
         axios
-            .get("/api/portfolio/remove/" + _this.props.match.params.id + "/" + symbol, {
+            .get("/api/portfolio/remove/" + _this.props.match.params.id + "/" + symbol + "/" + transactionId, {
                 timeout: 3000
             })
             .then(function(result) {
@@ -97,7 +97,7 @@ class Transactions extends React.Component {
                                                   <a
                                                       href="#"
                                                       onClick={() => {
-                                                          this.removeStock(item.symbol);
+                                                          this.removeStock(item.symbol, item.transactionId);
                                                       }}>
                                                       (<span className="red delete" />)
                                                   </a>
