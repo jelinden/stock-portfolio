@@ -107,7 +107,7 @@ func populateDatabase() {
 		// update all transactions to have a transactionid
 		exec(`update portfoliostocks set transactionid = $1 where portfolioid = $2 and date = $3 and amount = $4 and price = $5 and symbol = $6`,
 			util.GetTimeBasedID(), item["portfolioid"], item["date"], item["amount"], item["price"], item["symbol"])
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
