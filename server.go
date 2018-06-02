@@ -22,6 +22,7 @@ import (
 )
 
 var fromEmail, emailSendingPasswd string
+var indexPage string
 
 type HTTPError struct {
 	code    int
@@ -38,6 +39,15 @@ func Init() {
 	flag.Parse()
 	log.Println("Loading configuration from file " + configFile)
 	config.SetConfig(configFile)
+	f, err := fsPublic.Open("index.html")
+	if err != nil {
+		log.Println(err)
+	}
+	result, err := ioutil.ReadAll(bufio.NewReader(f))
+	if err != nil {
+		log.Println(err)
+	}
+	indexPage = string(result)
 }
 
 func main() {
@@ -98,17 +108,14 @@ func main() {
 var fsPublic = util.JustFilesFilesystem{Fs: http.Dir("build/")}
 
 func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	f, err := fsPublic.Open("index.html")
-	if err != nil {
-		log.Println(err)
-	}
-
-	result, err := ioutil.ReadAll(bufio.NewReader(f))
-	if err != nil {
-		log.Println(err)
-	}
+	var lastModifiedTimeStamp = time.Now().Add(6 * time.Hour).Format(http.TimeFormat)
+	var noBrowserCache = time.Now().Add(-6 * time.Hour).Format(http.TimeFormat)
+	w.Header().Add("Cache-Control", "no-store, private, no-cache, must-revalidate")
+	w.Header().Add("Expires", noBrowserCache)
+	w.Header().Add("Last-Modified", lastModifiedTimeStamp)
+	w.Header().Add("Pragma", "no-cache")
 	w.Header().Add("Content-Type", "text/html")
-	fmt.Fprint(w, string(result))
+	fmt.Fprint(w, indexPage)
 }
 
 func gracefullShutdown() {
