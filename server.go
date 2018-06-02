@@ -64,6 +64,7 @@ func main() {
 	//router.Handler("GET", "/build/*name", http.StripPrefix("/build", util.GH(http.FileServer(fsAssets))))
 	router.Handler("GET", "/js/*.js", http.StripPrefix("/js", util.GH(http.FileServer(fsAssets))))
 	router.Handler("GET", "/css/*.css", http.StripPrefix("/css", util.GH(http.FileServer(fsAssets))))
+	router.Handler("GET", "/img/*.png", http.StripPrefix("/img", util.GH(http.FileServer(fsAssets))))
 	router.Handler("GET", "/favicon.ico", util.GH(http.FileServer(fsAssets)))
 	router.Handle("GET", "/", middleware.HttpLogger(middleware.RequestCounter(index)))
 	router.Handle("GET", "/login", middleware.HttpLogger(middleware.RequestCounter(index)))
