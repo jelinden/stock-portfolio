@@ -177,7 +177,7 @@ a {
 }
 
 .content {
-    margin-top: 10px;
+    margin-top: 0px;
     width: 100%;
     margin-left: 10px;
 }
@@ -322,21 +322,20 @@ table {
 }
 
 .headerLinks {
-    background-color: black;
+    background-color: white;
     border-top: 0;
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.055);
+    border-bottom: 1px solid lightgrey;
+    width: 100%;
 }
 
 .headerLinks>a {
-    color: #aaa;
+    color: black;
     display: block;
     text-decoration: none;
 }
 
-.headerLinks:hover {
-    background-color: rgb( 40, 44, 47);
-}
-
+.headerLinks:hover,
 .headerLinks:hover>a {
-    color: rgb( 255, 255, 255);
+    background-color: white !important;
+    color: black !important;
 }

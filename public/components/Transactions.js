@@ -61,52 +61,54 @@ class Transactions extends React.Component {
             return null;
         }
         return (
-            <div className="content pure-g">
-                <div className="headerLinks">
+            <div>
+                <div className="headerLinks pure-g">
                     <Link className="pure-menu-link pure-menu-heading" to={"/portfolio/" + this.props.match.params.id}>
                         Portfolio
                     </Link>
                 </div>
-                <div className="alert info"> {this.state.failed ? "Connection lost" : ""}</div>
-                <div id="portfolio" className="pure-u-1">
-                    <h1> {this.state.portfolioName ? this.state.portfolioName : ""}</h1>
-                    <div className="scrolling-wrapper-flexbox">
-                        <table className="pure-table">
-                            <thead>
-                                <tr>
-                                    <th>Symbol</th>
-                                    <th>Company Name</th>
-                                    <th>Buying Price</th>
-                                    <th>Amount</th>
-                                    <th>Commission</th>
-                                    <th>Date</th>
-                                    <th>Remove</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {this.state.transactions
-                                    ? this.state.transactions.map((item, index) => (
-                                          <tr>
-                                              <td className="right">{item.symbol}</td>
-                                              <td className="right">{item.companyName}</td>
-                                              <td className="right">{item.price}</td>
-                                              <td className="right">{item.amount}</td>
-                                              <td className="right">{item.commission}</td>
-                                              <td className="right">{item.date}</td>
-                                              <td className="right">
-                                                  <a
-                                                      href="#"
-                                                      onClick={() => {
-                                                          this.removeStock(item.symbol, item.transactionId);
-                                                      }}>
-                                                      (<span className="red delete" />)
-                                                  </a>
-                                              </td>
-                                          </tr>
-                                      ))
-                                    : ""}
-                            </tbody>
-                        </table>
+                <div className="content pure-g">
+                    <div className="alert info"> {this.state.failed ? "Connection lost" : ""}</div>
+                    <div id="portfolio" className="pure-u-1">
+                        <h1> {this.state.portfolioName ? this.state.portfolioName : ""}</h1>
+                        <div className="scrolling-wrapper-flexbox">
+                            <table className="pure-table">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Company Name</th>
+                                        <th>Buying Price</th>
+                                        <th>Amount</th>
+                                        <th>Commission</th>
+                                        <th>Date</th>
+                                        <th>Remove</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {this.state.transactions
+                                        ? this.state.transactions.map((item, index) => (
+                                              <tr>
+                                                  <td className="right">{item.symbol}</td>
+                                                  <td className="right">{item.companyName}</td>
+                                                  <td className="right">{item.price}</td>
+                                                  <td className="right">{item.amount}</td>
+                                                  <td className="right">{item.commission}</td>
+                                                  <td className="right">{item.date}</td>
+                                                  <td className="right">
+                                                      <a
+                                                          href="#"
+                                                          onClick={() => {
+                                                              this.removeStock(item.symbol, item.transactionId);
+                                                          }}>
+                                                          (<span className="red delete" />)
+                                                      </a>
+                                                  </td>
+                                              </tr>
+                                          ))
+                                        : ""}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
