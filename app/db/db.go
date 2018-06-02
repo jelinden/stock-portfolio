@@ -49,7 +49,6 @@ CREATE TABLE IF NOT EXISTS portfoliostocks (
 	date string,
 	commission float64
 );
-ALTER TABLE portfoliostocks ADD transactionid string;
 CREATE INDEX IF NOT EXISTS portfolioStocksTransactionIdIndex ON portfoliostocks (transactionid, portfolioid);
 CREATE UNIQUE INDEX IF NOT EXISTS transactionIdIndex ON portfoliostocks (transactionid);
 
@@ -82,6 +81,8 @@ CREATE TABLE IF NOT EXISTS dividend (
 CREATE INDEX IF NOT EXISTS divSymbolIndex ON dividend (symbol);
 CREATE UNIQUE INDEX IF NOT EXISTS divSymbolPaymentIndex ON dividend (paymentDate, symbol, type);
 CREATE INDEX IF NOT EXISTS divPaymentDateIndex ON dividend (paymentDate);`
+
+// ALTER TABLE portfoliostocks ADD transactionid string;
 
 func Init() {
 	var err error
