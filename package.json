@@ -1,40 +1,41 @@
 {
-  "name": "stock-portfolio",
-  "version": "0.1.0",
-  "description": "Stock portfolio",
-  "scripts": {
-    "build-dir": "rm -rf build && mkdir -p build/components && cp -r public/components build && cp public/index.* build && cp public/favicon.ico build && mkdir -p logs",
-    "css": "cp -r public/css/* build",
-    "babelify": "NODE_ENV=production browserify build/index.js -g browserify-css -o build/bundle.js -t [ babelify --presets [ es2015 es2016 react ] ]",
-    "browserify": "NODE_ENV=production browserify build/bundle.js -t envify -t uglifyify --outfile build/main.bundle.min.js",
-    "build": "npm run build-dir && npm run css && npm run babelify && npm run browserify",
-    "dev": "npm run build-dir && npm run browserify:dev"
-  },
-  "dependencies": {
-    "axios": "^0.16.2",
-    "chart.js": "^1.1.1",
-    "history": "^4.7.2",
-    "moment": "^2.20.1",
-    "object-assign": "^4.1.1",
-    "react": "^16.2.0",
-    "react-chartjs": "^1.2.0",
-    "react-datepicker": "^1.2.1",
-    "react-dom": "^16.2.0",
-    "react-router-dom": "^4.2.2"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-syntax-jsx": "^6.18.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-es2016": "^6.24.1",
-    "babel-preset-react": "^6.24.1",
-    "babelify": "^8.0.0",
-    "browserify": "^16.1.0",
-    "browserify-css": "^0.14.0",
-    "envify": "^4.1.0",
-    "eslint": "^4.19.1",
-    "eslint-plugin-react": "^7.8.2",
-    "reactify": "^1.1.1",
-    "uglifyify": "^4.0.4"
-  }
+    "name": "stock-portfolio",
+    "version": "0.1.0",
+    "description": "Stock portfolio",
+    "scripts": {
+        "build-dir": "rm -rf build && mkdir -p build/components && cp -r public/components build && cp public/index.* build && cp public/favicon.ico build && mkdir -p logs",
+        "css": "cp -r public/css/* build",
+        "img": "cp -r public/img/* build",
+        "babelify": "NODE_ENV=production browserify build/index.js -g browserify-css -o build/bundle.js -t [ babelify --presets [ es2015 es2016 react ] ]",
+        "browserify": "NODE_ENV=production browserify build/bundle.js -t envify -t uglifyify --outfile build/main.bundle.min.js",
+        "build": "npm run build-dir && npm run css && npm run img && npm run babelify && npm run browserify",
+        "dev": "npm run build-dir && npm run browserify:dev"
+    },
+    "dependencies": {
+        "axios": "^0.16.2",
+        "chart.js": "^1.1.1",
+        "history": "^4.7.2",
+        "moment": "^2.22.2",
+        "object-assign": "^4.1.1",
+        "react": "^16.4.0",
+        "react-chartjs": "^1.2.0",
+        "react-datepicker": "^1.5.0",
+        "react-dom": "^16.4.0",
+        "react-router-dom": "^4.2.2"
+    },
+    "devDependencies": {
+        "babel-cli": "^6.26.0",
+        "babel-plugin-syntax-jsx": "^6.18.0",
+        "babel-preset-es2015": "^6.24.1",
+        "babel-preset-es2016": "^6.24.1",
+        "babel-preset-react": "^6.24.1",
+        "babelify": "^8.0.0",
+        "browserify": "^16.1.0",
+        "browserify-css": "^0.14.0",
+        "envify": "^4.1.0",
+        "eslint": "^4.19.1",
+        "eslint-plugin-react": "^7.8.2",
+        "reactify": "^1.1.1",
+        "uglifyify": "^4.0.4"
+    }
 }
