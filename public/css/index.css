@@ -163,10 +163,6 @@ a {
     color: black;
 }
 
-.login {
-    margin: auto;
-}
-
 .register {
     display: inline-block;
 }
@@ -338,4 +334,23 @@ table {
 .headerLinks:hover>a {
     background-color: white !important;
     color: black !important;
+}
+
+.loginPage {
+    margin: auto;
+    padding-top: 30px;
+}
+
+.exampleImg {
+    float: left;
+    margin-top: 20px;
+}
+
+.exampleImg>img {
+    max-width: 600px;
+}
+
+.login {
+    float: left;
+    padding-right: 30px;
 }

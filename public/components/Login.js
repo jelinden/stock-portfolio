@@ -33,28 +33,30 @@ class Login extends React.Component {
     render() {
         return (
             <div className="pure-g">
-                <div className="login">
-                    <h1> Login </h1>{" "}
-                    <form id="login" method="post" action="/login" className="pure-form pure-form-stacked">
-                        <label htmlFor="emailLogin"> Email </label> <input id="emailLogin" type="text" name="email" placeholder="my@email.com" />
-                        <label htmlFor="passwordLogin"> Password </label>{" "}
-                        <input id="passwordLogin" type="password" name="password" placeholder="Over 8 characters" />
-                        <button type="submit" className="pure-button pure-button-primary">
-                            {" "}
-                            Login{" "}
-                        </button>{" "}
-                    </form>{" "}
-                    <div>
-                        {" "}
-                        New user ? Please{" "}
-                        <a className="a-link" href="/signup">
-                            {" "}
-                            signup{" "}
-                        </a>.
+                <div className="loginPage">
+                    <div className="login">
+                        <h1> Login </h1>
+                        <form id="login" method="post" action="/login" className="pure-form pure-form-stacked">
+                            <label htmlFor="emailLogin"> Email </label> <input id="emailLogin" type="text" name="email" placeholder="my@email.com" />
+                            <label htmlFor="passwordLogin"> Password </label>
+                            <input id="passwordLogin" type="password" name="password" placeholder="Over 8 characters" />
+                            <button type="submit" className="pure-button pure-button-primary">
+                                Login
+                            </button>
+                        </form>
+                        <div>
+                            New user? Please
+                            <a className="a-link" href="/signup">
+                                {` signup`}
+                            </a>.
+                        </div>
+                        <div className="alert"> {this.getUrlParameter("login") === "failed" ? "Login failed" : ""} </div>
+                        <div className="success"> {this.getUrlParameter("verified") === "true" ? "Verification succeeded, please login" : ""} </div>
                     </div>
-                    <div className="alert"> {this.getUrlParameter("login") === "failed" ? "Login failed" : ""} </div>{" "}
-                    <div className="success"> {this.getUrlParameter("verified") === "true" ? "Verification succeeded, please login" : ""} </div>{" "}
-                </div>{" "}
+                    <div className="exampleImg">
+                        <img src="/img/portfolio-example.png" alt="Portfolio example view" />
+                    </div>
+                </div>
             </div>
         );
     }
