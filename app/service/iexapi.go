@@ -30,6 +30,18 @@ func GetDividends(symbols ...string) []Dividend {
 	return dividends
 }
 
+func GetClosePrices(symbols ...string) []ClosePrice {
+	closePrices := []ClosePrice{}
+	for _, symbol := range symbols {
+		if closePrice := getStockClosePrices(symbol); closePrice != nil {
+			closePrices = append(closePrices, closePrice...)
+		}
+		time.Sleep(1200 * time.Millisecond)
+	}
+	return closePrices
+}
+
+// https://api.iextrading.com/1.0/stock/dividends/chart/5y
 func getStockDividends(symbol string) []Dividend {
 	rawDividend := []rawDividend{}
 	dividend := util.Get(`https://api.iextrading.com/1.0/stock/`+symbol+`/dividends/5y`, httpTimeout)
@@ -58,6 +70,29 @@ func getStockDividends(symbol string) []Dividend {
 		dividends = append(dividends, div)
 	}
 	return dividends
+}
+
+// https://api.iextrading.com/1.0/stock/aapl/chart/5y
+func getStockClosePrices(symbol string) []ClosePrice {
+	rawClosePrices := []rawClosePrice{}
+	fetchedClosePrices := util.Get(`https://api.iextrading.com/1.0/stock/`+symbol+`/chart/5y`, httpTimeout)
+	err := json.Unmarshal(fetchedClosePrices, &rawClosePrices)
+	if err != nil {
+		log.Println("Getting closePrices for", symbol, "failed")
+		return nil
+	}
+	closePrices := []ClosePrice{}
+	for i := range rawClosePrices {
+		closePrice := ClosePrice{Symbol: symbol, ClosePrice: rawClosePrices[i].ClosePrice}
+		date, err := time.Parse("2006-01-02", rawClosePrices[i].ClosePriceDate)
+		if err != nil {
+			log.Println("err")
+			return nil
+		}
+		closePrice.ClosePriceDate = date.Unix() * 1000
+		closePrices = append(closePrices, closePrice)
+	}
+	return closePrices
 }
 
 func MarshalQuotes(q []byte) []Quote {
@@ -109,4 +144,15 @@ type Dividend struct {
 	PaymentDate int64   `json:"paymentDate"`
 	Amount      float64 `json:"amount"`
 	Type        string  `json:"type"`
+}
+
+type rawClosePrice struct {
+	ClosePriceDate string  `json:"date"`
+	ClosePrice     float64 `json:"close"`
+}
+
+type ClosePrice struct {
+	Symbol         string  `json:"symbol"`
+	ClosePriceDate int64   `json:"closePriceDate"`
+	ClosePrice     float64 `json:"closePrice"`
 }
