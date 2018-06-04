@@ -80,11 +80,19 @@ CREATE TABLE IF NOT EXISTS dividend (
 );
 CREATE INDEX IF NOT EXISTS divSymbolIndex ON dividend (symbol);
 CREATE UNIQUE INDEX IF NOT EXISTS divSymbolPaymentIndex ON dividend (paymentDate, symbol, type);
-CREATE INDEX IF NOT EXISTS divPaymentDateIndex ON dividend (paymentDate);`
+CREATE INDEX IF NOT EXISTS divPaymentDateIndex ON dividend (paymentDate);
+
+CREATE TABLE IF NOT EXISTS history (
+	symbol string,
+	closePriceDate int64,
+	closePrice float64
+);
+CREATE INDEX IF NOT EXISTS histSymbolIndex ON history (symbol);
+CREATE UNIQUE INDEX IF NOT EXISTS histSymbolClosePriceIndex ON history (symbol, closePriceDate);`
 
 // ALTER TABLE portfoliostocks ADD transactionid string;
 
-func Init() {
+func init() {
 	var err error
 	ql.RegisterDriver()
 	db, err = sql.Open("ql", dbFileName)
@@ -93,6 +101,7 @@ func Init() {
 	}
 	log.Println("db file", dbFileName, "opened")
 	populateDatabase()
+	go util.DoEvery(time.Hour*12, getHistory)
 	go util.DoEvery(time.Second*20, getQuotes)
 	go util.DoEvery(time.Minute*180, getDividends)
 }
@@ -272,6 +281,14 @@ func getQuotes() {
 	if len(quotes) > 0 {
 		log.Printf("got %v quotes\n", len(quotes))
 		SaveQuotes(quotes)
+	}
+}
+
+func getHistory() {
+	closePrices := service.GetClosePrices(GetPortfolioSymbols()...)
+	if len(closePrices) > 0 {
+		log.Printf("got %v closePrices\n", len(closePrices))
+		SaveHistory(closePrices)
 	}
 }
 
