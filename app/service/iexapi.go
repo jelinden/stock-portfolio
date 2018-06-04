@@ -99,7 +99,7 @@ func MarshalQuotes(q []byte) []Quote {
 	var objmap map[string]*json.RawMessage
 	err := json.Unmarshal(q, &objmap)
 	if err != nil {
-		log.Println(err)
+		log.Println("failed to unmarshal", string(q), err)
 	}
 	quotes := []Quote{}
 	for r := range objmap {
