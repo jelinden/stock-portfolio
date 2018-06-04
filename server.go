@@ -62,7 +62,6 @@ func main() {
 	config.Config.AdminUser = adminUser
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	Init()
-	db.Init()
 	db.InitBolt()
 
 	router := httprouter.New()
