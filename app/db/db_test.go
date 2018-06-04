@@ -12,7 +12,6 @@ import (
 )
 
 func TestInsert(t *testing.T) {
-	Init()
 	now := time.Now().UTC().Format(time.RFC3339)
 	user := domain.User{
 		ID:                      util.GetID(),
@@ -28,7 +27,7 @@ func TestInsert(t *testing.T) {
 	}
 	ok := SaveUser(user)
 	log.Println("save ok", ok)
-	u := fetchUser()
+	u := GetUser("test@test.com")
 	assert.Equal(t, "test@test.com", u.Email, "test@test.com isn't equal to "+u.Email)
 	log.Println("removing user test@test.com")
 	err := exec(`delete from user where email == "test@test.com"`)
@@ -36,8 +35,4 @@ func TestInsert(t *testing.T) {
 		log.Println("delete error", err)
 	}
 	After()
-}
-
-func fetchUser() domain.User {
-	return GetUser("test@test.com")
 }
