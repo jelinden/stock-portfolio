@@ -1,23 +1,22 @@
-import React from 'react'
+import React from "react";
 
 class Verify extends React.Component {
+    constructor() {
+        super();
+    }
 
-  constructor() {
-    super();
-  }
-
-  render() {
-      return (
-        <div class="pure-g">
-          <div class="login">
-            <div class="register">
-              <h1>Verifying your email address</h1>
-              <p>Please verify your email by clicking the link in the email that was sent to you.</p>
+    render() {
+        return (
+            <div class="pure-g">
+                <div class="login">
+                    <div class="register">
+                        <h1>Verifying your email address</h1>
+                        <p>Please verify your email by clicking the link in the email that was sent to you.</p>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      )
-  }
+        );
+    }
 }
 
-export default Verify
+export default Verify;
