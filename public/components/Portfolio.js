@@ -106,7 +106,7 @@ class Portfolio extends React.Component {
             var parts = n.toString().split(".");
             return parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ") + (parts[1] ? "." + parts[1] : "");
         }
-        return "";
+        return "0.00";
     }
 
     componentDidMount() {
@@ -207,7 +207,7 @@ class Portfolio extends React.Component {
                                                             " (" +
                                                             this.numberFormat((item.changePercent * 100).toFixed(2)) +
                                                             "%)"
-                                                          : ""}
+                                                          : "0.00"}
                                                   </td>
                                                   <td className="right">{item.amount}</td>
                                                   <td className="right">{this.numberFormat(item.price.toFixed(2))}</td>
@@ -237,7 +237,7 @@ class Portfolio extends React.Component {
                                                           : ""}
                                                   </td>
                                                   <td className={item.change && item.change > 0 ? "right green" : item.change < 0 ? "right red" : "right"}>
-                                                      {item.change ? this.numberFormat((item.change * item.amount).toFixed(2)) : ""}
+                                                      {item.change ? this.numberFormat((item.change * item.amount).toFixed(2)) : "0.00"}
                                                   </td>
                                                   <td className="right">{item.close ? this.numberFormat(item.close.toFixed(2)) : ""}</td>
                                                   <td className="right">{this.convertTimestamp(item.closeTime)}</td>
