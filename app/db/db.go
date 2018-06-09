@@ -84,10 +84,11 @@ CREATE INDEX IF NOT EXISTS divPaymentDateIndex ON dividend (paymentDate);
 
 CREATE TABLE IF NOT EXISTS history (
 	symbol string,
-	closePriceDate int64,
+	closePriceDate string,
 	closePrice float64
 );
 CREATE INDEX IF NOT EXISTS histSymbolIndex ON history (symbol);
+CREATE INDEX IF NOT EXISTS histDateIndex ON history (closePriceDate);
 CREATE UNIQUE INDEX IF NOT EXISTS histSymbolClosePriceIndex ON history (symbol, closePriceDate);`
 
 // ALTER TABLE portfoliostocks ADD transactionid string;
