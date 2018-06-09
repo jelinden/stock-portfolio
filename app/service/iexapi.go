@@ -89,7 +89,7 @@ func getStockClosePrices(symbol string) []ClosePrice {
 			log.Println("err")
 			return nil
 		}
-		closePrice.ClosePriceDate = date.Unix() * 1000
+		closePrice.ClosePriceDate = date.Format("01/02/2006")
 		closePrices = append(closePrices, closePrice)
 	}
 	return closePrices
@@ -152,7 +152,7 @@ type rawClosePrice struct {
 }
 
 type ClosePrice struct {
-	Symbol         string  `json:"symbol"`
-	ClosePriceDate int64   `json:"closePriceDate"`
-	ClosePrice     float64 `json:"closePrice"`
+	Symbol         string  `sql:"symbol" json:"symbol"`
+	ClosePriceDate string  `sql:"closePriceDate" json:"closePriceDate"`
+	ClosePrice     float64 `sql:"closePrice" json:"closePrice"`
 }
