@@ -96,7 +96,7 @@ func main() {
 	router.Handle("GET", "/api/portfolio/remove/:portfolioid/:symbol/:transactionid", middleware.RequestCounter(middleware.HttpLogger(middleware.Auth(util.MakeGzipHandler(routes.RemoveStock)))))
 	router.Handle("GET", "/api/dividends", middleware.HttpLogger(middleware.RequestCounter(middleware.Auth(util.MakeGzipHandler(routes.GetDividend)))))
 	router.Handle("GET", "/api/transactions/:id", middleware.HttpLogger(middleware.RequestCounter(middleware.Auth(util.MakeGzipHandler(routes.GetTransactions)))))
-
+	router.Handle("GET", "/api/history/:id", middleware.HttpLogger(middleware.RequestCounter(middleware.Auth(util.MakeGzipHandler(routes.GetHistory)))))
 	router.Handle("GET", "/api/health", middleware.HttpLogger(middleware.RequestCounter(middleware.AdminAuth(util.MakeGzipHandler(routes.Health)))))
 
 	gracefullShutdown()

@@ -6,7 +6,8 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/cznic/ql"
+	_ "github.com/cznic/ql/driver"
+
 	"github.com/jelinden/stock-portfolio/app/domain"
 	"github.com/jelinden/stock-portfolio/app/service"
 	"github.com/jelinden/stock-portfolio/app/util"
@@ -15,6 +16,7 @@ import (
 const dbFileName = "./ql.db"
 
 var db *sql.DB
+var mdb *sql.DB
 
 const createTables = `CREATE TABLE IF NOT EXISTS user (
 	id string,
@@ -47,10 +49,15 @@ CREATE TABLE IF NOT EXISTS portfoliostocks (
 	price float64,
 	amount int,
 	date string,
+	epoch int64,
 	commission float64
 );
 CREATE INDEX IF NOT EXISTS portfolioStocksTransactionIdIndex ON portfoliostocks (transactionid, portfolioid);
 CREATE UNIQUE INDEX IF NOT EXISTS transactionIdIndex ON portfoliostocks (transactionid);
+CREATE INDEX IF NOT EXISTS portfolioStocksEpochIndex ON portfoliostocks (epoch);
+CREATE INDEX IF NOT EXISTS portfolioIdSymbolIndex ON portfoliostocks (portfolioid, symbol);
+CREATE INDEX IF NOT EXISTS portfolioSymbolEpochIndex ON portfoliostocks (symbol, epoch);
+CREATE INDEX IF NOT EXISTS xportfoliostocks_portfolioid ON portfoliostocks(portfolioid);
 
 CREATE TABLE IF NOT EXISTS instrument (
 	symbol string
@@ -85,26 +92,96 @@ CREATE INDEX IF NOT EXISTS divPaymentDateIndex ON dividend (paymentDate);
 CREATE TABLE IF NOT EXISTS history (
 	symbol string,
 	closePriceDate string,
+	epoch int64,
 	closePrice float64
 );
 CREATE INDEX IF NOT EXISTS histSymbolIndex ON history (symbol);
-CREATE INDEX IF NOT EXISTS histDateIndex ON history (closePriceDate);
-CREATE UNIQUE INDEX IF NOT EXISTS histSymbolClosePriceIndex ON history (symbol, closePriceDate);`
+CREATE INDEX IF NOT EXISTS histEpochIndex ON history (epoch);
+CREATE INDEX IF NOT EXISTS histSymbolEpochIndex ON history (symbol, epoch);`
 
+// ALTER TABLE portfoliostocks ADD epoch int64;
+// ALTER TABLE history ADD epoch int64;
 // ALTER TABLE portfoliostocks ADD transactionid string;
 
 func init() {
 	var err error
-	ql.RegisterDriver()
 	db, err = sql.Open("ql", dbFileName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("db file", dbFileName, "opened")
+
+	mdb, err = sql.Open("ql-mem", "mem.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	tx, _ := mdb.Begin()
+	defer recoverFrom(tx)
+	_, err = tx.Exec(createTables)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tx.Commit()
+	initMemoryDatabase()
+
 	if err != nil {
 		log.Fatalf("ql.OpenFile() failed with '%s'\n", err.Error())
 	}
-	log.Println("db file", dbFileName, "opened")
+
 	populateDatabase()
 	go util.DoEvery(time.Hour*12, getHistory)
 	go util.DoEvery(time.Second*20, getQuotes)
 	go util.DoEvery(time.Minute*180, getDividends)
+}
+
+func initMemoryDatabase() {
+	transactions := getQuery(`select * from portfoliostocks;`)
+	tx, _ := mdb.Begin()
+	defer recoverFrom(tx)
+	for _, item := range transactions {
+		// get all transactions to memory db
+		_, err := tx.Exec(`insert into portfoliostocks (
+					transactionid,
+					portfolioid,
+					userid,
+					symbol,
+					price,
+					amount,
+					date,
+					epoch,
+					commission) values ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+			item["transactionid"],
+			item["portfolioid"],
+			item["userid"],
+			item["symbol"],
+			item["price"],
+			item["amount"],
+			item["date"],
+			item["epoch"],
+			item["commission"])
+		if err != nil {
+			log.Println(err)
+		}
+	}
+	tx.Commit()
+	log.Println("updated mdb portfoliostocks", len(transactions), "items")
+
+	historyItems := getQuery(`select * from history;`)
+	tx2, _ := mdb.Begin()
+	defer recoverFrom(tx2)
+	for _, item := range historyItems {
+		// update all history lines memory db
+		_, err := tx2.Exec(`insert into history (symbol, closePriceDate, epoch, closePrice) values ($1,$2,$3,$4)`,
+			item["symbol"],
+			item["closePriceDate"],
+			item["epoch"],
+			item["closePrice"])
+		if err != nil {
+			log.Println(err)
+		}
+	}
+	tx2.Commit()
+	log.Println("updated mdb history", len(historyItems), "items")
 }
 
 func populateDatabase() {
@@ -119,6 +196,34 @@ func populateDatabase() {
 		exec(`update portfoliostocks set transactionid = $1 where portfolioid = $2 and date = $3 and amount = $4 and price = $5 and symbol = $6`,
 			util.GetTimeBasedID(), item["portfolioid"], item["date"], item["amount"], item["price"], item["symbol"])
 		time.Sleep(10 * time.Millisecond)
+	}
+
+	transactionDates := getQuery(`select transactionid, date from portfoliostocks where epoch is null;`)
+	for _, item := range transactionDates {
+		// update all transactions to have an epoch timestamp
+		d, err := time.Parse("01/02/2006", item["date"].(string))
+		if err != nil {
+			log.Println("parsing date failed", err)
+		} else {
+			epoch := d.Unix() * 1000
+			exec(`update portfoliostocks set epoch = $1 where transactionid = $2`, epoch, item["transactionid"])
+			time.Sleep(5 * time.Millisecond)
+			log.Println("updated portfoliostocks", item["transactionid"], item["date"], epoch)
+		}
+	}
+
+	historyDates := getQuery(`select symbol, closePriceDate from history where epoch is null;`)
+	for _, item := range historyDates {
+		// update all history lines to have an epoch timestamp
+		d, err := time.Parse("01/02/2006", item["closePriceDate"].(string))
+		if err != nil {
+			log.Println("parsing closePriceDate failed", err)
+		} else {
+			epoch := d.Unix() * 1000
+			exec(`update history set epoch = $1 where symbol = $2 and closePriceDate = $3`, epoch, item["symbol"], item["closePriceDate"])
+			time.Sleep(5 * time.Millisecond)
+			log.Println("updated history", item["symbol"], item["closePriceDate"], epoch)
+		}
 	}
 }
 

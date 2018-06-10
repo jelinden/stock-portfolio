@@ -2,50 +2,60 @@ package db
 
 import (
 	"log"
+	"time"
 
 	"github.com/jelinden/stock-portfolio/app/service"
 )
 
 func GetHistory(portfolioid string) []service.ClosePrice {
-	rows, err := db.Query(`SELECT h.symbol, h.closePrice, h.closePriceDate
+	timeFrom := time.Now()
+	var closePrices = []service.ClosePrice{}
+
+	rows, err := mdb.Query(`SELECT h.symbol, h.closePrice, h.epoch
 		FROM history AS h,
-			(SELECT symbol, min(date) as minDate
+			(SELECT symbol, min(epoch) as minDate
 				FROM portfoliostocks
-				WHERE portfolioid LIKE ($1)
+				WHERE portfolioid = $1
 				GROUP BY symbol) AS p
 		WHERE h.symbol = p.symbol
-		AND h.closePriceDate = p.minDate
-		ORDER BY p.minDate ASC;`, portfolioid)
-	if err != nil {
-		log.Printf("failed with '%s'\n", err)
-		return []service.ClosePrice{}
-	}
+		AND h.epoch >= p.minDate`, portfolioid)
 	defer rows.Close()
-	var closePrices []service.ClosePrice
+	if err != nil {
+		log.Printf("failed with '%v'\n", err)
+		return closePrices
+	}
 	for rows.Next() {
 		closePrice := service.ClosePrice{}
 		err := rows.Scan(
 			&closePrice.Symbol,
 			&closePrice.ClosePrice,
-			&closePrice.ClosePriceDate)
+			&closePrice.Epoch)
 		if err != nil {
 			log.Println("scanning row failed", err.Error())
 		}
 		closePrices = append(closePrices, closePrice)
 	}
+	log.Println("get history took", time.Now().Sub(timeFrom))
 	return closePrices
 }
 
 func SaveHistory(closePrices []service.ClosePrice) {
 	for _, c := range closePrices {
 		if !isClosePrice(c.Symbol, c.ClosePriceDate) {
-			err := exec(`INSERT INTO history (symbol, closePrice, closePriceDate) 
-				VALUES ($1,$2,$3);`,
-				c.Symbol,
-				c.ClosePrice,
-				c.ClosePriceDate)
+			d, err := time.Parse("01/02/2006", c.ClosePriceDate)
 			if err != nil {
-				log.Printf("failed with '%s' %s\n", err.Error(), c.Symbol)
+				log.Println("SaveHistory failed", err)
+			} else {
+				err := exec(`INSERT INTO history (symbol, closePrice, closePriceDate, epoch) 
+				VALUES ($1,$2,$3,$4);`,
+					c.Symbol,
+					c.ClosePrice,
+					c.ClosePriceDate,
+					d.Unix()*1000,
+				)
+				if err != nil {
+					log.Printf("failed with '%s' %s\n", err.Error(), c.Symbol)
+				}
 			}
 		}
 	}
