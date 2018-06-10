@@ -41,12 +41,13 @@ func AddStock(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 				addStockResponse(w, portfolioid+"?commissionMsg=true")
 				return
 			}
-			d, err := checkDate(date)
+			d, epoch, err := checkDate(date)
 			if err {
 				addStockResponse(w, portfolioid+"?dateMsg=true")
 				return
 			}
 			stock.Date = *d
+			stock.Epoch = *epoch
 			stock.Amount = *a
 			stock.Price = *p
 			stock.Commission = *c
@@ -149,10 +150,11 @@ func checkCommission(commission string) (*float64, bool) {
 	return &c, false
 }
 
-func checkDate(date string) (*string, bool) {
-	_, err := time.Parse("01/02/2006", date)
+func checkDate(date string) (*string, *int64, bool) {
+	d, err := time.Parse("01/02/2006", date)
 	if err != nil {
-		return nil, true
+		return nil, nil, true
 	}
-	return &date, false
+	epoch := d.Unix() * 1000
+	return &date, &epoch, false
 }
