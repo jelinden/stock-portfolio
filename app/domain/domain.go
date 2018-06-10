@@ -46,6 +46,7 @@ type PortfolioStock struct {
 	Amount        int      `json:"amount"`
 	Commission    float64  `json:"commission"`
 	Date          string   `json:"date"`
+	Epoch         int64    `json:"epoch"`
 	CompanyName   *string  `json:"companyName,omitempty"`
 	LatestPrice   *float64 `json:"latestPrice,omitempty"`
 	LatestUpdate  *float64 `json:"latestUpdate,omitempty"`

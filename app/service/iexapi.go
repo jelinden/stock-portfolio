@@ -148,11 +148,13 @@ type Dividend struct {
 
 type rawClosePrice struct {
 	ClosePriceDate string  `json:"date"`
+	Epoch          int64   `json:"epoch"`
 	ClosePrice     float64 `json:"close"`
 }
 
 type ClosePrice struct {
 	Symbol         string  `sql:"symbol" json:"symbol"`
 	ClosePriceDate string  `sql:"closePriceDate" json:"closePriceDate"`
+	Epoch          int64   `sql:"epoch" json:"epoch"`
 	ClosePrice     float64 `sql:"closePrice" json:"closePrice"`
 }
