@@ -383,9 +383,10 @@ func queryPortfolioSymbols() []string {
 }
 
 func getQuotes() {
+	timeFrom := time.Now()
 	quotes := service.GetQuotes(GetPortfolioSymbols()...)
 	if len(quotes) > 0 {
-		log.Printf("got %v quotes\n", len(quotes))
+		log.Printf("got %v quotes in %v\n", len(quotes), time.Now().Sub(timeFrom))
 		SaveQuotes(quotes)
 	}
 }
