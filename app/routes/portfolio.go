@@ -67,6 +67,21 @@ func GetTransactions(w http.ResponseWriter, r *http.Request, p httprouter.Params
 	ok(w, marshalled)
 }
 
+func GetHistory(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var marshalled = []byte(`{"response": "failed"}`)
+	var err error
+	user := getUser(r)
+	log.Println("id", p.ByName("id"))
+	if verifyPortfolioName(p.ByName("id")) && user.ID != "" {
+		history := db.GetHistory(p.ByName("id"))
+		marshalled, err = json.Marshal(history)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+	ok(w, marshalled)
+}
+
 func verifyPortfolioName(v string) bool {
 	re, err := regexp.Compile(`^[a-zA-ZöäåÖÄÅ0-9:?€$\- ]+$`)
 	if err != nil {
