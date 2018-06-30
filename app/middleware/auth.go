@@ -21,7 +21,7 @@ func Auth(fn httprouter.Handle) httprouter.Handle {
 			}
 		}
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(200)
+		w.WriteHeader(403)
 		w.Write([]byte(`{"error":"no rights"}`))
 	}
 }
@@ -41,7 +41,7 @@ func AdminAuth(fn httprouter.Handle) httprouter.Handle {
 			}
 		}
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(200)
+		w.WriteHeader(403)
 		w.Write([]byte(`{"error":"no rights"}`))
 	}
 }
