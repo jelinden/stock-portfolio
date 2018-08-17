@@ -19,6 +19,7 @@ class Portfolio extends React.Component {
             changeTotal: 0,
             itemTotal: 0,
             currentItemTotal: 0,
+            closeTotal: 0,
             gain: "",
             failed: false,
             symbols: null,
@@ -49,6 +50,7 @@ class Portfolio extends React.Component {
                 let currentItemTotal = 0;
                 let currentTotal = 0;
                 let gainTotal = 0;
+                let closeTotal = 0;
                 let changeTotal = 0;
                 let symbols = "";
                 let stockMap = [];
@@ -61,6 +63,7 @@ class Portfolio extends React.Component {
                             currentItemTotal += item.latestPrice;
                             changeTotal += item.change * item.amount;
                         }
+                        closeTotal += item.close * item.amount;
                         if (symbols === "") {
                             symbols += item.symbol;
                         } else {
@@ -79,6 +82,7 @@ class Portfolio extends React.Component {
                     changeTotal: changeTotal,
                     itemTotal: itemTotal,
                     currentItemTotal: currentItemTotal,
+                    closeTotal: closeTotal,
                     gain: gainTotal,
                     failed: false,
                     symbols: symbols
@@ -233,7 +237,8 @@ class Portfolio extends React.Component {
                                                                   : "right"
                                                       }>
                                                       {item.latestPrice
-                                                          ? ((item.latestPrice - item.price / item.amount) / (item.price / item.amount) * 100).toFixed(2) + "%"
+                                                          ? (((item.latestPrice - item.price / item.amount) / (item.price / item.amount)) * 100).toFixed(2) +
+                                                            "%"
                                                           : ""}
                                                   </td>
                                                   <td className={item.change && item.change > 0 ? "right green" : item.change < 0 ? "right red" : "right"}>
@@ -261,7 +266,7 @@ class Portfolio extends React.Component {
                                                         : "right"
                                             }>
                                             {this.state.itemTotal !== "undefined"
-                                                ? this.numberFormat((this.state.itemTotal / this.state.currentItemTotal * 100).toFixed(2)) + " %"
+                                                ? this.numberFormat(((this.state.itemTotal / this.state.currentItemTotal) * 100).toFixed(2)) + "%"
                                                 : ""}
                                         </th>
                                         <th />
@@ -274,7 +279,11 @@ class Portfolio extends React.Component {
                                         </th>
                                         <th />
                                         <th className={this.state.changeTotal && this.state.changeTotal >= 0 ? "right green" : "right red"}>
-                                            {this.state.changeTotal ? this.numberFormat(this.state.changeTotal.toFixed(2)) : ""}
+                                            {this.state.changeTotal ? this.numberFormat(this.state.changeTotal.toFixed(2)) : ""} (
+                                            {this.state.changeTotal
+                                                ? this.numberFormat(((this.state.changeTotal / this.state.closeTotal) * 100).toFixed(2)) + "%"
+                                                : ""}
+                                            )
                                         </th>
                                         <th />
                                         <th />
