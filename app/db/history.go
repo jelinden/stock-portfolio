@@ -13,10 +13,9 @@ func GetHistory(portfolioid string) []service.ClosePrice {
 
 	rows, err := mdb.Query(`SELECT h.symbol, h.closePrice, h.epoch
 		FROM history AS h,
-			(SELECT symbol, min(epoch) as minDate
+			(SELECT symbol, amount, epoch as minDate
 				FROM portfoliostocks
-				WHERE portfolioid = $1
-				GROUP BY symbol) AS p
+				WHERE portfolioid = $1) AS p
 		WHERE h.symbol = p.symbol
 		AND h.epoch >= p.minDate`, portfolioid)
 	defer rows.Close()
@@ -67,13 +66,11 @@ func isClosePrice(symbol string, date string) bool {
 	if err != nil {
 		log.Println(err)
 	}
-	var s string
+	var s = ""
 	if row.Next() {
 		row.Scan(&s)
 	}
-	log.Println("s1", s)
 	row.Close()
-	log.Println("s2", s)
 	if s != "" {
 		return true
 	}
