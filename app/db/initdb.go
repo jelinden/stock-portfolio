@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS portfolio (
 CREATE INDEX IF NOT EXISTS portfolioUserIdIndex ON portfolio (userid);
 CREATE UNIQUE INDEX IF NOT EXISTS portfolioIdIndex ON portfolio (portfolioid);
 
+ALTER TABLE portfoliostocks ADD epoch int64;
 CREATE TABLE IF NOT EXISTS portfoliostocks (
 	transactionid string,
 	portfolioid string,
@@ -97,7 +98,6 @@ CREATE INDEX IF NOT EXISTS histSymbolIndex ON history (symbol);
 CREATE INDEX IF NOT EXISTS histEpochIndex ON history (epoch);
 CREATE INDEX IF NOT EXISTS histSymbolEpochIndex ON history (symbol, epoch);`
 
-// ALTER TABLE portfoliostocks ADD epoch int64;
 // ALTER TABLE history ADD epoch int64;
 // ALTER TABLE portfoliostocks ADD transactionid string;
 
