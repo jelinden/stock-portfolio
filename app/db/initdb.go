@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS portfolio (
 CREATE INDEX IF NOT EXISTS portfolioUserIdIndex ON portfolio (userid);
 CREATE UNIQUE INDEX IF NOT EXISTS portfolioIdIndex ON portfolio (portfolioid);
 
-ALTER TABLE portfoliostocks ADD epoch int64;
+// ALTER TABLE portfoliostocks ADD epoch int64;
 CREATE TABLE IF NOT EXISTS portfoliostocks (
 	transactionid string,
 	portfolioid string,
@@ -87,7 +87,6 @@ CREATE INDEX IF NOT EXISTS divSymbolIndex ON dividend (symbol);
 CREATE UNIQUE INDEX IF NOT EXISTS divSymbolPaymentIndex ON dividend (paymentDate, symbol, type);
 CREATE INDEX IF NOT EXISTS divPaymentDateIndex ON dividend (paymentDate);
 
-DROP TABLE history;
 CREATE TABLE IF NOT EXISTS history (
 	symbol string,
 	closePriceDate string,
