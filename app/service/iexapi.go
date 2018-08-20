@@ -41,7 +41,7 @@ func GetClosePrices(symbols ...string) []ClosePrice {
 	return closePrices
 }
 
-// https://api.iextrading.com/1.0/stock/dividends/chart/5y
+// https://api.iextrading.com/1.0/stock/xom/dividends/chart/5y
 func getStockDividends(symbol string) []Dividend {
 	rawDividend := []rawDividend{}
 	dividend := util.Get(`https://api.iextrading.com/1.0/stock/`+symbol+`/dividends/5y`, httpTimeout)

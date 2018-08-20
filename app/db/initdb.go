@@ -86,6 +86,7 @@ CREATE INDEX IF NOT EXISTS divSymbolIndex ON dividend (symbol);
 CREATE UNIQUE INDEX IF NOT EXISTS divSymbolPaymentIndex ON dividend (paymentDate, symbol, type);
 CREATE INDEX IF NOT EXISTS divPaymentDateIndex ON dividend (paymentDate);
 
+DROP TABLE history;
 CREATE TABLE IF NOT EXISTS history (
 	symbol string,
 	closePriceDate string,
@@ -157,7 +158,10 @@ func populateMemoryDatabase() {
 	log.Println("updated mdb portfoliostocks", len(transactions), "items")
 
 	historyItems := getQuery(`select * from history;`)
-	tx2, _ := mdb.Begin()
+	tx2, err := mdb.Begin()
+	if err != nil {
+		log.Println(err)
+	}
 	defer recoverFrom(tx2)
 	for _, item := range historyItems {
 		// update all history lines memory db

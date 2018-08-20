@@ -65,12 +65,13 @@ func isClosePrice(symbol string, date string) bool {
 	row, err := db.Query(`select symbol from history where symbol = $1 and closePriceDate = $2;`, symbol, date)
 	if err != nil {
 		log.Println(err)
+		return false
 	}
+	defer row.Close()
 	var s = ""
 	if row.Next() {
 		row.Scan(&s)
 	}
-	row.Close()
 	if s != "" {
 		return true
 	}
