@@ -105,8 +105,15 @@ func initFileDB() {
 	var err error
 	db, err = sql.Open("ql", dbFileName)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("fatal", err)
 	}
+	tx, _ := db.Begin()
+	defer recoverFrom(tx)
+	_, err = tx.Exec(createTables)
+	if err != nil {
+		log.Fatal("fatal error creating tables", err)
+	}
+	tx.Commit()
 	log.Println("db file", dbFileName, "opened")
 }
 
@@ -120,7 +127,7 @@ func initMemDatabase() {
 	defer recoverFrom(tx)
 	_, err = tx.Exec(createTables)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("fatal error creating tables", err)
 	}
 	tx.Commit()
 }
