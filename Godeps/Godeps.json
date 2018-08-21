@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/jelinden/stock-portfolio",
-	"GoVersion": "go1.10",
+	"GoVersion": "go1.11",
 	"GodepVersion": "v79",
 	"Deps": [
 		{
@@ -27,18 +27,18 @@
 		},
 		{
 			"ImportPath": "github.com/cznic/internal/buffer",
-			"Comment": "1.0.0-4-g4747030",
-			"Rev": "4747030f7cf2f4c0a01512b00cd68734b167ac3b"
+			"Comment": "1.0.0-6-gf44710a",
+			"Rev": "f44710a21d00af8b5c8d1b3ff5f141fe5cb9b9eb"
 		},
 		{
 			"ImportPath": "github.com/cznic/internal/file",
-			"Comment": "1.0.0-4-g4747030",
-			"Rev": "4747030f7cf2f4c0a01512b00cd68734b167ac3b"
+			"Comment": "1.0.0-6-gf44710a",
+			"Rev": "f44710a21d00af8b5c8d1b3ff5f141fe5cb9b9eb"
 		},
 		{
 			"ImportPath": "github.com/cznic/internal/slice",
-			"Comment": "1.0.0-4-g4747030",
-			"Rev": "4747030f7cf2f4c0a01512b00cd68734b167ac3b"
+			"Comment": "1.0.0-6-gf44710a",
+			"Rev": "f44710a21d00af8b5c8d1b3ff5f141fe5cb9b9eb"
 		},
 		{
 			"ImportPath": "github.com/cznic/lldb",
@@ -47,17 +47,22 @@
 		},
 		{
 			"ImportPath": "github.com/cznic/mathutil",
-			"Rev": "7764e6a2216aaa02c36f75aad62538d39c2962c2"
+			"Rev": "ca4c9f2c136954238c3158b92de72078c7672ecc"
 		},
 		{
 			"ImportPath": "github.com/cznic/ql",
-			"Comment": "v1.1.0-64-geccf3e9",
-			"Rev": "eccf3e9caa43fab70d7ddfdee5c3fb73fc76c2a1"
+			"Comment": "v1.2.0",
+			"Rev": "47bf73cf8ed137969f12b223b7016784cdd9d42e"
+		},
+		{
+			"ImportPath": "github.com/cznic/ql/driver",
+			"Comment": "v1.2.0",
+			"Rev": "47bf73cf8ed137969f12b223b7016784cdd9d42e"
 		},
 		{
 			"ImportPath": "github.com/cznic/ql/vendored/github.com/camlistore/go4/lock",
-			"Comment": "v1.1.0-64-geccf3e9",
-			"Rev": "eccf3e9caa43fab70d7ddfdee5c3fb73fc76c2a1"
+			"Comment": "v1.2.0",
+			"Rev": "47bf73cf8ed137969f12b223b7016784cdd9d42e"
 		},
 		{
 			"ImportPath": "github.com/cznic/sortutil",
@@ -91,8 +96,8 @@
 		},
 		{
 			"ImportPath": "github.com/julienschmidt/httprouter",
-			"Comment": "v1.1-29-g77366a4",
-			"Rev": "77366a47451a56bb3ba682481eed85b64fea14e8"
+			"Comment": "v1.1-64-g348b672",
+			"Rev": "348b672cd90d8190f8240323e372ecd1e66b59dc"
 		},
 		{
 			"ImportPath": "github.com/pmezard/go-difflib/difflib",
