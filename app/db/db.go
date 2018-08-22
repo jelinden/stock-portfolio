@@ -18,7 +18,7 @@ func init() {
 	populateMemoryDatabase()
 	populateDatabase()
 
-	go util.DoEvery(time.Hour*12, getHistory)
+	//go util.DoEvery(time.Hour*12, getHistory)
 	go util.DoEvery(time.Second*20, getQuotes)
 	go util.DoEvery(time.Minute*180, getDividends)
 }
