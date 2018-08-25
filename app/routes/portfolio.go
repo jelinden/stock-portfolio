@@ -47,7 +47,7 @@ func GetPortfolio(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		portfolio := db.GetPortfolio(p.ByName("id"))
 		marshalled, err = json.Marshal(portfolio)
 		if err != nil {
-			log.Println(err)
+			log.Println("routes/portfolio.go marshalling portfolio failed ", err)
 		}
 	}
 	ok(w, marshalled)

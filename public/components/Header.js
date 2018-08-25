@@ -44,7 +44,9 @@ class Header extends React.Component {
                 });
             })
             .catch(function(error) {
-                console.log(error);
+                if (window.location.pathname !== "/login" && window.location.pathname !== "/signup") {
+                    location.href = "/login";
+                }
                 _this.setState({
                     user: undefined,
                     loggedin: false

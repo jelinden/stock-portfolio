@@ -12,9 +12,12 @@ import (
 const httpTimeout = 8 // seconds
 
 func GetQuotes(symbols ...string) []Quote {
-	quoteData := util.Get(`https://api.iextrading.com/1.0/stock/market/batch?symbols=`+strings.Join(symbols, ",")+`&types=quote`, httpTimeout)
-	if quoteData == nil {
-		return []Quote{}
+	var quoteData = []byte{}
+	if len(symbols) > 0 {
+		quoteData = util.Get(`https://api.iextrading.com/1.0/stock/market/batch?symbols=`+strings.Join(symbols, ",")+`&types=quote`, httpTimeout)
+		if quoteData == nil {
+			return []Quote{}
+		}
 	}
 	return MarshalQuotes(quoteData)
 }
@@ -97,18 +100,21 @@ func getStockClosePrices(symbol string) []ClosePrice {
 
 func MarshalQuotes(q []byte) []Quote {
 	var objmap map[string]*json.RawMessage
-	err := json.Unmarshal(q, &objmap)
-	if err != nil {
-		log.Println("failed to unmarshal", string(q), err)
-	}
-	quotes := []Quote{}
-	for r := range objmap {
-		quote := Q{}
-		err = json.Unmarshal(*objmap[string(r)], &quote)
+	var quotes = []Quote{}
+	if len(q) > 0 {
+		err := json.Unmarshal(q, &objmap)
 		if err != nil {
-			log.Println(err.Error())
+			log.Println("failed to unmarshal", string(q), err)
 		}
-		quotes = append(quotes, quote.Quote)
+
+		for r := range objmap {
+			quote := Q{}
+			err = json.Unmarshal(*objmap[string(r)], &quote)
+			if err != nil {
+				log.Println(err.Error(), string(*objmap[string(r)]))
+			}
+			quotes = append(quotes, quote.Quote)
+		}
 	}
 	return quotes
 }

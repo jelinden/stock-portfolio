@@ -15,7 +15,8 @@ const memDB = "mem.db"
 var db *sql.DB
 var mdb *sql.DB
 
-const createTables = `CREATE TABLE IF NOT EXISTS user (
+const createTables = `
+CREATE TABLE IF NOT EXISTS user (
 	id string,
 	email string,
 	username string,
@@ -55,7 +56,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS transactionIdIndex ON portfoliostocks (transac
 CREATE INDEX IF NOT EXISTS portfolioStocksEpochIndex ON portfoliostocks (epoch);
 CREATE INDEX IF NOT EXISTS portfolioIdSymbolIndex ON portfoliostocks (portfolioid, symbol);
 CREATE INDEX IF NOT EXISTS portfolioSymbolEpochIndex ON portfoliostocks (symbol, epoch);
-CREATE INDEX IF NOT EXISTS xportfoliostocks_portfolioid ON portfoliostocks(portfolioid);
+CREATE INDEX IF NOT EXISTS portfoliostocks_portfolioid ON portfoliostocks(portfolioid);
 
 CREATE TABLE IF NOT EXISTS instrument (
 	symbol string
@@ -104,13 +105,13 @@ func initFileDB() {
 	var err error
 	db, err = sql.Open("ql", dbFileName)
 	if err != nil {
-		log.Fatal("fatal", err)
+		log.Fatal("fatal ", err)
 	}
 	tx, _ := db.Begin()
 	defer recoverFrom(tx)
 	_, err = tx.Exec(createTables)
 	if err != nil {
-		log.Fatal("fatal error creating tables", err)
+		log.Fatal("fatal error creating tables ", err)
 	}
 	tx.Commit()
 	log.Println("db file", dbFileName, "opened")
@@ -126,7 +127,7 @@ func initMemDatabase() {
 	defer recoverFrom(tx)
 	_, err = tx.Exec(createTables)
 	if err != nil {
-		log.Fatal("fatal error creating tables", err)
+		log.Fatal("fatal error creating mem tables", err)
 	}
 	tx.Commit()
 }
