@@ -9,7 +9,8 @@ class Header extends React.Component {
             user: null,
             signup: "",
             login: "",
-            loggedin: false
+            loggedin: false,
+            loaded: false
         };
     }
 
@@ -40,7 +41,8 @@ class Header extends React.Component {
                 }
                 _this.setState({
                     user: result.data,
-                    loggedin: result.data.error ? false : true
+                    loggedin: result.data.error ? false : true,
+                    loaded: true
                 });
             })
             .catch(function(error) {
@@ -48,17 +50,16 @@ class Header extends React.Component {
                     location.href = "/login";
                 }
                 _this.setState({
-                    user: undefined,
-                    loggedin: false
+                    loggedin: false,
+                    loaded: true
                 });
             });
     }
 
     render() {
-        if (!this.state.user) {
+        if (!this.state.loaded) {
             return null;
-        }
-        if (
+        } else if (
             !this.state.loggedin &&
             location.pathname.indexOf("login") === -1 &&
             location.pathname.indexOf("signup") === -1 &&
