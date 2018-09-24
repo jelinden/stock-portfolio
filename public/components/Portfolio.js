@@ -274,16 +274,24 @@ class Portfolio extends React.Component {
                                         <th className="right">
                                             {this.state.stocks !== "undefined" ? this.numberFormat(this.state.currentTotal.toFixed(2)) : ""}
                                         </th>
-                                        <th className={this.state.gain && this.state.gain >= 0 ? "right green" : "right red"}>
+                                        <th className={this.state.gain && this.state.gain > 0 ? "right green" : this.state.gain < 0 ? "right red" : "right"}>
                                             {this.state.gain ? this.numberFormat(this.state.gain.toFixed(2)) : ""}
                                         </th>
-                                        <th />
-                                        <th className={this.state.changeTotal && this.state.changeTotal >= 0 ? "right green" : "right red"}>
-                                            {this.state.changeTotal ? this.numberFormat(this.state.changeTotal.toFixed(2)) : ""} (
+                                        <th className={this.state.gain && this.state.gain > 0 ? "right green" : this.state.gain < 0 ? "right red" : "right"}>
+                                            {this.numberFormat(((this.state.gain / this.state.total) * 100).toFixed(2)) + "%"}
+                                        </th>
+                                        <th
+                                            className={
+                                                this.state.changeTotal && this.state.changeTotal > 0
+                                                    ? "right green"
+                                                    : this.state.changeTotal < 0
+                                                        ? "right red"
+                                                        : "right"
+                                            }>
+                                            {this.state.changeTotal ? this.numberFormat(this.state.changeTotal.toFixed(2)) : ""}
                                             {this.state.changeTotal
-                                                ? this.numberFormat(((this.state.changeTotal / this.state.closeTotal) * 100).toFixed(2)) + "%"
+                                                ? " (" + this.numberFormat(((this.state.changeTotal / this.state.closeTotal) * 100).toFixed(2)) + "%)"
                                                 : ""}
-                                            )
                                         </th>
                                         <th />
                                         <th />
