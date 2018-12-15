@@ -2,30 +2,6 @@
 github.com/StackExchange/wmi
 # github.com/boltdb/bolt v1.2.1
 github.com/boltdb/bolt
-# github.com/cznic/b v0.0.0-20180115125044-35e9bbe41f07
-github.com/cznic/b
-# github.com/cznic/fileutil v0.0.0-20180108211300-6a051e75936f
-github.com/cznic/fileutil
-# github.com/cznic/golex v0.0.0-20170803123110-4ab7c5e190e4
-github.com/cznic/golex/lex
-# github.com/cznic/internal v0.0.0-20180608152220-f44710a21d00
-github.com/cznic/internal/buffer
-github.com/cznic/internal/file
-github.com/cznic/internal/slice
-# github.com/cznic/lldb v1.1.0
-github.com/cznic/lldb
-# github.com/cznic/mathutil v0.0.0-20180504122225-ca4c9f2c1369
-github.com/cznic/mathutil
-# github.com/cznic/ql v1.2.0
-github.com/cznic/ql/driver
-github.com/cznic/ql
-github.com/cznic/ql/vendored/github.com/camlistore/go4/lock
-# github.com/cznic/sortutil v0.0.0-20150617083342-4c7342852e65
-github.com/cznic/sortutil
-# github.com/cznic/strutil v0.0.0-20171016134553-529a34b1c186
-github.com/cznic/strutil
-# github.com/cznic/zappy v0.0.0-20160723133515-2533cb5b45cc
-github.com/cznic/zappy
 # github.com/davecgh/go-spew v0.0.0-20151105211317-5215b55f46b2
 github.com/davecgh/go-spew/spew
 # github.com/edsrzf/mmap-go v0.0.0-20170320065105-0bce6a688712
@@ -37,6 +13,8 @@ github.com/go-ole/go-ole/oleutil
 github.com/julienschmidt/httprouter
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
+# github.com/remyoudompheng/bigfft v0.0.0-20170806203942-52369c62f446
+github.com/remyoudompheng/bigfft
 # github.com/shirou/gopsutil v0.0.0-20180502055836-57f370e13068
 github.com/shirou/gopsutil/cpu
 github.com/shirou/gopsutil/disk
@@ -51,3 +29,31 @@ golang.org/x/crypto/pbkdf2
 # golang.org/x/sys v0.0.0-20160516132347-d4feaf1a7e61
 golang.org/x/sys/unix
 golang.org/x/sys/windows
+# modernc.org/b v1.0.0
+modernc.org/b
+# modernc.org/db v1.0.0
+modernc.org/db
+# modernc.org/file v1.0.0
+modernc.org/file
+# modernc.org/fileutil v1.0.0
+modernc.org/fileutil
+# modernc.org/golex v1.0.0
+modernc.org/golex/lex
+# modernc.org/internal v1.0.0
+modernc.org/internal/buffer
+modernc.org/internal/file
+modernc.org/internal/slice
+# modernc.org/lldb v1.0.0
+modernc.org/lldb
+# modernc.org/mathutil v1.0.0
+modernc.org/mathutil
+# modernc.org/ql v1.0.0
+modernc.org/ql/driver
+modernc.org/ql
+modernc.org/ql/vendored/github.com/camlistore/go4/lock
+# modernc.org/sortutil v1.0.0
+modernc.org/sortutil
+# modernc.org/strutil v1.0.0
+modernc.org/strutil
+# modernc.org/zappy v1.0.0
+modernc.org/zappy

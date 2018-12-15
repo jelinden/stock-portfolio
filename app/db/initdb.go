@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	_ "github.com/cznic/ql/driver"
 	"github.com/jelinden/stock-portfolio/app/util"
+	_ "modernc.org/ql/driver"
 )
 
 const dbFileName = "./ql.db"
@@ -103,7 +103,7 @@ CREATE INDEX IF NOT EXISTS histSymbolEpochIndex ON history (symbol, epoch);`
 
 func initFileDB() {
 	var err error
-	db, err = sql.Open("ql", dbFileName)
+	db, err = sql.Open("ql2", dbFileName)
 	if err != nil {
 		log.Fatal("fatal ", err)
 	}

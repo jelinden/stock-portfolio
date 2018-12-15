@@ -9,7 +9,7 @@
         "babelify": "NODE_ENV=production browserify build/index.js -g browserify-css -o build/bundle.js -t [ babelify --presets [ es2015 es2016 react ] ]",
         "browserify": "NODE_ENV=production browserify build/bundle.js -t envify -t uglifyify --outfile build/main.bundle.min.js",
         "build": "npm run build-dir && npm run css && npm run img && npm run babelify && npm run browserify",
-        "dev": "npm run build-dir && npm run browserify:dev"
+        "dev": "npm run build && go build -mod=vendor && ./stock-portfolio"
     },
     "dependencies": {
         "axios": "^0.16.2",
