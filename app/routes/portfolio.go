@@ -5,8 +5,10 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"sort"
 
 	"github.com/jelinden/stock-portfolio/app/db"
+	"github.com/jelinden/stock-portfolio/app/domain"
 	"github.com/jelinden/stock-portfolio/app/util"
 	"github.com/julienschmidt/httprouter"
 )
@@ -58,13 +60,20 @@ func GetTransactions(w http.ResponseWriter, r *http.Request, p httprouter.Params
 	var err error
 	user := getUser(r)
 	if user.ID != "" {
-		portfolio := db.GetTransactions(p.ByName("id"))
-		marshalled, err = json.Marshal(portfolio)
+		portfolioStocks := db.GetTransactions(p.ByName("id"))
+		portfolioStocks.Stocks = orderTransactions(portfolioStocks.Stocks)
+		marshalled, err = json.Marshal(portfolioStocks)
 		if err != nil {
 			log.Println(err)
 		}
 	}
 	ok(w, marshalled)
+}
+
+func orderTransactions(transactions []domain.PortfolioStock) []domain.PortfolioStock {
+	sort.SliceStable(transactions, func(i, j int) bool { return transactions[i].Epoch < transactions[j].Epoch })
+	sort.SliceStable(transactions, func(i, j int) bool { return transactions[i].Symbol < transactions[j].Symbol })
+	return transactions
 }
 
 func GetHistory(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
