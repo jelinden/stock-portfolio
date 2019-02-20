@@ -71,7 +71,7 @@ func GetTransactions(w http.ResponseWriter, r *http.Request, p httprouter.Params
 }
 
 func orderTransactions(transactions []domain.PortfolioStock) []domain.PortfolioStock {
-	sort.SliceStable(transactions, func(i, j int) bool { return transactions[i].Epoch < transactions[j].Epoch })
+	sort.SliceStable(transactions, func(i, j int) bool { return transactions[i].Epoch > transactions[j].Epoch })
 	sort.SliceStable(transactions, func(i, j int) bool { return transactions[i].Symbol < transactions[j].Symbol })
 	return transactions
 }

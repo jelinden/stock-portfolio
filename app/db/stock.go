@@ -2,6 +2,7 @@ package db
 
 import (
 	"log"
+	"time"
 
 	"github.com/jelinden/stock-portfolio/app/domain"
 	"github.com/jelinden/stock-portfolio/app/service"
@@ -226,6 +227,11 @@ func GetTransactions(portfolioid string) domain.PortfolioStocks {
 		if err != nil {
 			log.Println("scanning row failed", err.Error())
 		}
+		t, err := time.Parse("01/02/2006", stock.Date)
+		if err != nil {
+			log.Println(err.Error())
+		}
+		stock.Epoch = t.Unix()
 		portfolioStocks.Stocks = append(portfolioStocks.Stocks, stock)
 	}
 	return portfolioStocks
