@@ -11,6 +11,7 @@ var Config struct {
 	FromEmail          string
 	EmailSendingPasswd string
 	AdminUser          string
+	Token 			   string
 }
 
 func SetConfig(file string) {

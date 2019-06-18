@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"regexp"
 	"sort"
+	"strings"
+
+	"github.com/jelinden/stock-portfolio/app/service"
 
 	"github.com/jelinden/stock-portfolio/app/db"
 	"github.com/jelinden/stock-portfolio/app/domain"
@@ -47,6 +50,11 @@ func GetPortfolio(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	user := getUser(r)
 	if user.ID != "" {
 		portfolio := db.GetPortfolio(p.ByName("id"))
+		var querySymbols []string
+		for _, s := range portfolio.Stocks {
+			querySymbols = append(querySymbols, s.Symbol)
+		}
+		portfolio.News = service.GetPortfolioNews(strings.Join(validateParams(querySymbols), ","))
 		marshalled, err = json.Marshal(portfolio)
 		if err != nil {
 			log.Println("routes/portfolio.go marshalling portfolio failed ", err)
@@ -97,4 +105,16 @@ func verifyPortfolioName(v string) bool {
 		log.Println(err.Error())
 	}
 	return re.MatchString(v)
+}
+
+func validateParams(params []string) []string {
+	for i, item := range params {
+		params[i] = validateAndCorrectifySearchTerm(item)
+	}
+	return params
+}
+
+func validateAndCorrectifySearchTerm(searchString string) string {
+	r, _ := regexp.Compile("[^-a-zåäöA-ZÅÄÖ0-9 ]+")
+	return string(r.ReplaceAll([]byte(searchString), []byte(""))[:])
 }

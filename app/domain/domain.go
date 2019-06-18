@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"time"
 )
 
 const Admin = "admin"
@@ -36,6 +37,7 @@ func (e CustomError) Error() string {
 type PortfolioStocks struct {
 	Stocks        []PortfolioStock `json:"stocks,omitempty"`
 	PortfolioName string           `json:"portfolioName"`
+	News          News             `json:"news"`
 }
 
 type PortfolioStock struct {
@@ -65,4 +67,23 @@ type Portfolio struct {
 	Portfolioid string `json:"portfolioid"`
 	Userid      string `json:"userid"`
 	Name        string `json:"name"`
+	News        News   `json:"news"`
+}
+
+type News struct {
+	Items []RSS `json:"items"`
+}
+
+type RSS struct {
+	ID        string    `json:"id"`
+	RssTitle  string    `json:"rssTitle"`
+	RssLink   string    `json:"rssLink"`
+	PubDate   time.Time `json:"pubDate"`
+	RssSource string    `json:"rssSource"`
+	Language  string    `json:"language"`
+	Category  Category  `json:"category"`
+}
+
+type Category struct {
+	CategoryName string `json:"categoryName"`
 }

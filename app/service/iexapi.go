@@ -5,16 +5,17 @@ import (
 	"log"
 	"strings"
 	"time"
-
+	"github.com/jelinden/stock-portfolio/app/config"
 	"github.com/jelinden/stock-portfolio/app/util"
 )
 
 const httpTimeout = 8 // seconds
+const iexBaseURL = "https://cloud.iexapis.com/stable/"
 
 func GetQuotes(symbols ...string) []Quote {
 	var quoteData = []byte{}
 	if len(symbols) > 0 {
-		quoteData = util.Get(`https://api.iextrading.com/1.0/stock/market/batch?symbols=`+strings.Join(symbols, ",")+`&types=quote`, httpTimeout)
+		quoteData = util.Get(iexBaseURL+`stock/market/batch?symbols=`+strings.Join(symbols, ",")+`&types=quote&token=`+config.Config.Token, httpTimeout)
 		if quoteData == nil {
 			return []Quote{}
 		}
@@ -44,10 +45,10 @@ func GetClosePrices(symbols ...string) []ClosePrice {
 	return closePrices
 }
 
-// https://api.iextrading.com/1.0/stock/xom/dividends/chart/5y
+// https://cloud.iexapis.com/stable/stock/xom/dividends/chart/5y
 func getStockDividends(symbol string) []Dividend {
 	rawDividend := []rawDividend{}
-	dividend := util.Get(`https://api.iextrading.com/1.0/stock/`+symbol+`/dividends/5y`, httpTimeout)
+	dividend := util.Get(iexBaseURL+`stock/`+symbol+`/dividends/5y?token=`+config.Config.Token, httpTimeout)
 	err := json.Unmarshal(dividend, &rawDividend)
 	if err != nil {
 		log.Println("Getting dividends for", symbol, "failed")
@@ -75,10 +76,10 @@ func getStockDividends(symbol string) []Dividend {
 	return dividends
 }
 
-// https://api.iextrading.com/1.0/stock/aapl/chart/5y
+// https://cloud.iexapis.com/stable/stock/aapl/chart/5y
 func getStockClosePrices(symbol string) []ClosePrice {
 	rawClosePrices := []rawClosePrice{}
-	fetchedClosePrices := util.Get(`https://api.iextrading.com/1.0/stock/`+symbol+`/chart/5y`, httpTimeout)
+	fetchedClosePrices := util.Get(iexBaseURL+`stock/`+symbol+`/chart/5y?token=`+config.Config.Token, httpTimeout)
 	err := json.Unmarshal(fetchedClosePrices, &rawClosePrices)
 	if err != nil {
 		log.Println("Getting closePrices for", symbol, "failed")

@@ -2,9 +2,9 @@ import { Redirect, withRouter, Link } from "react-router-dom";
 import React from "react";
 import axios from "axios";
 import DatePicker from "react-datepicker";
-
 import moment from "moment";
 
+import News from "./News";
 import "react-datepicker/dist/react-datepicker.css";
 
 class Portfolio extends React.Component {
@@ -24,7 +24,8 @@ class Portfolio extends React.Component {
             failed: false,
             symbols: null,
             dividendData: null,
-            stockMap: null
+            stockMap: null,
+            news: null
         };
         this.handleChange = this.handleChange.bind(this);
         this.convertTimestamp = this.convertTimestamp.bind(this);
@@ -85,7 +86,8 @@ class Portfolio extends React.Component {
                     closeTotal: closeTotal,
                     gain: gainTotal,
                     failed: false,
-                    symbols: symbols
+                    symbols: symbols,
+                    news: result.data.news
                 });
             })
             .catch(function(error) {
@@ -203,8 +205,8 @@ class Portfolio extends React.Component {
                                                           item.changePercent && item.changePercent > 0
                                                               ? "right green"
                                                               : item.changePercent < 0
-                                                                  ? "right red"
-                                                                  : "right"
+                                                              ? "right red"
+                                                              : "right"
                                                       }>
                                                       {item.changePercent
                                                           ? this.numberFormat(item.change.toFixed(2)) +
@@ -223,8 +225,8 @@ class Portfolio extends React.Component {
                                                           item.latestPrice && item.latestPrice * item.amount - item.price > 0
                                                               ? "right green"
                                                               : item.latestPrice * item.amount - item.price < 0
-                                                                  ? "right red"
-                                                                  : "right"
+                                                              ? "right red"
+                                                              : "right"
                                                       }>
                                                       {item.latestPrice ? (item.latestPrice * item.amount - item.price).toFixed(2) : ""}
                                                   </td>
@@ -233,8 +235,8 @@ class Portfolio extends React.Component {
                                                           item.latestPrice && item.latestPrice - item.price / item.amount > 0
                                                               ? "right green"
                                                               : item.latestPrice - item.price / item.amount < 0
-                                                                  ? "right red"
-                                                                  : "right"
+                                                              ? "right red"
+                                                              : "right"
                                                       }>
                                                       {item.latestPrice
                                                           ? (((item.latestPrice - item.price / item.amount) / (item.price / item.amount)) * 100).toFixed(2) +
@@ -262,8 +264,8 @@ class Portfolio extends React.Component {
                                                 this.state.itemTotal && this.state.itemTotal > 0
                                                     ? "right green"
                                                     : this.state.itemTotal < 0
-                                                        ? "right red"
-                                                        : "right"
+                                                    ? "right red"
+                                                    : "right"
                                             }>
                                             {this.state.itemTotal !== "undefined"
                                                 ? this.numberFormat(((this.state.itemTotal / this.state.currentItemTotal) * 100).toFixed(2)) + "%"
@@ -285,8 +287,8 @@ class Portfolio extends React.Component {
                                                 this.state.changeTotal && this.state.changeTotal > 0
                                                     ? "right green"
                                                     : this.state.changeTotal < 0
-                                                        ? "right red"
-                                                        : "right"
+                                                    ? "right red"
+                                                    : "right"
                                             }>
                                             {this.state.changeTotal ? this.numberFormat(this.state.changeTotal.toFixed(2)) : ""}
                                             {this.state.changeTotal
@@ -332,6 +334,7 @@ class Portfolio extends React.Component {
                             </button>
                         </form>
                     </div>
+                    {/* <News news={this.state.news} /> */}
 
                     <div id="dividends">
                         <h2>Latest dividend</h2>

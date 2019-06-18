@@ -54,12 +54,14 @@ func main() {
 	fromEmail = os.Getenv("FROMEMAIL")
 	emailSendingPasswd = os.Getenv("EMAILSENDINGPASSWD")
 	adminUser := os.Getenv("ADMINUSER")
-	if fromEmail == "" || emailSendingPasswd == "" {
-		log.Fatal("FROMEMAIL or EMAILSENDINGPASSWD was not set")
+	apiToken := os.Getenv("IEXAPITOKEN")
+	if fromEmail == "" || emailSendingPasswd == "" || apiToken  == "" {
+		log.Fatal("FROMEMAIL or EMAILSENDINGPASSWD or IEXAPITOKEN was not set")
 	}
 	config.Config.FromEmail = fromEmail
 	config.Config.EmailSendingPasswd = emailSendingPasswd
 	config.Config.AdminUser = adminUser
+	config.Config.Token = apiToken
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	Init()
 	db.InitBolt()
