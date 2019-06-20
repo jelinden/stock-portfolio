@@ -179,15 +179,18 @@ func queryPortfolioSymbols() []string {
 }
 
 func getQuotes() {
-	if time.Now().Hour() > 16 && time.Now().Hour() < 24 {
-		timeFrom := time.Now()
-		quotes := service.GetQuotes(GetPortfolioSymbols()...)
-		if len(quotes) > 0 {
-			log.Printf("got %v quotes in %v\n", len(quotes), time.Now().Sub(timeFrom))
-			SaveQuotes(quotes)
+	now := time.Now()
+	if int(now.Weekday()) != 0 && int(now.Weekday()) != 6 { // https://golang.org/pkg/time/#Weekday
+		// get only when the stock exchange is open
+		if now.Hour() > 16 && now.Hour() < 24 {
+			quotes := service.GetQuotes(GetPortfolioSymbols()...)
+			if len(quotes) > 0 {
+				log.Printf("got %v quotes in %v\n", len(quotes), now.Sub(now))
+				SaveQuotes(quotes)
+			}
+		} else {
+			log.Println("time", now.Hour(), "was not between 16-24")
 		}
-	} else {
-		log.Println("time", time.Now().Hour(), "was not between 16-24")
 	}
 }
 
