@@ -19,8 +19,8 @@ func init() {
 	populateDatabase()
 
 	//go util.DoEvery(time.Hour*12, getHistory)
-	go util.DoEvery(time.Minute*1, getQuotes)
-	go util.DoEvery(time.Hour*12, getDividends)
+	go util.DoEvery(time.Minute*10, getQuotes)
+	go util.DoEvery(time.Hour*24, getDividends)
 }
 
 func exec(command string, args ...interface{}) error {
