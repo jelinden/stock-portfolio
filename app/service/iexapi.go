@@ -29,7 +29,7 @@ func GetDividends(symbols ...string) []Dividend {
 		if div := getStockDividends(symbol); div != nil {
 			dividends = append(dividends, div...)
 		}
-		time.Sleep(1200 * time.Millisecond)
+		time.Sleep(2 * time.Second)
 	}
 	return dividends
 }
