@@ -19,8 +19,8 @@ func init() {
 	populateDatabase()
 
 	//go util.DoEvery(time.Hour*12, getHistory)
-	go util.DoEvery(time.Second*20, getQuotes)
-	go util.DoEvery(time.Minute*180, getDividends)
+	go util.DoEvery(time.Minute*1, getQuotes)
+	go util.DoEvery(time.Hour*12, getDividends)
 }
 
 func exec(command string, args ...interface{}) error {
@@ -179,11 +179,15 @@ func queryPortfolioSymbols() []string {
 }
 
 func getQuotes() {
-	timeFrom := time.Now()
-	quotes := service.GetQuotes(GetPortfolioSymbols()...)
-	if len(quotes) > 0 {
-		log.Printf("got %v quotes in %v\n", len(quotes), time.Now().Sub(timeFrom))
-		SaveQuotes(quotes)
+	if time.Now().Hour() > 16 && time.Now().Hour() < 24 {
+		timeFrom := time.Now()
+		quotes := service.GetQuotes(GetPortfolioSymbols()...)
+		if len(quotes) > 0 {
+			log.Printf("got %v quotes in %v\n", len(quotes), time.Now().Sub(timeFrom))
+			SaveQuotes(quotes)
+		}
+	} else {
+		log.Println("time", time.Now().Hour(), "was not between 16-24")
 	}
 }
 
