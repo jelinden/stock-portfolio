@@ -19,7 +19,7 @@ func init() {
 	populateDatabase()
 
 	//go util.DoEvery(time.Hour*12, getHistory)
-	go util.DoEvery(time.Minute*10, getQuotes)
+	go util.DoEvery(time.Minute*15, getQuotes)
 	go util.DoEvery(time.Hour*24, getDividends)
 }
 
@@ -180,8 +180,8 @@ func queryPortfolioSymbols() []string {
 
 func getQuotes() {
 	now := time.Now()
+	// get quotes only when the stock exchange is open
 	if int(now.Weekday()) != 0 && int(now.Weekday()) != 6 { // https://golang.org/pkg/time/#Weekday
-		// get only when the stock exchange is open
 		if now.Hour() > 16 && now.Hour() < 24 {
 			quotes := service.GetQuotes(GetPortfolioSymbols()...)
 			if len(quotes) > 0 {
