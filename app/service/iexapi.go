@@ -9,7 +9,7 @@ import (
 	"github.com/jelinden/stock-portfolio/app/util"
 )
 
-const httpTimeout = 8 // seconds
+const httpTimeout = 20 // seconds
 const iexBaseURL = "https://cloud.iexapis.com/stable/"
 
 func GetQuotes(symbols ...string) []Quote {

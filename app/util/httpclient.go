@@ -22,7 +22,7 @@ func timeoutDialer(cTimeout time.Duration, rwTimeout time.Duration) func(net, ad
 func newTimeoutClient(readWriteTimeout time.Duration) *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
-			Dial: timeoutDialer(time.Second, readWriteTimeout),
+			Dial: timeoutDialer(30*time.Second, readWriteTimeout),
 		},
 	}
 }
