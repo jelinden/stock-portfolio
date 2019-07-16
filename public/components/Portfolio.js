@@ -99,7 +99,7 @@ class Portfolio extends React.Component {
     dividends(symbols) {
         var _this = this;
         if (symbols) {
-            axios.get("/api/dividends?symbols=" + symbols, { timeout: 3000 }).then(function(result) {
+            axios.get("/api/dividends?symbols=" + symbols, { timeout: 6000 }).then(function(result) {
                 if (result.data) {
                     _this.setState({ dividendData: result.data });
                 }
@@ -355,7 +355,6 @@ class Portfolio extends React.Component {
                                         ? this.state.dividendData.map((item, index) => (
                                               <tr>
                                                   <td>{item.symbol}</td>
-                                                  <td className="right">{item.type}</td>
                                                   <td className="right">{this.convertTimestamp(item.exDate, true)}</td>
                                                   <td className="right">{this.convertTimestamp(item.paymentDate, true)}</td>
                                                   <td className="right">{item.amount}</td>
