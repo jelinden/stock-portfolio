@@ -343,7 +343,6 @@ class Portfolio extends React.Component {
                                 <thead>
                                     <tr>
                                         <th>Symbol</th>
-                                        <th>Type</th>
                                         <th>Ex date</th>
                                         <th>Payment date</th>
                                         <th>Amount</th>
@@ -365,7 +364,6 @@ class Portfolio extends React.Component {
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th />
                                         <th />
                                         <th />
                                         <th />
