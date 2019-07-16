@@ -6,9 +6,6 @@ import (
 	"net/http"
 	"regexp"
 	"sort"
-	"strings"
-
-	"github.com/jelinden/stock-portfolio/app/service"
 
 	"github.com/jelinden/stock-portfolio/app/db"
 	"github.com/jelinden/stock-portfolio/app/domain"
@@ -54,7 +51,7 @@ func GetPortfolio(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		for _, s := range portfolio.Stocks {
 			querySymbols = append(querySymbols, s.Symbol)
 		}
-		portfolio.News = service.GetPortfolioNews(strings.Join(validateParams(querySymbols), ","))
+		//portfolio.News = service.GetPortfolioNews(strings.Join(validateParams(querySymbols), ","))
 		marshalled, err = json.Marshal(portfolio)
 		if err != nil {
 			log.Println("routes/portfolio.go marshalling portfolio failed ", err)

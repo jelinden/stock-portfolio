@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 	"time"
+
 	"github.com/jelinden/stock-portfolio/app/config"
 	"github.com/jelinden/stock-portfolio/app/util"
 )
