@@ -202,7 +202,7 @@ func populateDatabase() {
 	transactionDates := getQuery(`select transactionid, date from portfoliostocks where epoch is null;`)
 	for _, item := range transactionDates {
 		// update all transactions to have an epoch timestamp
-		d, err := time.Parse("01/02/2006", item["date"].(string))
+		d, err := time.Parse("1/02/2006", item["date"].(string))
 		if err != nil {
 			log.Println("parsing date failed", err)
 		} else {
