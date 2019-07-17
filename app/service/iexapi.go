@@ -131,6 +131,7 @@ type Quote struct {
 	Sector        string  `json:"sector"`
 	Close         float64 `json:"close"`
 	CloseTime     int     `json:"closeTime"`
+	PreviousClose float64 `json:"previousClose"`
 	LatestPrice   float64 `json:"latestPrice"`
 	LatestUpdate  int     `json:"latestUpdate"`
 	Change        float64 `json:"change"`
