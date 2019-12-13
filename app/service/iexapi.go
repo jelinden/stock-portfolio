@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -46,19 +47,19 @@ func GetClosePrices(symbols ...string) []ClosePrice {
 	return closePrices
 }
 
-// https://cloud.iexapis.com/stable/stock/xom/dividends/chart/5y
+// https://cloud.iexapis.com/stable/stock/xom/dividends/3m
 func getStockDividends(symbol string) []Dividend {
 	rawDividend := []rawDividend{}
-	dividend := util.Get(iexBaseURL+`stock/`+symbol+`/dividends/5y?token=`+config.Config.Token, httpTimeout)
+	dividend := util.Get(iexBaseURL+`stock/`+symbol+`/dividends/3m?token=`+config.Config.Token, httpTimeout)
 	err := json.Unmarshal(dividend, &rawDividend)
 	if err != nil {
-		log.Println("Getting dividends for", symbol, "failed")
+		log.Println("Getting dividends for", symbol, "failed", err)
 		return nil
 	}
 	dividends := []Dividend{}
 	for i := range rawDividend {
 		div := Dividend{Symbol: symbol}
-		div.Amount = rawDividend[i].Amount
+		div.Amount, _ = strconv.ParseFloat(rawDividend[i].Amount, 32)
 		div.Type = rawDividend[i].Type
 		exDate, err := time.Parse("2006-01-02", rawDividend[i].ExDate)
 		if err != nil {
@@ -140,11 +141,11 @@ type Quote struct {
 }
 
 type rawDividend struct {
-	Symbol      string  `json:"symbol"`
-	ExDate      string  `json:"exDate"`
-	PaymentDate string  `json:"paymentDate"`
-	Amount      float64 `json:"amount"`
-	Type        string  `json:"type"`
+	Symbol      string `json:"symbol"`
+	ExDate      string `json:"exDate"`
+	PaymentDate string `json:"paymentDate"`
+	Amount      string `json:"amount"`
+	Type        string `json:"type"`
 }
 
 type Dividend struct {

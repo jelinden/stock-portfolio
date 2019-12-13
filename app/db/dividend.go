@@ -4,11 +4,18 @@ import (
 	"log"
 	"reflect"
 	"time"
+
 	"github.com/jelinden/stock-portfolio/app/service"
 )
 
 func GetDividend(symbols string) []service.Dividend {
-	m := getQuery(`select symbol, max(paymentDate) as maxPaymentDate from dividend where symbol in (` + symbols + `) group by symbol order by maxPaymentDate desc`)
+	m := getQuery(`
+				select symbol, max(paymentDate) as maxPaymentDate 
+				from dividend 
+				where symbol in (` + symbols + `) 
+				group by symbol 
+				order by maxPaymentDate desc
+	`)
 	var divs = []service.Dividend{}
 	for i := range m {
 		if reflect.TypeOf(m[i]["symbol"]).String() == "int64" {
@@ -75,6 +82,8 @@ func getDividends() {
 		if len(dividends) > 0 {
 			log.Printf("got %v dividends\n", len(dividends))
 			saveDividends(dividends)
+		} else {
+			log.Printf("got zero dividends\n")
 		}
 	}
 }
