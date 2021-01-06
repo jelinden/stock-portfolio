@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 
@@ -59,11 +58,11 @@ func getStockDividends(symbol string) []Dividend {
 	dividends := []Dividend{}
 	for i := range rawDividend {
 		div := Dividend{Symbol: symbol}
-		div.Amount, _ = strconv.ParseFloat(rawDividend[i].Amount, 32)
+		div.Amount = rawDividend[i].Amount
 		div.Type = rawDividend[i].Type
 		exDate, err := time.Parse("2006-01-02", rawDividend[i].ExDate)
 		if err != nil {
-			log.Println("err")
+			log.Println(err)
 			return nil
 		}
 		paymentDate, err := time.Parse("2006-01-02", rawDividend[i].PaymentDate)
@@ -141,11 +140,11 @@ type Quote struct {
 }
 
 type rawDividend struct {
-	Symbol      string `json:"symbol"`
-	ExDate      string `json:"exDate"`
-	PaymentDate string `json:"paymentDate"`
-	Amount      string `json:"amount"`
-	Type        string `json:"type"`
+	Symbol      string  `json:"symbol"`
+	ExDate      string  `json:"exDate"`
+	PaymentDate string  `json:"paymentDate"`
+	Amount      float64 `json:"amount"`
+	Type        string  `json:"type"`
 }
 
 type Dividend struct {

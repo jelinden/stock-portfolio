@@ -1,8 +1,10 @@
 package service
 
 import (
+	"os"
 	"testing"
 
+	"github.com/jelinden/stock-portfolio/app/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,6 +14,10 @@ func TestGetQuotes(t *testing.T) {
 }
 
 func TestGetDividends(t *testing.T) {
+	config.Config.FromEmail = os.Getenv("FROMEMAIL")
+	config.Config.EmailSendingPasswd = os.Getenv("EMAILSENDINGPASSWD")
+	config.Config.AdminUser = os.Getenv("ADMINUSER")
+	config.Config.Token = os.Getenv("IEXAPITOKEN")
 	dividends := GetDividends("XOM")
 	assert.True(t, dividends[0].Symbol == "XOM", "symbol should be XOM")
 }
