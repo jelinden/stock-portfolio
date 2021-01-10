@@ -72,8 +72,8 @@ func Signup(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			CreateDate:              time.Now().UTC().Format(time.RFC3339),
 			ModifyDate:              time.Now().UTC().Format(time.RFC3339),
 			EmailVerificationString: util.ShaHashString(emailParam),
-			ID:       util.GetID(),
-			RoleName: domain.Normal,
+			ID:                      util.GetID(),
+			RoleName:                domain.Normal,
 		}
 		db.SaveUser(user)
 		email.SendVerificationEmail(emailParam, user.EmailVerificationString, config.Config.FromEmail, config.Config.EmailSendingPasswd)
@@ -111,6 +111,7 @@ func Verify(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			w.Header().Add("Location", "/login?verified=true")
 			w.WriteHeader(302)
 			w.Write(nil)
+			return
 		}
 	}
 	w.Header().Add("Location", "/login?verified=false")
