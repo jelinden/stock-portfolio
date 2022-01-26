@@ -2,49 +2,34 @@ package db
 
 import (
 	"log"
-	"reflect"
 	"time"
 
 	"github.com/jelinden/stock-portfolio/app/service"
 )
 
 func GetDividend(symbols string) []service.Dividend {
-	m := getQuery(`
-				select symbol, max(paymentDate) as maxPaymentDate 
-				from dividend 
-				where symbol in (` + symbols + `) 
-				group by symbol 
-				order by maxPaymentDate desc
-	`)
-	var divs = []service.Dividend{}
-	for i := range m {
-		if reflect.TypeOf(m[i]["symbol"]).String() == "int64" {
-			return []service.Dividend{}
-		}
-		symbol := m[i]["symbol"].(string)
-		maxPaymentDate := m[i]["maxPaymentDate"].(int64)
 
-		dividends := getQuery(`select
+	var divs = []service.Dividend{}
+
+	dividends := getQuery(`select
 			symbol,
 			amount,
 			type,
 			paymentDate,
 			exDate
 		from dividend
-		where paymentDate = $1
-		and symbol = $2`, maxPaymentDate, symbol)
+		where symbol in (` + symbols + `) order by paymentDate desc limit 5`)
 
-		for i := range dividends {
-			var div = service.Dividend{}
-			if dividends[i]["amount"] != nil {
-				div.Amount = dividends[i]["amount"].(float64)
-				div.Symbol = dividends[i]["symbol"].(string)
-				div.Type = dividends[i]["type"].(string)
-				div.PaymentDate = dividends[i]["paymentDate"].(int64)
-				div.ExDate = dividends[i]["exDate"].(int64)
-			}
-			divs = append(divs, div)
+	for i := range dividends {
+		var div = service.Dividend{}
+		if dividends[i]["amount"] != nil {
+			div.Amount = dividends[i]["amount"].(float64)
+			div.Symbol = dividends[i]["symbol"].(string)
+			div.Type = dividends[i]["type"].(string)
+			div.PaymentDate = dividends[i]["paymentDate"].(int64)
+			div.ExDate = dividends[i]["exDate"].(int64)
 		}
+		divs = append(divs, div)
 	}
 	return divs
 }
