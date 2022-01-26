@@ -22,4 +22,4 @@ Fontend: Reactjs
 
 Backend: Golang, http router github.com/julienschmidt/httprouter
 
-Database: Embedded github.com/cznic/ql
+Database: Embedded github.com/cznic/ql / modernc.org/ql
