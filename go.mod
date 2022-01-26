@@ -12,5 +12,8 @@ require (
 	github.com/ventu-io/go-shortid v0.0.0-20201117134242-e59966efd125
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
+	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
+	modernc.org/db v1.0.4 // indirect
+	modernc.org/lldb v1.0.4 // indirect
 	modernc.org/ql v1.4.1
 )
