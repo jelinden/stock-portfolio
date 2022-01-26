@@ -18,7 +18,7 @@ func GetDividend(symbols string) []service.Dividend {
 			paymentDate,
 			exDate
 		from dividend
-		where symbol in (` + symbols + `) order by paymentDate desc limit 5`)
+		where symbol in (` + symbols + `) order by paymentDate desc limit 50`)
 
 	for i := range dividends {
 		var div = service.Dividend{}
