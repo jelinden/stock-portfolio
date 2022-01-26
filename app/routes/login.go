@@ -76,7 +76,7 @@ func Signup(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			RoleName:                domain.Normal,
 		}
 		db.SaveUser(user)
-		email.SendVerificationEmail(emailParam, user.EmailVerificationString, config.Config.FromEmail, config.Config.EmailSendingPasswd)
+		email.SendVerificationEmail(emailParam, user.EmailVerificationString, config.Config.FromEmail)
 		w.Header().Add("Location", "/verify")
 	} else {
 		w.Header().Add("Location", "/signup?emailused=true")

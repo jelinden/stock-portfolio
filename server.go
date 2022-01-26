@@ -52,14 +52,12 @@ func Init() {
 
 func main() {
 	fromEmail = os.Getenv("FROMEMAIL")
-	emailSendingPasswd = os.Getenv("EMAILSENDINGPASSWD")
 	adminUser := os.Getenv("ADMINUSER")
 	apiToken := os.Getenv("IEXAPITOKEN")
-	if fromEmail == "" || emailSendingPasswd == "" || apiToken == "" {
-		log.Fatal("FROMEMAIL or EMAILSENDINGPASSWD or IEXAPITOKEN was not set")
+	if fromEmail == "" || apiToken == "" {
+		log.Fatal("FROMEMAIL or IEXAPITOKEN was not set")
 	}
 	config.Config.FromEmail = fromEmail
-	config.Config.EmailSendingPasswd = emailSendingPasswd
 	config.Config.AdminUser = adminUser
 	config.Config.Token = apiToken
 	runtime.GOMAXPROCS(runtime.NumCPU())
