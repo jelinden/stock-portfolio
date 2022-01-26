@@ -11,11 +11,10 @@ all: editor
 	go vet 2>&1 | grep -v $(ngrep) || true
 	golint 2>&1 | grep -v $(ngrep) || true
 	make todo
-	unused . || true
 	misspell *.go
-	gosimple || true
 	unconvert || true
 	maligned || true
+	staticcheck || true
 
 clean:
 	go clean
@@ -29,7 +28,7 @@ cpu: clean
 	go tool pprof -lines *.test cpu.out
 
 edit:
-	@ 1>/dev/null 2>/dev/null gvim -p Makefile *.go
+	@ 1>/dev/null 2>/dev/null gvim -p Makefile *.go &
 
 editor:
 	gofmt -l -s -w *.go

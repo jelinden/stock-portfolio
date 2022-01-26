@@ -3643,7 +3643,7 @@ func newCall(f string, arg []expression) (v expression, isAgg bool, err error) {
 	}
 
 	isAgg = x.isAggregate
-	if g, min, max := len(arg), x.minArgs, x.maxArgs; g < min || g > max {
+	if g, min, max := len(arg), x.minArgs, x.maxArgs; (g < min) || ((max != builtinNoMaximum) && (g > max)) {
 		a := []interface{}{}
 		for _, v := range arg {
 			a = append(a, v)

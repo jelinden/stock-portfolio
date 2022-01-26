@@ -15794,3 +15794,122 @@ BEGIN TRANSACTION;
 COMMIT;
 SELECT * FROM t;
 |"a", "b", "c"
+
+-- 1359 // https://gitlab.com/cznic/ql/issues/211
+BEGIN TRANSACTION;
+        CREATE TABLE people (name string);
+        INSERT INTO people VALUES ("alice");
+COMMIT;
+SELECT coalesce(name, "default") as result FROM people;
+|"result"
+[alice]
+
+-- 1360 // https://gitlab.com/cznic/ql/issues/211
+BEGIN TRANSACTION;
+        CREATE TABLE people (name string);
+        INSERT INTO people VALUES (NULL);
+COMMIT;
+SELECT coalesce(name, "default") as result FROM people;
+|"result"
+[default]
+
+-- 1361 // https://gitlab.com/cznic/ql/issues/211
+BEGIN TRANSACTION;
+        CREATE TABLE people (name string);
+        INSERT INTO people VALUES (NULL);
+COMMIT;
+SELECT coalesce(name, NULL, NULL, NULL, 
+                NULL, NULL, NULL, NULL, "default") as result FROM people;
+|"result"
+[default]
+
+-- 1362 // https://gitlab.com/cznic/ql/-/issues/221
+BEGIN TRANSACTION;
+	CREATE TABLE t (i int);
+	CREATE UNIQUE INDEX x ON t (i);
+	INSERT INTO t VALUES(NULL);
+	INSERT INTO t VALUES(10);
+	INSERT INTO t IF NOT EXISTS VALUES(10);
+	INSERT INTO t VALUES(NULL);
+COMMIT;
+SELECT * FROM t WHERE i < 30;
+|"i"
+[10]
+
+-- 1363 // https://gitlab.com/cznic/ql/-/issues/221
+BEGIN TRANSACTION;
+	CREATE TABLE t (i int);
+	CREATE UNIQUE INDEX x ON t (i);
+	INSERT INTO t VALUES(NULL);
+	INSERT INTO t IF NOT EXISTS VALUES(10);
+	INSERT INTO t VALUES(10);
+	INSERT INTO t VALUES(NULL);
+COMMIT;
+SELECT * FROM t WHERE i < 30;
+||duplicate
+
+-- 1364 // https://gitlab.com/cznic/ql/-/issues/221
+BEGIN TRANSACTION;
+	CREATE TABLE t (i int);
+	CREATE UNIQUE INDEX x ON t (i);
+	INSERT INTO t VALUES(NULL);
+	INSERT INTO t IF NOT EXISTS VALUES(10);
+	INSERT INTO t IF NOT EXISTS VALUES(10);
+	INSERT INTO t VALUES(NULL);
+COMMIT;
+SELECT * FROM t WHERE i < 30;
+|"i"
+[10]
+
+-- 1365 // https://gitlab.com/cznic/ql/-/issues/221
+BEGIN TRANSACTION;
+	CREATE TABLE t(a int, b int, c int);
+	CREATE UNIQUE INDEX x ON t(b, c);
+	INSERT INTO t IF NOT EXISTS VALUES
+		(100, 200, 300), (1, 2, 3), (10, 20, 30),
+		(NULL, 200, 300), (1, NULL, 3), (10, NULL, 30),
+		(NULL, NULL, NULL), (NULL, NULL, NULL);
+COMMIT;
+SELECT * FROM t ORDER BY a, b, c;
+|"a", "b", "c"
+[<nil> <nil> <nil>]
+[<nil> <nil> <nil>]
+[1 <nil> 3]
+[1 2 3]
+[10 <nil> 30]
+[10 20 30]
+[100 200 300]
+
+-- 1366 // https://gitlab.com/cznic/ql/-/issues/221
+BEGIN TRANSACTION;
+	CREATE TABLE t(a int, b int, c int);
+	CREATE UNIQUE INDEX x ON t(b, c);
+	INSERT INTO t IF NOT EXISTS VALUES
+		(NULL, 200, 300), (1, 2, 3), (10, 20, 30),
+		(100, 200, 300), (1, NULL, 3), (10, NULL, 30),
+		(NULL, NULL, NULL), (NULL, NULL, NULL);
+COMMIT;
+SELECT * FROM t ORDER BY a, b, c;
+|"a", "b", "c"
+[<nil> <nil> <nil>]
+[<nil> <nil> <nil>]
+[<nil> 200 300]
+[1 <nil> 3]
+[1 2 3]
+[10 <nil> 30]
+[10 20 30]
+
+-- 1367 // https://gitlab.com/cznic/ql/-/issues/221
+BEGIN TRANSACTION;
+	CREATE TABLE t (i int);
+	CREATE UNIQUE INDEX x ON t(i);
+	CREATE TABLE u (i int);
+	INSERT INTO u VALUES (1), (4), (1), (3), (2), (3), (1);
+	INSERT INTO t IF NOT EXISTS (i) SELECT * FROM u;
+COMMIT;
+SELECT * FROM t ORDER BY i;
+|"i"
+[1]
+[2]
+[3]
+[4]

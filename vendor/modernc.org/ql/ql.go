@@ -817,7 +817,7 @@ func (f *col) typeCheck(x interface{}) (ok bool) { //NTYPE
 func cols2meta(f []*col) (s string) {
 	a := []string{}
 	for _, f := range f {
-		a = append(a, string(f.typ)+f.name)
+		a = append(a, string(rune(f.typ))+f.name)
 	}
 	return strings.Join(a, "|")
 }

@@ -164,6 +164,7 @@ import (
 	GroupByClause		"GROUP BY clause"
 	Index			"string index"
 	InsertIntoStmt		"INSERT INTO statement"
+	InsertIntoStmt0		"INSERT INTO statement optional if not exists clause"
 	InsertIntoStmt1		"INSERT INTO statement optional column list clause"
 	InsertIntoStmt2		"INSERT INTO statement optional values list"
 	JoinClause		"SELECT statement JOIN clause"
@@ -720,9 +721,9 @@ Index:
 	}
 
 InsertIntoStmt:
-	"INSERT" "INTO" TableName InsertIntoStmt1 "VALUES" '(' ExpressionList ')' InsertIntoStmt2 CommaOpt
+	"INSERT" "INTO" TableName InsertIntoStmt0 InsertIntoStmt1 "VALUES" '(' ExpressionList ')' InsertIntoStmt2 CommaOpt
 	{
-		$$ = &insertIntoStmt{tableName: $3.(string), colNames: $4.([]string), lists: append([][]expression{$7.([]expression)}, $9.([][]expression)...)}
+		$$ = &insertIntoStmt{tableName: $3.(string), ifNotExists: $4.(bool), colNames: $5.([]string), lists: append([][]expression{$8.([]expression)}, $10.([][]expression)...)}
 
 		if yylex.(*lexer).root {
 			break
@@ -733,10 +734,20 @@ InsertIntoStmt:
 			return 1
 		}
 	}
-|	"INSERT" "INTO" TableName InsertIntoStmt1 SelectStmt
+|	"INSERT" "INTO" TableName InsertIntoStmt0 InsertIntoStmt1 SelectStmt
 	{
-		$$ = &insertIntoStmt{tableName: $3.(string), colNames: $4.([]string), sel: $5.(*selectStmt)}
+		$$ = &insertIntoStmt{tableName: $3.(string), ifNotExists: $4.(bool), colNames: $5.([]string), sel: $6.(*selectStmt)}
 	}
+
+InsertIntoStmt0:
+	{
+		$$ = false
+	}
+|	"IF" "NOT" "EXISTS"
+	{
+		$$ = true
+	}
+
 
 InsertIntoStmt1:
 	/* EMPTY */

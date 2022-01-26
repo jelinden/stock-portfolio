@@ -9,10 +9,23 @@
 
 // Package ql implements a pure Go embedded SQL database engine.
 //
+// Builders
+//
+// Builder results available at
+//
+//	https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2fql
+//
 // QL is a member of the SQL family of languages. It is less complex and less
 // powerful than SQL (whichever specification SQL is considered to be).
 //
 // Change list
+//
+// 2020-12-10: sql/database driver now supports url parameter removeemptywal=N
+// which has the same semantics as passing RemoveEmptyWAL = N != 0 to OpenFile
+// options.
+//
+// 2020-11-09: Add IF NOT EXISTS support for the INSERT INTO statement. Add
+// IsDuplicateUniqueIndexError function.
 //
 // 2018-11-04: Back end file format V2 is now released. To use the new format
 // for newly created databases set the FileFormat field in *Options passed to
@@ -280,11 +293,16 @@
 //
 // Identifiers
 //
-// Identifiers name entities such as tables or record set columns. An
-// identifier is a sequence of one or more letters and digits. The first
-// character in an identifier must be a letter.
+// Identifiers name entities such as tables or record set columns.
+// There are two kinds of identifiers, normal idententifiers and quoted
+// identifiers.
 //
-//  identifier = letter { letter | decimal_digit | unicode_digit } .
+//  indentifier = normal_identifier | quoted_identifier.
+//
+// An normal identifier is a sequence of one or more letters and digits.
+// The first character in an identifier must be a letter.
+//
+//  normal_identifier = letter { letter | decimal_digit | unicode_digit } .
 //
 // For example
 //
@@ -292,10 +310,25 @@
 // 	_tmp42
 // 	Sales
 //
+// A quoted identifier is a string of any charaters between guillmets «».
+// Quoted identifiers allow QL key words or phrases with spaces to be used
+// as identifiers. The guillemets were chosen because QL already uses
+// double quotes, single quotes, and backticks for other quoting purposes.
+//
+//  quoted_identifier = "«" { unicode_char | newline } "»".
+//
+// For example
+//
+// «TRANSACTION»
+// «duration»
+// «lovely stories»
+//
+//
 // No identifiers are predeclared, however note that no keyword can be used as
-// an identifier.  Identifiers starting with two underscores are used for meta
-// data virtual tables names. For forward compatibility, users should generally
-// avoid using any identifiers starting with two underscores. For example
+// a normal identifier.  Identifiers starting with two underscores are used for
+// meta data virtual tables names. For forward compatibility, users should
+// generally avoid using any identifiers starting with two underscores.
+// For example
 //
 //	__Column
 //	__Column2
@@ -1625,7 +1658,12 @@
 // assigned to a column must be the same as is the column's type or the value
 // must be NULL.
 //
-//  InsertIntoStmt = "INSERT" "INTO" TableName [ "(" ColumnNameList ")" ] ( Values | SelectStmt ) .
+// If there exists an unique index that would make the insert statement fail,
+// the optional IF NOT EXISTS turns the insert statement in such case into a
+// no-op.
+//
+//  InsertIntoStmt = "INSERT" "INTO" TableName [ "IF" "NOT" "EXISTS" ]
+//	[ "(" ColumnNameList ")" ] ( Values | SelectStmt ) .
 //
 //  ColumnNameList = ColumnName { "," ColumnName } [ "," ] .
 //  Values = "VALUES" "(" ExpressionList ")" { "," "(" ExpressionList ")" } [ "," ] .
@@ -2115,6 +2153,15 @@
 // The column values must be of a numeric type.
 //
 //	SELECT salesperson, avg(sales) FROM salesforce GROUP BY salesperson;
+//
+// Coalesce
+//
+// The built-in function coalesce takes at least one argument and returns
+// the first of its arguments which is not NULL. If all arguments are NULL,
+// this function returns NULL. This is useful for providing defaults
+// for NULL values in a select query.
+//
+//  func coalesce(args ...interface{}) interface{}
 //
 // Contains
 //

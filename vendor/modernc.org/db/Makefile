@@ -29,13 +29,12 @@ cpu: clean
 	go tool pprof -lines *.test cpu.out
 
 edit:
-	@ 1>/dev/null 2>/dev/null gvim -p Makefile *.go
+	gvim -p Makefile *.go &
 
 editor:
-	date |& tee log
+	date 2>&1 | tee log
 	gofmt -l -s -w *.go
-	go test -i
-	go test 2>&1 | tee -a log
+	go test -o /dev/null -c 2>&1 | tee -a log
 	go install
 
 internalError:

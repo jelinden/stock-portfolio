@@ -461,7 +461,7 @@ func (o iop) String() string {
 	case rsh:
 		return ">>"
 	default:
-		return string(i)
+		return string(rune(i))
 	}
 }
 
@@ -898,34 +898,34 @@ func convert(val interface{}, typ int) (v interface{}, err error) { //NTYPE
 		//case idealComplex:
 		//case idealFloat:
 		case idealInt:
-			return string(x), nil
+			return string(rune(x)), nil
 		case idealRune:
-			return string(x), nil
+			return string(rune(x)), nil
 		case idealUint:
-			return string(x), nil
+			return string(rune(x)), nil
 		//case bool:
 		//case complex64:
 		//case complex128:
 		//case float32:
 		//case float64:
 		case int8:
-			return string(x), nil
+			return string(rune(x)), nil
 		case int16:
-			return string(x), nil
+			return string(rune(x)), nil
 		case int32:
 			return string(x), nil
 		case int64:
-			return string(x), nil
+			return string(rune(x)), nil
 		case string:
 			return x, nil
 		case uint8:
-			return string(x), nil
+			return string(rune(x)), nil
 		case uint16:
-			return string(x), nil
+			return string(rune(x)), nil
 		case uint32:
-			return string(x), nil
+			return string(rune(x)), nil
 		case uint64:
-			return string(x), nil
+			return string(rune(x)), nil
 		case []byte:
 			return string(x), nil
 		case *big.Int:
@@ -1695,7 +1695,7 @@ func typeCheck(rec []interface{}, cols []*col) (err error) {
 					rec[i] = int64(y)
 					continue
 				case qString:
-					rec[i] = string(y)
+					rec[i] = string(rune(y))
 					continue
 				case qUint8:
 					if y > math.MaxUint8 {

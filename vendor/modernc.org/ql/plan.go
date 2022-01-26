@@ -2016,10 +2016,10 @@ func (r *selectFieldsGroupPlan) do(ctx *execCtx, f func(id interface{}, data []i
 	var t temp
 	var cols []*col
 	var err error
-	out := make([]interface{}, len(r.flds))
 	ok := false
 	rows := false
 	if err = r.src.do(ctx, func(rid interface{}, in []interface{}) (bool, error) {
+		out := make([]interface{}, len(r.flds))
 		if ok {
 			h := in[0].(int64)
 			m := map[interface{}]interface{}{}
@@ -2062,7 +2062,6 @@ func (r *selectFieldsGroupPlan) do(ctx *execCtx, f func(id interface{}, data []i
 			for i, v := range cols {
 				r.flds[i] = &fld{expr: &ident{v.name}, name: v.name}
 			}
-			out = make([]interface{}, len(r.flds))
 		}
 		return true, nil
 	}); err != nil {
@@ -2074,13 +2073,13 @@ func (r *selectFieldsGroupPlan) do(ctx *execCtx, f func(id interface{}, data []i
 	}
 
 	m := map[interface{}]interface{}{"$agg0": true} // aggregate empty record set
+	out := make([]interface{}, len(r.flds))
 	for i, fld := range r.flds {
 		if out[i], err = fld.expr.eval(ctx, m); err != nil {
 			return err
 		}
 	}
 	_, err = f(nil, out)
-
 	return err
 }
 

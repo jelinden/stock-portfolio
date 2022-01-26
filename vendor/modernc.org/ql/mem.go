@@ -42,6 +42,20 @@ func (x *memIndex) Clear() error {
 	return nil
 }
 
+func (x *memIndex) Exists(indexedValues []interface{}) (bool, error) {
+	t := x.t
+	switch {
+	case !x.unique:
+		return false, nil
+	case isIndexNull(indexedValues): // unique, NULL
+		return false, nil
+	default: // unique, non NULL
+		k := indexKey{indexedValues, 0}
+		_, ok := t.Get(k)
+		return ok, nil
+	}
+}
+
 func (x *memIndex) Create(indexedValues []interface{}, h int64) error {
 	//dbg("memIndex(%p, %p).Create %v, %v", x, x.m, indexedValues, h)
 	t := x.t
@@ -57,7 +71,7 @@ func (x *memIndex) Create(indexedValues []interface{}, h int64) error {
 	default: // unique, non NULL
 		k := indexKey{indexedValues, 0}
 		if _, ok := t.Get(k); ok { //LATER need .Put
-			return fmt.Errorf("cannot insert into unique index: duplicate value(s): %v", indexedValues)
+			return errDuplicateUniqueIndex(indexedValues)
 		}
 
 		x.m.newUndo(undoCreateX, 0, []interface{}{x, k}) //TODO why is old value, if any, not saved?

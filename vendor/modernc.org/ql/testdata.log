@@ -8472,3 +8472,55 @@ SELECT * FROM t;
 ┌Iterate all rows of table "t"
 └Output field names ["a" "b" "c"]
 
+---- 1359
+SELECT coalesce(name, "default") AS result FROM people;
+┌Iterate all rows of table "people"
+└Output field names ["name"]
+┌Evaluate coalesce(name, "default") as "result",
+└Output field names ["result"]
+
+---- 1360
+SELECT coalesce(name, "default") AS result FROM people;
+┌Iterate all rows of table "people"
+└Output field names ["name"]
+┌Evaluate coalesce(name, "default") as "result",
+└Output field names ["result"]
+
+---- 1361
+SELECT coalesce(name, NULL, NULL, NULL, NULL, NULL, NULL, NULL, "default") AS result FROM people;
+┌Iterate all rows of table "people"
+└Output field names ["name"]
+┌Evaluate coalesce(name, NULL, NULL, NULL, NULL, NULL, NULL, NULL, "default") as "result",
+└Output field names ["result"]
+
+---- 1362
+SELECT * FROM t WHERE i < 30;
+┌Iterate all rows of table "t" using index "x" where i < 30
+└Output field names ["i"]
+
+---- 1364
+SELECT * FROM t WHERE i < 30;
+┌Iterate all rows of table "t" using index "x" where i < 30
+└Output field names ["i"]
+
+---- 1365
+SELECT * FROM t ORDER BY a, b, c;
+┌Iterate all rows of table "t"
+└Output field names ["a" "b" "c"]
+┌Order by a, b, c,
+└Output field names ["a" "b" "c"]
+
+---- 1366
+SELECT * FROM t ORDER BY a, b, c;
+┌Iterate all rows of table "t"
+└Output field names ["a" "b" "c"]
+┌Order by a, b, c,
+└Output field names ["a" "b" "c"]
+
+---- 1367
+SELECT * FROM t ORDER BY i;
+┌Iterate all rows of table "t"
+└Output field names ["i"]
+┌Order by i,
+└Output field names ["i"]
+

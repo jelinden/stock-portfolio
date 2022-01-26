@@ -14,6 +14,7 @@ import (
 )
 
 //TODO agg bigint, bigrat, time, duration
+const builtinNoMaximum = -1
 
 var builtin = map[string]struct {
 	f           func([]interface{}, map[interface{}]interface{}) (interface{}, error)
@@ -25,6 +26,7 @@ var builtin = map[string]struct {
 	"__testBlob":   {builtinTestBlob, 1, 1, true, false},
 	"__testString": {builtinTestString, 1, 1, true, false},
 	"avg":          {builtinAvg, 1, 1, false, true},
+	"coalesce":     {builtinCoalesce, 1, builtinNoMaximum, true, false},
 	"complex":      {builtinComplex, 2, 2, true, false},
 	"contains":     {builtinContains, 2, 2, true, false},
 	"count":        {builtinCount, 0, 1, false, true},
@@ -194,6 +196,18 @@ func builtinAvg(arg []interface{}, ctx map[interface{}]interface{}) (v interface
 	data.n++
 	ctx[fn] = data
 	return
+}
+
+func builtinCoalesce(arg []interface{}, _ map[interface{}]interface{}) (v interface{}, err error) {
+	for _, v := range arg {
+		switch x := v.(type) {
+		case nil:
+			continue
+		default:
+			return x, nil
+		}
+	}
+	return nil, nil
 }
 
 func builtinComplex(arg []interface{}, _ map[interface{}]interface{}) (v interface{}, err error) {

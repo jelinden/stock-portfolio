@@ -868,6 +868,8 @@ type insertIntoStmt struct {
 	lists     [][]expression
 	sel       *selectStmt
 	tableName string
+
+	ifNotExists bool
 }
 
 func (s *insertIntoStmt) explain(ctx *execCtx, w strutil.Formatter) {
@@ -879,9 +881,13 @@ func (s *insertIntoStmt) String() string {
 	if len(s.colNames) != 0 {
 		cn = fmt.Sprintf(" (%s)", strings.Join(s.colNames, ", "))
 	}
+	var ifNotExists string
+	if s.ifNotExists {
+		ifNotExists = " IF NOT EXISTS"
+	}
 	switch {
 	case s.sel != nil:
-		return fmt.Sprintf("INSERT INTO %s%s %s;", s.tableName, cn, s.sel)
+		return fmt.Sprintf("INSERT INTO %s%s%s %s;", s.tableName, ifNotExists, cn, s.sel)
 	default:
 		a := make([]string, len(s.lists))
 		for i, v := range s.lists {
@@ -891,7 +897,7 @@ func (s *insertIntoStmt) String() string {
 			}
 			a[i] = fmt.Sprintf("(%s)", strings.Join(b, ", "))
 		}
-		return fmt.Sprintf("INSERT INTO %s%s VALUES %s;", s.tableName, cn, strings.Join(a, ", "))
+		return fmt.Sprintf("INSERT INTO %s%s%s VALUES %s;", s.tableName, ifNotExists, cn, strings.Join(a, ", "))
 	}
 }
 
@@ -916,6 +922,40 @@ func (s *insertIntoStmt) execSelect(t *table, cols []*col, ctx *execCtx) (_ Reco
 
 		if err = t.checkConstraintsAndDefaults(ctx, data0[2:], m); err != nil {
 			return false, err
+		}
+
+		if s.ifNotExists {
+			id := int64(-1)
+			data0[1] = id
+			for i, v := range t.indices {
+				if v == nil {
+					continue
+				}
+
+				ok, err := v.x.Exists([]interface{}{data0[i+1]})
+				if err != nil {
+					return false, err
+				}
+
+				if ok {
+					return true, nil
+				}
+			}
+			for _, ix := range t.indices2 {
+				vlist, err := ix.eval(ctx, t.cols, id, data0[2:])
+				if err != nil {
+					return false, err
+				}
+
+				ok, err := ix.x.Exists(vlist)
+				if err != nil {
+					return false, err
+				}
+
+				if ok {
+					return true, nil
+				}
+			}
 		}
 
 		id, err := t.store.ID()
@@ -1015,9 +1055,13 @@ func (s *insertIntoStmt) exec(ctx *execCtx) (_ Recordset, err error) {
 			return nil, err
 		}
 
-		id, err := t.addRecord(ctx, r)
+		id, err := t.addRecord(ctx, r, s.ifNotExists)
 		if err != nil {
 			return nil, err
+		}
+
+		if id < 0 {
+			continue
 		}
 
 		cc.RowsAffected++

@@ -6,6 +6,8 @@
 //
 // Changelog
 //
+// 2019-10-24: v1.1.0: Added topological sort.
+//
 // 2015-06-17: Added utils for math/big.{Int,Rat}.
 package sortutil // import "modernc.org/sortutil"
 

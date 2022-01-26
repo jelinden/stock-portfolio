@@ -467,7 +467,7 @@ func newFileFromOSFile(f lldb.OSFile, headroom int64, new bool) (fi *file, err e
 
 	var w *os.File
 	closew := false
-	wn := walName(f.Name())
+	wn := WalName(f.Name())
 	w, err = os.OpenFile(wn, os.O_CREATE|os.O_EXCL|os.O_RDWR, 0666)
 	closew = true
 	defer func() {
@@ -1140,7 +1140,9 @@ func lockName(dbname string) string {
 	return filepath.Join(filepath.Dir(dbname), fmt.Sprintf(".%x", h.Sum(nil)))
 }
 
-func walName(dbname string) (r string) {
+// WalName computes the WAL name for dbname. The results are different for
+// relative vs absolute paths.
+func WalName(dbname string) (r string) {
 	base := filepath.Base(filepath.Clean(dbname))
 	h := sha1.New()
 	io.WriteString(h, base)
@@ -1175,6 +1177,31 @@ func isIndexNull(data []interface{}) bool {
 		}
 	}
 	return true
+}
+
+func (x *fileIndex) Exists(indexedValues []interface{}) (bool, error) {
+	for i, indexedValue := range indexedValues {
+		chunk, ok := indexedValue.(chunk)
+		if ok {
+			indexedValues[i] = chunk.b
+		}
+	}
+
+	t := x.t
+	switch {
+	case !x.unique:
+		return false, nil
+	case isIndexNull(indexedValues): // unique, NULL
+		return false, nil
+	default: // unique, non NULL
+		k, err := lldb.EncodeScalars(append(indexedValues, int64(0))...)
+		if err != nil {
+			return false, err
+		}
+
+		v, err := t.Get(nil, k)
+		return v != nil, err
+	}
 }
 
 // The []byte version of the key in the BTree shares chunks, if any, with
@@ -1219,7 +1246,7 @@ func (x *fileIndex) Create(indexedValues []interface{}, h int64) error {
 				return v, true, nil
 			}
 
-			return nil, false, fmt.Errorf("(file-018) cannot insert into unique index: duplicate value(s): %v", indexedValues)
+			return nil, false, errDuplicateUniqueIndex(indexedValues)
 		})
 		return err
 	}

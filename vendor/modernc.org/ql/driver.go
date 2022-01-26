@@ -221,6 +221,16 @@ func (d *sqlDriver) Open(name string) (driver.Conn, error) {
 		}
 	}
 
+	var reWAL bool
+	if a := uri.Query()["removeemptywal"]; len(a) != 0 {
+		n, err := strconv.ParseInt(a[0], 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		reWAL = n != 0
+	}
+
 	ff := 0
 	if d == file2Driver {
 		ff = 2
@@ -234,7 +244,7 @@ func (d *sqlDriver) Open(name string) (driver.Conn, error) {
 		case true:
 			db0, err = OpenMem()
 		default:
-			db0, err = OpenFile(name, &Options{CanCreate: true, Headroom: headroom, FileFormat: ff})
+			db0, err = OpenFile(name, &Options{CanCreate: true, Headroom: headroom, FileFormat: ff, RemoveEmptyWAL: reWAL})
 		}
 		if err != nil {
 			return nil, err

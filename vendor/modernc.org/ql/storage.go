@@ -53,6 +53,7 @@ type btreeIndex interface {
 	Create(indexedValues []interface{}, h int64) error                          // supports insert into statement
 	Delete(indexedValues []interface{}, h int64) error                          // supports delete from statement
 	Drop() error                                                                // supports drop table, drop index statements
+	Exists(indexedValues []interface{}) (bool, error)                           // supports insert into if not exists statement
 	Seek(indexedValues []interface{}) (iter indexIterator, hit bool, err error) // supports where clause
 	SeekFirst() (iter indexIterator, err error)                                 // supports aggregate min / ascending order by
 	SeekLast() (iter indexIterator, err error)                                  // supports aggregate max / descending order by
@@ -714,7 +715,42 @@ func (t *table) updated() (err error) {
 // 0: next record handle int64
 // 1: record id          int64
 // 2...: data row
-func (t *table) addRecord(execCtx *execCtx, r []interface{}) (id int64, err error) {
+func (t *table) addRecord(execCtx *execCtx, r []interface{}, ifNotExists bool) (id int64, err error) {
+	if ifNotExists {
+		id := int64(-1)
+		r := append([]interface{}{t.head, id}, r...)
+		for i, v := range t.indices {
+			if v == nil {
+				continue
+			}
+
+			ok, err := v.x.Exists([]interface{}{r[i+1]})
+			if err != nil {
+				return -1, err
+			}
+
+			if ok {
+				return -1, nil
+			}
+		}
+
+		for _, ix := range t.indices2 {
+			vlist, err := ix.eval(execCtx, t.cols, id, r[2:])
+			if err != nil {
+				return -1, err
+			}
+
+			ok, err := ix.x.Exists(vlist)
+			if err != nil {
+				return -1, err
+			}
+
+			if ok {
+				return -1, nil
+			}
+		}
+	}
+
 	if id, err = t.store.ID(); err != nil {
 		return
 	}

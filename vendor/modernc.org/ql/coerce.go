@@ -8,7 +8,7 @@
 //
 // DO NOT EDIT!
 
-package ql // import "modernc.org/ql"
+package ql
 
 import (
 	"math"
@@ -93,13 +93,13 @@ func coerce1(inVal, otherVal interface{}) (coercedInVal interface{}) {
 		//case idealUint:
 		//case bool:
 		case complex64:
-			return complex(float32(x), 0)
+			return complex64(complex(float32(x), 0))
 		case complex128:
-			return complex(float64(x), 0)
+			return complex128(complex(float64(x), 0))
 		case float32:
 			return float32(float64(x))
 		case float64:
-			return float64(x)
+			return float64(float64(x))
 		//case int8:
 		//case int16:
 		//case int32:
@@ -130,9 +130,9 @@ func coerce1(inVal, otherVal interface{}) (coercedInVal interface{}) {
 			}
 		//case bool:
 		case complex64:
-			return complex(float32(x), 0)
+			return complex64(complex(float32(x), 0))
 		case complex128:
-			return complex(float64(x), 0)
+			return complex128(complex(float64(x), 0))
 		case float32:
 			return float32(int64(x))
 		case float64:
@@ -190,9 +190,9 @@ func coerce1(inVal, otherVal interface{}) (coercedInVal interface{}) {
 			return idealUint(int64(x))
 		//case bool:
 		case complex64:
-			return complex(float32(x), 0)
+			return complex64(complex(float32(x), 0))
 		case complex128:
-			return complex(float64(x), 0)
+			return complex128(complex(float64(x), 0))
 		case float32:
 			return float32(int64(x))
 		case float64:
@@ -237,9 +237,9 @@ func coerce1(inVal, otherVal interface{}) (coercedInVal interface{}) {
 			return idealUint(uint64(x))
 		//case bool:
 		case complex64:
-			return complex(float32(x), 0)
+			return complex64(complex(float32(x), 0))
 		case complex128:
-			return complex(float64(x), 0)
+			return complex128(complex(float64(x), 0))
 		case float32:
 			return float32(uint64(x))
 		case float64:

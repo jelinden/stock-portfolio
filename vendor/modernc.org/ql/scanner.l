@@ -96,7 +96,7 @@ desc            {d}{e}{s}{c}
 distinct        {d}{i}{s}{t}{i}{n}{c}{t}
 drop            {d}{r}{o}{p}
 exists          {e}{x}{i}{s}{t}{s}
-explain		{e}{x}{p}{l}{a}{i}{n}
+explain		    {e}{x}{p}{l}{a}{i}{n}
 from            {f}{r}{o}{m}
 full            {f}{u}{l}{l}
 group           {g}{r}{o}{u}{p}
@@ -150,6 +150,9 @@ idchar0         [a-zA-Z_\x81]
 idchars         {idchar0}|[0-9\x82]
 ident           {idchar0}{idchars}*
 
+og              \x84 // open guillemet «. See runeClass() in lexer.go.
+cg              \x85 // close guillemet ».
+
 %%
 			c = l.Rule0()
                         
@@ -164,19 +167,17 @@ ident           {idchar0}{idchars}*
 {imaginary_lit}         return l.float(lval, true)
 {int_lit}               return l.int(lval, false)
 {float_lit}             return l.float(lval, false)
-
 \"                      l.sc = S1
 `                       l.sc = S2
-
 '(\\.|[^'])*'           if ret := l.str(lval, ""); ret != stringLit {
                                 return ret
                         }
                         lval.item = idealRune(lval.item.(string)[0])
                         return intLit
-
 <S1>(\\.|[^\"])*\"      return l.str(lval, "\"")
 <S2>([^`]|\n)*`         return l.str(lval, "`")
-
+{og}[^\n\r\x85]+{cg}    return l.delimitedIdentifier(lval)
+                        return identifier
 "!="                    return neq
 "&&"                    return andand
 "&^"                    return andnot

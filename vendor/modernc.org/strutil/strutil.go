@@ -446,6 +446,18 @@ func PrettyString(v interface{}, prefix, suffix string, hooks PrettyPrintHooks) 
 
 // PrettyPrint pretty prints v to w. Zero values and unexported struct fields
 // are omitted.
+//
+// Force printing of zero values of struct fields by including in the field tag
+// PrettyPrint:"zero".
+//
+// Enable using a String method, if any, of a struct field type by including in
+// the field tag PrettyPrint:"stringer".
+//
+// The tags can be combined as in PrettyPrint:"zero,stringer". The order is not
+// important, so PrettyPrint:stringer,zero has the same effect.
+//
+// A hook attached to the field type has priority over the struct field tag
+// described above.
 func PrettyPrint(w io.Writer, v interface{}, prefix, suffix string, hooks PrettyPrintHooks) {
 	if v == nil {
 		return
@@ -459,10 +471,10 @@ func PrettyPrint(w io.Writer, v interface{}, prefix, suffix string, hooks Pretty
 		}
 	}()
 
-	prettyPrint(nil, f, prefix, suffix, v, hooks)
+	prettyPrint(nil, f, prefix, suffix, v, hooks, false, false)
 }
 
-func prettyPrint(protect map[interface{}]struct{}, sf Formatter, prefix, suffix string, v interface{}, hooks PrettyPrintHooks) {
+func prettyPrint(protect map[interface{}]struct{}, sf Formatter, prefix, suffix string, v interface{}, hooks PrettyPrintHooks, zero, stringer bool) {
 	if v == nil {
 		return
 	}
@@ -474,26 +486,34 @@ func prettyPrint(protect map[interface{}]struct{}, sf Formatter, prefix, suffix 
 	}
 
 	rv := reflect.ValueOf(v)
+	if stringer {
+		if _, ok := v.(fmt.Stringer); ok {
+			sf.Format("%s%s", prefix, v)
+			sf.Format(suffix)
+			return
+		}
+	}
+
 	switch rt.Kind() {
 	case reflect.Slice:
-		if rv.Len() == 0 {
+		if rv.Len() == 0 && !zero {
 			return
 		}
 
 		sf.Format("%s[]%T{ // len %d%i\n", prefix, rv.Index(0).Interface(), rv.Len())
 		for i := 0; i < rv.Len(); i++ {
-			prettyPrint(protect, sf, fmt.Sprintf("%d: ", i), ",\n", rv.Index(i).Interface(), hooks)
+			prettyPrint(protect, sf, fmt.Sprintf("%d: ", i), ",\n", rv.Index(i).Interface(), hooks, false, false)
 		}
 		suffix = strings.Replace(suffix, "%", "%%", -1)
 		sf.Format("%u}" + suffix)
 	case reflect.Array:
-		if reflect.Zero(rt).Interface() == rv.Interface() {
+		if reflect.Zero(rt).Interface() == rv.Interface() && !zero {
 			return
 		}
 
 		sf.Format("%s[%d]%T{%i\n", prefix, rv.Len(), rv.Index(0).Interface())
 		for i := 0; i < rv.Len(); i++ {
-			prettyPrint(protect, sf, fmt.Sprintf("%d: ", i), ",\n", rv.Index(i).Interface(), hooks)
+			prettyPrint(protect, sf, fmt.Sprintf("%d: ", i), ",\n", rv.Index(i).Interface(), hooks, false, false)
 		}
 		suffix = strings.Replace(suffix, "%", "%%", -1)
 		sf.Format("%u}" + suffix)
@@ -502,7 +522,7 @@ func prettyPrint(protect map[interface{}]struct{}, sf Formatter, prefix, suffix 
 			return
 		}
 
-		if reflect.DeepEqual(reflect.Zero(rt).Interface(), rv.Interface()) {
+		if reflect.DeepEqual(reflect.Zero(rt).Interface(), rv.Interface()) && !zero {
 			return
 		}
 
@@ -513,12 +533,25 @@ func prettyPrint(protect map[interface{}]struct{}, sf Formatter, prefix, suffix 
 				continue
 			}
 
-			prettyPrint(protect, sf, fmt.Sprintf("%s: ", rt.Field(i).Name), ",\n", f.Interface(), hooks)
+			var stringer, zero bool
+			ft := rt.Field(i)
+			if tag, ok := ft.Tag.Lookup("PrettyPrint"); ok {
+				a := strings.Split(tag, ",")
+				for _, v := range a {
+					switch strings.TrimSpace(v) {
+					case "stringer":
+						stringer = true
+					case "zero":
+						zero = true
+					}
+				}
+			}
+			prettyPrint(protect, sf, fmt.Sprintf("%s: ", rt.Field(i).Name), ",\n", f.Interface(), hooks, zero, stringer)
 		}
 		suffix = strings.Replace(suffix, "%", "%%", -1)
 		sf.Format("%u}" + suffix)
 	case reflect.Ptr:
-		if rv.IsNil() {
+		if rv.IsNil() && !zero {
 			return
 		}
 
@@ -533,55 +566,55 @@ func prettyPrint(protect map[interface{}]struct{}, sf Formatter, prefix, suffix 
 			protect = map[interface{}]struct{}{}
 		}
 		protect[rvi] = struct{}{}
-		prettyPrint(protect, sf, prefix+"&", suffix, rv.Elem().Interface(), hooks)
+		prettyPrint(protect, sf, prefix+"&", suffix, rv.Elem().Interface(), hooks, false, false)
 	case reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int8:
-		if v := rv.Int(); v != 0 {
+		if v := rv.Int(); v != 0 || zero {
 			suffix = strings.Replace(suffix, "%", "%%", -1)
 			sf.Format("%s%v"+suffix, prefix, v)
 		}
 	case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint8:
-		if v := rv.Uint(); v != 0 {
+		if v := rv.Uint(); v != 0 || zero {
 			suffix = strings.Replace(suffix, "%", "%%", -1)
 			sf.Format("%s%v"+suffix, prefix, v)
 		}
 	case reflect.Float32, reflect.Float64:
-		if v := rv.Float(); v != 0 {
+		if v := rv.Float(); v != 0 || zero {
 			suffix = strings.Replace(suffix, "%", "%%", -1)
 			sf.Format("%s%v"+suffix, prefix, v)
 		}
 	case reflect.Complex64, reflect.Complex128:
-		if v := rv.Complex(); v != 0 {
+		if v := rv.Complex(); v != 0 || zero {
 			suffix = strings.Replace(suffix, "%", "%%", -1)
 			sf.Format("%s%v"+suffix, prefix, v)
 		}
 	case reflect.Uintptr:
-		if v := rv.Uint(); v != 0 {
+		if v := rv.Uint(); v != 0 || zero {
 			suffix = strings.Replace(suffix, "%", "%%", -1)
 			sf.Format("%s%v"+suffix, prefix, v)
 		}
 	case reflect.UnsafePointer:
 		s := fmt.Sprintf("%p", rv.Interface())
-		if s == "0x0" {
+		if s == "0x0" && !zero {
 			return
 		}
 
 		suffix = strings.Replace(suffix, "%", "%%", -1)
 		sf.Format("%s%s"+suffix, prefix, s)
 	case reflect.Bool:
-		if v := rv.Bool(); v {
+		if v := rv.Bool(); v || zero {
 			suffix = strings.Replace(suffix, "%", "%%", -1)
 			sf.Format("%s%v"+suffix, prefix, rv.Bool())
 		}
 	case reflect.String:
 		s := rv.Interface().(string)
-		if s == "" {
+		if s == "" && !zero {
 			return
 		}
 
 		suffix = strings.Replace(suffix, "%", "%%", -1)
 		sf.Format("%s%q"+suffix, prefix, s)
 	case reflect.Chan:
-		if reflect.Zero(rt).Interface() == rv.Interface() {
+		if reflect.Zero(rt).Interface() == rv.Interface() && !zero {
 			return
 		}
 
@@ -593,7 +626,7 @@ func prettyPrint(protect map[interface{}]struct{}, sf Formatter, prefix, suffix 
 		suffix = strings.Replace(suffix, "%", "%%", -1)
 		sf.Format("%s%s %s%s"+suffix, prefix, rt.ChanDir(), rt.Elem().Name(), s)
 	case reflect.Func:
-		if rv.IsNil() {
+		if rv.IsNil() && !zero {
 			return
 		}
 
@@ -621,7 +654,7 @@ func prettyPrint(protect map[interface{}]struct{}, sf Formatter, prefix, suffix 
 		sf.Format("%sfunc%s%s { ... }"+suffix, prefix, s, t)
 	case reflect.Map:
 		keys := rv.MapKeys()
-		if len(keys) == 0 {
+		if len(keys) == 0 && !zero {
 			return
 		}
 
@@ -629,7 +662,7 @@ func prettyPrint(protect map[interface{}]struct{}, sf Formatter, prefix, suffix 
 		nf := IndentFormatter(&buf, "· ")
 		var skeys []string
 		for i, k := range keys {
-			prettyPrint(protect, nf, "", "", k.Interface(), hooks)
+			prettyPrint(protect, nf, "", "", k.Interface(), hooks, false, false)
 			skeys = append(skeys, fmt.Sprintf("%s%10d", buf.Bytes(), i))
 			buf.Reset()
 		}
@@ -640,7 +673,7 @@ func prettyPrint(protect map[interface{}]struct{}, sf Formatter, prefix, suffix 
 			k = k[:len(k)-10]
 			n, _ := strconv.ParseUint(si, 10, 64)
 			mv := rv.MapIndex(keys[n])
-			prettyPrint(protect, sf, fmt.Sprintf("%s: ", k), ",\n", mv.Interface(), hooks)
+			prettyPrint(protect, sf, fmt.Sprintf("%s: ", k), ",\n", mv.Interface(), hooks, false, false)
 		}
 		suffix = strings.Replace(suffix, "%", "%%", -1)
 		sf.Format("%u}" + suffix)

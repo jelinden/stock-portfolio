@@ -6,6 +6,10 @@
 
 // Package db implements selected data structures found in database
 // implementations.
+//
+// Build status
+//
+// available at https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2fdb
 package db // import "modernc.org/db"
 
 import (

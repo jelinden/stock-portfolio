@@ -29,11 +29,14 @@ hex_digit = "0" … "9"
 	| "A" … "F"
 	| "a" … "f" .
 hex_lit = "0" ( "x" | "X" ) hex_digit { hex_digit } .
-identifier = letter {
+identifier = normal_identifier 
+		| quoted_identifier .
+normal_identifier = letter {
 		  letter
 		| decimal_digit
 		| unicode_digit
 	  } .
+quoted_identifier = "«" { unicode_char | newline } "»".
 imaginary_lit = ( decimals | float_lit ) "i" .
 int_lit = decimal_lit
 	| octal_lit

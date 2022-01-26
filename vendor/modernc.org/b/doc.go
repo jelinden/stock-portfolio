@@ -3,6 +3,10 @@
 // license that can be found in the LICENSE file.
 
 // Package b implements the B+tree flavor of a BTree.
+// 
+// Build status
+// 
+// available at https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2fb
 //
 // Changelog
 //

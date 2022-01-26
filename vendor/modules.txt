@@ -1,59 +1,79 @@
-# github.com/StackExchange/wmi v0.0.0-20180412205111-cdffdb33acae
-github.com/StackExchange/wmi
-# github.com/boltdb/bolt v1.2.1
+# github.com/boltdb/bolt v1.3.1
 github.com/boltdb/bolt
-# github.com/davecgh/go-spew v0.0.0-20151105211317-5215b55f46b2
+# github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/edsrzf/mmap-go v0.0.0-20170320065105-0bce6a688712
+# github.com/edsrzf/mmap-go v1.1.0
 github.com/edsrzf/mmap-go
-# github.com/go-ole/go-ole v0.0.0-20180213002836-a1ec82a652eb
+# github.com/go-ole/go-ole v1.2.6
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
-# github.com/julienschmidt/httprouter v0.0.0-20180715161854-348b672cd90d
+# github.com/gorilla/mux v1.8.0
+github.com/gorilla/mux
+# github.com/json-iterator/go v1.1.10
+github.com/json-iterator/go
+# github.com/julienschmidt/httprouter v1.3.0
 github.com/julienschmidt/httprouter
+# github.com/mailgun/mailgun-go/v4 v4.6.0
+github.com/mailgun/mailgun-go/v4
+github.com/mailgun/mailgun-go/v4/events
+# github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421
+github.com/modern-go/concurrent
+# github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742
+github.com/modern-go/reflect2
+# github.com/pkg/errors v0.8.1
+github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/remyoudompheng/bigfft v0.0.0-20170806203942-52369c62f446
+# github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0
 github.com/remyoudompheng/bigfft
-# github.com/shirou/gopsutil v0.0.0-20180502055836-57f370e13068
+# github.com/shirou/gopsutil v3.21.11+incompatible
 github.com/shirou/gopsutil/cpu
 github.com/shirou/gopsutil/disk
-github.com/shirou/gopsutil/mem
 github.com/shirou/gopsutil/internal/common
-# github.com/stretchr/testify v0.0.0-20160524234229-8d64eb7173c7
+github.com/shirou/gopsutil/mem
+# github.com/stretchr/testify v1.7.0
 github.com/stretchr/testify/assert
-# github.com/ventu-io/go-shortid v0.0.0-20170305092000-935de6796a71
+# github.com/tklauser/go-sysconf v0.3.9
+github.com/tklauser/go-sysconf
+# github.com/tklauser/numcpus v0.3.0
+github.com/tklauser/numcpus
+# github.com/ventu-io/go-shortid v0.0.0-20201117134242-e59966efd125
 github.com/ventu-io/go-shortid
-# golang.org/x/crypto v0.0.0-20170317163734-459e26527287
+# github.com/yusufpapurcu/wmi v1.2.2
+github.com/yusufpapurcu/wmi
+# golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
 golang.org/x/crypto/pbkdf2
-# golang.org/x/sys v0.0.0-20160516132347-d4feaf1a7e61
+# golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e
+golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# modernc.org/b v1.0.0
+# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+gopkg.in/yaml.v3
+# modernc.org/b v1.0.2
 modernc.org/b
-# modernc.org/db v1.0.0
+# modernc.org/db v1.0.3
 modernc.org/db
-# modernc.org/file v1.0.0
+# modernc.org/file v1.0.3
 modernc.org/file
 # modernc.org/fileutil v1.0.0
 modernc.org/fileutil
-# modernc.org/golex v1.0.0
+# modernc.org/golex v1.0.1
 modernc.org/golex/lex
-# modernc.org/internal v1.0.0
+# modernc.org/internal v1.0.3
 modernc.org/internal/buffer
 modernc.org/internal/file
 modernc.org/internal/slice
-# modernc.org/lldb v1.0.0
+# modernc.org/lldb v1.0.2
 modernc.org/lldb
-# modernc.org/mathutil v1.0.0
+# modernc.org/mathutil v1.4.1
 modernc.org/mathutil
-# modernc.org/ql v1.0.0
-modernc.org/ql/driver
+# modernc.org/ql v1.4.1
 modernc.org/ql
+modernc.org/ql/driver
 modernc.org/ql/vendored/github.com/camlistore/go4/lock
-# modernc.org/sortutil v1.0.0
+# modernc.org/sortutil v1.1.0
 modernc.org/sortutil
-# modernc.org/strutil v1.0.0
+# modernc.org/strutil v1.1.1
 modernc.org/strutil
-# modernc.org/zappy v1.0.0
+# modernc.org/zappy v1.0.3
 modernc.org/zappy

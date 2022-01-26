@@ -33,8 +33,8 @@
 package buffer // import "modernc.org/internal/buffer"
 
 import (
-	"modernc.org/internal/slice"
 	"io"
+	"modernc.org/internal/slice"
 )
 
 // CGet returns a pointer to a byte slice of len size. The pointed to byte

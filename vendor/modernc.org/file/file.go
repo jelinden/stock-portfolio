@@ -5,6 +5,10 @@
 // Package file handles write-ahead logs and space management of os.File-like
 // entities.
 //
+// Build status
+//
+// available at https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2ffile
+//
 // Changelog
 //
 // 2017-09-09: Write ahead log support - initial release.
@@ -15,6 +19,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"sync"
 	"unsafe"
 
@@ -422,7 +427,20 @@ func Mem(name string) (File, error) { return ifile.OpenMem(name) }
 
 // Map returns a File backed by memory mapping f or an error, if any. The Close
 // method of the result must be eventually called to avoid resource leaks.
-func Map(f *os.File) (File, error) { return ifile.Open(f) }
+//
+// This function returns (f, nil) on Windows because there some File methods,
+// like Truncate, produce errors in the current implementation:
+//
+//	The requested operation cannot be performed on a file with a user-mapped section open.
+//
+// Windows expert needed to fix this.
+func Map(f *os.File) (File, error) {
+	if runtime.GOOS == "windows" {
+		return f, nil
+	}
+
+	return ifile.Open(f)
+}
 
 type file struct {
 	_ [16]byte // User area. Magic file number etc.

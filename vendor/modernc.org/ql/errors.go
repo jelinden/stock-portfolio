@@ -5,6 +5,8 @@
 package ql // import "modernc.org/ql"
 
 import (
+	"fmt"
+
 	"errors"
 )
 
@@ -16,3 +18,16 @@ var (
 	errNoDataForHandle          = errors.New("read: no data for handle")
 	errRollbackNotInTransaction = errors.New("ROLLBACK: Not in transaction")
 )
+
+type errDuplicateUniqueIndex []interface{}
+
+func (err errDuplicateUniqueIndex) Error() string {
+	return fmt.Sprintf("cannot insert into unique index: duplicate value(s): %v", []interface{}(err))
+}
+
+// IsDuplicateUniqueIndexError reports whether err is produced by attempting to
+// violate unique index constraints.
+func IsDuplicateUniqueIndexError(err error) bool {
+	_, ok := err.(errDuplicateUniqueIndex)
+	return ok
+}

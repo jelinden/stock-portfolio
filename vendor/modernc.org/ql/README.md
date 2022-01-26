@@ -1,5 +1,6 @@
-ql
-==
+<img src="logo/ql-dark.svg" alt="ql Logo" height="250">
+
+-----------------
 
 Package ql is a pure Go embedded (S)QL database.
 

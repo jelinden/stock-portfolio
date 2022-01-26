@@ -11,23 +11,38 @@ import (
 )
 
 var (
-	// The maximun Int128 value.
+	// MaxInt128 represents the maximun Int128 value as big.Int
 	MaxInt128 *big.Int
-	// The minimun Int128 value.
+	// MinInt128 represents the minimun Int128 value as big.Int
 	MinInt128 *big.Int
+	// MaxUint128 represents the maximun Uint128 value as big.Int
+	MaxUint128 *big.Int
 )
 
 func init() {
-	MaxInt128 = big.NewInt(0)
-	MaxInt128.SetBit(MaxInt128, 127, 1)
-	MaxInt128.Sub(MaxInt128, _1)
-	MinInt128 = big.NewInt(0)
-	MinInt128.Set(MaxInt128)
+	var ok bool
+	MaxInt128, ok = big.NewInt(0).SetString("0x7fffffff_ffffffff_ffffffff_ffffffff", 0)
+	if !ok {
+		panic("internal error")
+	}
+
+	MinInt128 = big.NewInt(0).Set(MaxInt128)
 	MinInt128.Add(MinInt128, _1)
 	MinInt128.Neg(MinInt128)
+
+	MaxUint128, ok = big.NewInt(0).SetString("0xffffffff_ffffffff_ffffffff_ffffffff", 0)
+	if !ok {
+		panic("internal error")
+	}
 }
 
-// Int128 is an 128 bit integer.
+const (
+	maxInt128  = 1<<127 - 1
+	maxUint128 = 1<<128 - 1
+	minInt128  = -maxInt128 - 1
+)
+
+// Int128 is an 128 bit signed integer.
 type Int128 struct {
 	Lo int64 // Bits 63..0.
 	Hi int64 // Bits 127..64.
@@ -127,7 +142,7 @@ func (x *Int128) SetInt64(y int64) (r Int128) {
 	return r
 }
 
-// SetInt64 sets x to y and returns x.
+// SetUint64 sets x to y and returns x.
 func (x *Int128) SetUint64(y uint64) (r Int128) {
 	r = Int128{Lo: int64(y)}
 	*x = r
@@ -153,3 +168,112 @@ func (x Int128) Sign() int {
 
 // String implements fmt.Stringer()
 func (x Int128) String() string { return x.BigInt().String() }
+
+// NewInt128FromInt64 return a new Int128 value initialized to n.
+func NewInt128FromInt64(n int64) (r Int128) {
+	r.Lo = n
+	if n < 0 {
+		r.Hi = -1
+	}
+	return r
+}
+
+// NewInt128FromUint64 return a new Int128 value initialized to n.
+func NewInt128FromUint64(n uint64) (r Int128) { return Int128{Lo: int64(n)} }
+
+// NewInt128FromFloat32 returns a new Int128 value initialized to n. Result is
+// not specified in n does not represent a number within the range of Int128
+// values.
+func NewInt128FromFloat32(n float32) (r Int128) {
+	if n >= minInt128 && n <= maxInt128 {
+		if n >= math.MinInt64 && n <= math.MaxInt64 {
+			return NewInt128FromInt64(int64(n))
+		}
+
+		f := big.NewFloat(float64(n))
+		bi, _ := f.Int(nil)
+		r.SetBigInt(bi)
+	}
+	return r
+}
+
+// NewInt128FromFloat64 returns a new Int128 value initialized to n. Result is
+// not specified in n does not represent a number within the range of Int128
+// values.
+func NewInt128FromFloat64(n float64) (r Int128) {
+	if n >= minInt128 && n <= maxInt128 {
+		if n >= math.MinInt64 && n <= math.MaxInt64 {
+			return NewInt128FromInt64(int64(n))
+		}
+
+		f := big.NewFloat(n)
+		bi, _ := f.Int(nil)
+		r.SetBigInt(bi)
+	}
+	return r
+}
+
+// Uint128 is an 128 bit unsigned integer.
+type Uint128 struct {
+	Lo uint64 // Bits 63..0.
+	Hi uint64 // Bits 127..64.
+}
+
+// NewUint128FromInt64 return a new Uint128 value initialized to n.
+func NewUint128FromInt64(n int64) (r Uint128) {
+	r.Lo = uint64(n)
+	if n < 0 {
+		r.Hi = ^uint64(0)
+	}
+	return r
+}
+
+// NewUint128FromUint64 return a new Uint128 value initialized to n.
+func NewUint128FromUint64(n uint64) (r Uint128) { return Uint128{Lo: n} }
+
+// NewUint128FromFloat32 returns a new Uint128 value initialized to n. Result is
+// not specified in n does not represent a number within the range of Uint128
+// values.
+func NewUint128FromFloat32(n float32) (r Uint128) {
+	if n >= 0 {
+		if n <= math.MaxUint64 {
+			return NewUint128FromUint64(uint64(n))
+		}
+
+		f := big.NewFloat(float64(n))
+		bi, _ := f.Int(nil)
+		r.SetBigInt(bi)
+	}
+	return r
+}
+
+// NewUint128FromFloat64 returns a new Uint128 value initialized to n. Result is
+// not specified in n does not represent a number within the range of Uint128
+// values.
+func NewUint128FromFloat64(n float64) (r Uint128) {
+	if n >= 0 && n <= maxUint128 {
+		if n <= math.MaxUint64 {
+			return NewUint128FromUint64(uint64(n))
+		}
+
+		f := big.NewFloat(n)
+		bi, _ := f.Int(nil)
+		r.SetBigInt(bi)
+	}
+	return r
+}
+
+// SetBigInt sets x to y, returns x and an error, if any.
+func (x *Uint128) SetBigInt(y *big.Int) (r Uint128, err error) {
+	if y.Sign() < 0 || y.Cmp(MaxUint128) > 0 {
+		return *x, fmt.Errorf("%T.SetInt: overflow", x)
+	}
+
+	var z big.Int
+	z.Set(y)
+	r.Lo = z.Uint64()
+	z.Rsh(&z, 64)
+	r.Hi = z.Uint64()
+	*x = r
+	return r, nil
+}

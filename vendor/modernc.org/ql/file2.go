@@ -131,7 +131,7 @@ func newStorage2(f cfile.File, name string, headroom int64, tempFile func(dir, p
 		f = f1
 	}
 
-	wn := walName(name)
+	wn := WalName(name)
 	if w, err = os.OpenFile(wn, os.O_CREATE|os.O_EXCL|os.O_RDWR, 0666); err != nil {
 		if !os.IsExist(err) {
 			return nil, err
@@ -540,6 +540,19 @@ func (x *btreeIndex2) Clear() (err error) {
 	return x.bt.bt.Clear(x.free)
 }
 
+func (x *btreeIndex2) Exists(indexedValues []interface{}) (bool, error) {
+	switch {
+	case !x.unique:
+		return false, nil
+	case isIndexNull(indexedValues): // unique, NULL
+		return false, nil
+	default: // unique, non NULL
+		k := append(indexedValues, int64(0))
+		_, ok, err := x.bt.bt.Get(x.bt.cmp(k))
+		return ok, err
+	}
+}
+
 func (x *btreeIndex2) Create(indexedValues []interface{}, h int64) (err error) {
 	switch {
 	case !x.unique:
@@ -556,7 +569,7 @@ func (x *btreeIndex2) Create(indexedValues []interface{}, h int64) (err error) {
 		}
 
 		if ok {
-			return fmt.Errorf("cannot insert into unique index: duplicate value(s): %v", indexedValues)
+			return errDuplicateUniqueIndex(indexedValues)
 		}
 
 		return x.bt.set(k, []interface{}{h})

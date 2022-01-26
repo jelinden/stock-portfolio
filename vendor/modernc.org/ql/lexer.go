@@ -21,6 +21,8 @@ const (
 	ccLetter
 	ccDigit
 	ccOther
+	ccOGuill
+	ccCGuill
 )
 
 func runeClass(r rune) int {
@@ -33,6 +35,10 @@ func runeClass(r rune) int {
 		return ccLetter
 	case unicode.IsDigit(r):
 		return ccDigit
+	case r == '«':
+		return ccOGuill
+	case r == '»':
+		return ccCGuill
 	default:
 		return ccOther
 	}
@@ -146,6 +152,18 @@ func (l *lexer) str(lval *yySymType, pref string) int {
 
 	lval.item = s
 	return stringLit
+}
+
+func (l *lexer) delimitedIdentifier(lval *yySymType) int {
+	val := l.TokenBytes(nil)
+	l.sc = 0
+	if len(val) < 5 {
+		l.err("quotedIdentifier too short: %v", val)
+		return int(unicode.ReplacementChar)
+	}
+	s := string(val[2:(len(val) - 2)])
+	lval.item = s
+	return identifier
 }
 
 func (l *lexer) npos() (line, col int) {

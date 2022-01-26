@@ -9,12 +9,13 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"time"
 
+	"github.com/edsrzf/mmap-go"
 	"modernc.org/fileutil"
 	"modernc.org/internal/buffer"
 	"modernc.org/mathutil"
-	"github.com/edsrzf/mmap-go"
 )
 
 const copyBufSize = 1 << 20 // 1 MB.
@@ -22,6 +23,7 @@ const copyBufSize = 1 << 20 // 1 MB.
 var (
 	_ Interface = (*mem)(nil)
 	_ Interface = (*file)(nil)
+	_ Interface = (*windowsFile)(nil)
 
 	_ os.FileInfo = stat{}
 
@@ -42,7 +44,32 @@ type Interface interface {
 }
 
 // Open returns a new Interface backed by f, or an error, if any.
-func Open(f *os.File) (Interface, error) { return newFile(f, 1<<30, 20) }
+//
+// This function does not use memory mapped file I/O on Windows because there
+// some methods, like Truncate, produce errors in the current implementation:
+//
+//	The requested operation cannot be performed on a file with a user-mapped section open.
+//
+// Windows expert needed to fix this.
+func Open(f *os.File) (Interface, error) {
+	if runtime.GOOS == "windows" {
+		return newWindowsFile(f)
+	}
+
+	return newFile(f, 1<<30, 20)
+}
+
+type windowsFile struct {
+	*os.File
+}
+
+func newWindowsFile(f *os.File) (Interface, error) {
+	return &windowsFile{f}, nil
+}
+
+func (f *windowsFile) WriteTo(w io.Writer) (n int64, err error) {
+	return writeTo(f, w)
+}
 
 // OpenMem returns a new Interface, or an error, if any. The Interface content
 // is volatile, it's backed only by process' memory.

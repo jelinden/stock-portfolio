@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -211,11 +210,6 @@ func (db *DB) NewHTTPFS(query string) (*HTTPFS, error) {
 // The elements in a file path are separated by slash ('/', U+002F) characters,
 // regardless of host operating system convention.
 func (f *HTTPFS) Open(name string) (http.File, error) {
-	if filepath.Separator != '/' && strings.Contains(name, string(filepath.Separator)) ||
-		strings.Contains(name, "\x00") {
-		return nil, fmt.Errorf("invalid character in file path: %q", name)
-	}
-
 	name = path.Clean("/" + name)
 	rs, _, err := f.db.Execute(nil, f.get, name)
 	if err != nil {
@@ -246,8 +240,8 @@ func (f *HTTPFS) Open(name string) (http.File, error) {
 	}
 
 	dirName := name
-	if dirName[len(dirName)-1] != filepath.Separator {
-		dirName += string(filepath.Separator)
+	if dirName[len(dirName)-1] != '/' {
+		dirName += "/"
 	}
 	// Open("/a/b"): {/a/b/c.x,/a/b/d.x,/a/e.x,/a/b/f/g.x} -> {c.x,d.x,f}
 	rs, _, err = f.db.Execute(nil, f.dir, dirName)
@@ -263,11 +257,6 @@ func (f *HTTPFS) Open(name string) (http.File, error) {
 		n++
 		switch name := data[0].(type) {
 		case string:
-			if filepath.Separator != '/' && strings.Contains(name, string(filepath.Separator)) ||
-				strings.Contains(name, "\x00") {
-				return false, fmt.Errorf("invalid character in file path: %q", name)
-			}
-
 			name = path.Clean("/" + name)
 			rest := name[x:]
 			parts := strings.Split(rest, "/")

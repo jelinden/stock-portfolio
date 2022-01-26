@@ -21,8 +21,6 @@ func NextPrimeUint16(n uint16) (p uint16, ok bool) {
 }
 
 // IsPrime returns true if n is prime. Typical run time is about 100 ns.
-//
-//TODO rename to IsPrimeUint32
 func IsPrime(n uint32) bool {
 	switch {
 	case n&1 == 0:
@@ -169,8 +167,6 @@ func IsPrimeUint64(n uint64) bool {
 
 // NextPrime returns first prime > n and true if successful or an undefined value and false if there
 // is no next prime in the uint32 limits. Typical run time is about 2 µs.
-//
-//TODO rename to NextPrimeUint32
 func NextPrime(n uint32) (p uint32, ok bool) {
 	switch {
 	case n < 65521:
