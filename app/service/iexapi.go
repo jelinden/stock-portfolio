@@ -50,6 +50,7 @@ func GetClosePrices(symbols ...string) []ClosePrice {
 func getStockDividends(symbol string) []Dividend {
 	rawDividend := []rawDividend{}
 	dividend := util.Get(iexBaseURL+`stock/`+symbol+`/dividends/3m?token=`+config.Config.Token, httpTimeout)
+	//log.Println(string(dividend))
 	err := json.Unmarshal(dividend, &rawDividend)
 	if err != nil {
 		log.Println("Getting dividends for", symbol, "failed", err)
@@ -72,6 +73,7 @@ func getStockDividends(symbol string) []Dividend {
 		}
 		div.ExDate = exDate.Unix() * 1000
 		div.PaymentDate = paymentDate.Unix() * 1000
+		div.Currency = rawDividend[i].Currency
 		dividends = append(dividends, div)
 	}
 	return dividends
@@ -145,6 +147,7 @@ type rawDividend struct {
 	PaymentDate string  `json:"paymentDate"`
 	Amount      float64 `json:"amount"`
 	Type        string  `json:"type"`
+	Currency    string  `json:"currency"`
 }
 
 type Dividend struct {
@@ -153,6 +156,7 @@ type Dividend struct {
 	PaymentDate int64   `json:"paymentDate"`
 	Amount      float64 `json:"amount"`
 	Type        string  `json:"type"`
+	Currency    string  `json:"currency"`
 }
 
 type rawClosePrice struct {

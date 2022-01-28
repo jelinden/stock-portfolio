@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -41,7 +42,8 @@ func saveDividends(dividends []service.Dividend) {
 							amount, 
 							type, 
 							paymentDate, 
-							exDate 
+							exDate,
+							currency
 						from dividend 
 						where symbol = $1 
 							and type = $2
@@ -49,11 +51,32 @@ func saveDividends(dividends []service.Dividend) {
 			item.Symbol, item.Type, item.PaymentDate)
 
 		if div == nil {
-			log.Println("saving", item.Symbol, item.Amount, item.Type, item.PaymentDate, item.ExDate, "to database")
-			err := exec("insert into dividend (symbol, amount, type, paymentDate, exDate) values ($1, $2, $3, $4, $5)",
-				item.Symbol, item.Amount, item.Type, item.PaymentDate, item.ExDate)
+			log.Println("saving", item.Symbol, item.Amount, item.Type, item.PaymentDate, item.ExDate, item.Currency, "to database")
+			err := exec("insert into dividend (symbol, amount, type, paymentDate, exDate, currency) values ($1, $2, $3, $4, $5, $6)",
+				item.Symbol, item.Amount, item.Type, item.PaymentDate, item.ExDate, item.Currency)
 			if err != nil {
 				log.Println(err)
+			}
+		} else {
+			var amount = item.Amount
+			var exDate = item.ExDate
+			if i, ok := div[0]["amount"].(float64); ok {
+				amount = float64(i)
+			}
+			if i, ok := div[0]["exDate"].(int64); ok {
+				exDate = int64(i)
+			}
+			if amount != item.Amount ||
+				exDate != item.ExDate ||
+				fmt.Sprintf("%v", div[0]["currency"]) != item.Currency {
+				log.Println("updating", item.Symbol, div[0]["amount"], item.Type, item.PaymentDate, div[0]["exDate"], div[0]["currency"], "to database")
+				err := exec(`update dividend 
+							set amount=$1, exDate=$2, currency=$3
+							where symbol = $4 and type = $5 and paymentDate = $6`,
+					div[0]["amount"], div[0]["exDate"], div[0]["currency"], item.Symbol, item.Type, item.PaymentDate)
+				if err != nil {
+					log.Println(err)
+				}
 			}
 		}
 	}

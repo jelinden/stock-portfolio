@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"log"
+	"os"
 	"time"
 
 	"github.com/jelinden/stock-portfolio/app/util"
@@ -82,7 +83,8 @@ CREATE TABLE IF NOT EXISTS dividend (
 	exDate int64,
 	paymentDate int64,
 	amount float64,
-	type string
+	type string,
+	currency string
 );
 CREATE INDEX IF NOT EXISTS divSymbolIndex ON dividend (symbol);
 CREATE UNIQUE INDEX IF NOT EXISTS divSymbolPaymentIndex ON dividend (paymentDate, symbol, type);
@@ -96,7 +98,11 @@ CREATE TABLE IF NOT EXISTS history (
 );
 CREATE INDEX IF NOT EXISTS histSymbolIndex ON history (symbol);
 CREATE INDEX IF NOT EXISTS histEpochIndex ON history (epoch);
-CREATE INDEX IF NOT EXISTS histSymbolEpochIndex ON history (symbol, epoch);`
+CREATE INDEX IF NOT EXISTS histSymbolEpochIndex ON history (symbol, epoch);
+`
+const changesToDB = `
+	ALTER TABLE dividend ADD currency string;
+`
 
 // ALTER TABLE history ADD epoch int64;
 // ALTER TABLE portfoliostocks ADD transactionid string;
@@ -110,6 +116,25 @@ func initFileDB() {
 	tx, _ := db.Begin()
 	defer recoverFrom(tx)
 	_, err = tx.Exec(createTables)
+	if err != nil {
+		log.Fatal("fatal error creating tables ", err)
+	}
+	tx.Commit()
+	log.Println("db file", dbFileName, "opened")
+	if os.Getenv("UPDATEPORTFOLIODB") == "update" {
+		updateChangesToDB()
+	}
+}
+
+func updateChangesToDB() {
+	var err error
+	db, err = sql.Open("ql2", dbFileName)
+	if err != nil {
+		log.Fatal("fatal ", err)
+	}
+	tx, _ := db.Begin()
+	defer recoverFrom(tx)
+	_, err = tx.Exec(changesToDB)
 	if err != nil {
 		log.Fatal("fatal error creating tables ", err)
 	}
