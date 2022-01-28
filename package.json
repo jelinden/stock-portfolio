@@ -9,7 +9,10 @@
         "babelify": "NODE_ENV=production browserify build/index.js -g browserify-css -o build/bundle.js -t [ babelify --presets [ es2015 es2016 react ] ]",
         "browserify": "NODE_ENV=production browserify build/bundle.js -t envify -t uglifyify --outfile build/main.bundle.min.js",
         "build": "npm run build-dir && npm run css && npm run img && npm run babelify && npm run browserify",
-        "dev": "npm run build && go build -mod=vendor && ./stock-portfolio"
+        "dev": "npm run build && go build -mod=vendor && ./stock-portfolio",
+        "build-dev": "npm run build-dir && npm run css && npm run img && npm run babelify-dev",
+        "babelify-dev": "NODE_ENV=production browserify build/index.js -g browserify-css -o build/main.bundle.min.js -t [ babelify --presets [ es2015 es2016 react ] ]",
+        "rundev": "npm run build-dev && go build -mod=vendor && ./stock-portfolio"
     },
     "dependencies": {
         "axios": "^0.21.2",
@@ -36,6 +39,6 @@
         "eslint": "^5.16.0",
         "eslint-plugin-react": "^7.13.0",
         "reactify": "^1.1.1",
-        "uglifyify": "^5.0.1"
+        "uglifyify": "^5.0.2"
     }
 }

@@ -4,7 +4,8 @@ import axios from "axios";
 import DatePicker from "react-datepicker";
 import moment from "moment";
 
-import News from "./News";
+//import News from "./News";
+import Dividend from "./Dividend";
 import "react-datepicker/dist/react-datepicker.css";
 
 class Portfolio extends React.Component {
@@ -23,7 +24,6 @@ class Portfolio extends React.Component {
             gain: "",
             failed: false,
             symbols: null,
-            dividendData: null,
             stockMap: null,
             news: null
         };
@@ -32,7 +32,6 @@ class Portfolio extends React.Component {
         this.portfolio = this.portfolio.bind(this);
         this.getUrlParameter = this.getUrlParameter.bind(this);
         this.numberFormat = this.numberFormat.bind(this);
-        this.dividends = this.dividends.bind(this);
     }
 
     handleChange(date) {
@@ -96,17 +95,6 @@ class Portfolio extends React.Component {
             });
     }
 
-    dividends(symbols) {
-        var _this = this;
-        if (symbols) {
-            axios.get("/api/dividends?symbols=" + symbols, { timeout: 6000 }).then(function(result) {
-                if (result.data) {
-                    _this.setState({ dividendData: result.data });
-                }
-            });
-        }
-    }
-
     numberFormat(n) {
         if (n !== undefined) {
             var parts = n.toString().split(".");
@@ -118,9 +106,6 @@ class Portfolio extends React.Component {
     componentDidMount() {
         var _this = this;
         _this.portfolio();
-        setTimeout(function() {
-            _this.dividends(_this.state.symbols);
-        }, 1200);
         _this.interval = setInterval(_this.portfolio, 10000);
     }
 
@@ -335,45 +320,10 @@ class Portfolio extends React.Component {
                         </form>
                     </div>
                     {/* <News news={this.state.news} /> */}
-
-                    <div id="dividends">
-                        <h2>Latest dividend</h2>
-                        <div>
-                            <table class="pure-table">
-                                <thead>
-                                    <tr>
-                                        <th>Symbol</th>
-                                        <th>Ex date</th>
-                                        <th>Payment date</th>
-                                        <th>Amount</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {this.state.dividendData
-                                        ? this.state.dividendData.map((item, index) => (
-                                              <tr>
-                                                  <td>{item.symbol}</td>
-                                                  <td className="right">{this.convertTimestamp(item.exDate, true)}</td>
-                                                  <td className="right">{this.convertTimestamp(item.paymentDate, true)}</td>
-                                                  <td className="right">{item.amount.toFixed(4)}</td>
-                                                  <td className="right">{(this.state.stockMap[item.symbol] * item.amount).toFixed(2)}</td>
-                                              </tr>
-                                          ))
-                                        : ""}
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th />
-                                        <th />
-                                        <th />
-                                        <th />
-                                        <th />
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
+                    <Dividend 
+                        stockMap={this.state.stockMap} 
+                        symbols={this.state.symbols} />
+                    
                 </div>
             </div>
         );
