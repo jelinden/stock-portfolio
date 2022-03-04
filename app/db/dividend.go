@@ -70,11 +70,11 @@ func saveDividends(dividends []service.Dividend) {
 			if amount != item.Amount ||
 				exDate != item.ExDate ||
 				fmt.Sprintf("%v", div[0]["currency"]) != item.Currency {
-				log.Println("updating", item.Symbol, div[0]["amount"], item.Type, item.PaymentDate, div[0]["exDate"], div[0]["currency"], "to database")
+				log.Println("updating", item.Symbol, amount, item.Type, item.PaymentDate, div[0]["exDate"], item.Currency, "to database")
 				err := exec(`update dividend 
 							set amount=$1, exDate=$2, currency=$3
 							where symbol = $4 and type = $5 and paymentDate = $6`,
-					div[0]["amount"], div[0]["exDate"], div[0]["currency"], item.Symbol, item.Type, item.PaymentDate)
+					amount, div[0]["exDate"], item.Currency, item.Symbol, item.Type, item.PaymentDate)
 				if err != nil {
 					log.Println(err)
 				}
