@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"log"
+	"os"
 	"reflect"
 	"time"
 
@@ -21,6 +22,9 @@ func init() {
 	//go util.DoEvery(time.Hour*12, getHistory)
 	go util.DoEvery(time.Minute*15, getQuotes)
 	go util.DoEvery(time.Hour*24, getDividends)
+	if os.Getenv("divs") == "run" {
+		getDividends()
+	}
 }
 
 func exec(command string, args ...interface{}) error {

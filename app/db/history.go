@@ -18,11 +18,12 @@ func GetHistory(portfolioid string) []service.ClosePrice {
 				WHERE portfolioid = $1) AS p
 		WHERE h.symbol = p.symbol
 		AND h.epoch >= p.minDate`, portfolioid)
-	defer rows.Close()
 	if err != nil {
 		log.Printf("failed with '%v'\n", err)
 		return closePrices
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		closePrice := service.ClosePrice{}
 		err := rows.Scan(
@@ -34,7 +35,7 @@ func GetHistory(portfolioid string) []service.ClosePrice {
 		}
 		closePrices = append(closePrices, closePrice)
 	}
-	log.Println("get history took", time.Now().Sub(timeFrom))
+	log.Println("get history took", time.Since(timeFrom))
 	return closePrices
 }
 

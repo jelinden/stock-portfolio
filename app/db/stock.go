@@ -49,10 +49,7 @@ func isQuote(symbol string) bool {
 		row.Scan(&s)
 	}
 	row.Close()
-	if s != "" {
-		return true
-	}
-	return false
+	return s != ""
 }
 
 func SaveQuotes(quotes []service.Quote) {
