@@ -48,6 +48,7 @@ func Init() {
 		log.Println(err)
 	}
 	indexPage = string(result)
+	db.Init()
 }
 
 func main() {
