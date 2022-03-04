@@ -12,7 +12,7 @@ import (
 	"github.com/jelinden/stock-portfolio/app/util"
 )
 
-func init() {
+func Init() {
 	initFileDB()
 	initMemDatabase()
 

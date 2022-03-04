@@ -50,7 +50,7 @@ func GetClosePrices(symbols ...string) []ClosePrice {
 func getStockDividends(symbol string) []Dividend {
 	rawDividend := []rawDividend{}
 	dividend := util.Get(iexBaseURL+`stock/`+symbol+`/dividends/3m?token=`+config.Config.Token, httpTimeout)
-	//log.Println(string(dividend))
+	log.Println(string(dividend))
 	err := json.Unmarshal(dividend, &rawDividend)
 	if err != nil {
 		log.Println("Getting dividends for", symbol, "failed", err)
