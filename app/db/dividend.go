@@ -82,10 +82,12 @@ func saveDividends(dividends []service.Dividend) {
 	}
 }
 
-func getDividends() {
+func getDividends(runNow ...bool) {
 	now := time.Now()
 	// get dividends once per week
-	if now.Weekday() == 1 || now.Weekday() == 3 { // https://golang.org/pkg/time/#Weekday
+	if (len(runNow) > 0 && runNow[0]) ||
+		now.Weekday() == 1 ||
+		now.Weekday() == 3 { // https://golang.org/pkg/time/#Weekday
 		dividends := service.GetDividends(GetPortfolioSymbols()...)
 		if len(dividends) > 0 {
 			log.Printf("got %v dividends\n", len(dividends))
