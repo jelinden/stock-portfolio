@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/jelinden/stock-portfolio/app/service"
@@ -82,10 +83,10 @@ func saveDividends(dividends []service.Dividend) {
 	}
 }
 
-func getDividends(runNow ...bool) {
+func getDividends() {
 	now := time.Now()
 	// get dividends once per week
-	if (len(runNow) > 0 && runNow[0]) ||
+	if os.Getenv("divs") == "run" ||
 		now.Weekday() == 1 ||
 		now.Weekday() == 3 { // https://golang.org/pkg/time/#Weekday
 		dividends := service.GetDividends(GetPortfolioSymbols()...)
