@@ -2,7 +2,9 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -74,6 +76,21 @@ func getStockDividends(symbol string) []Dividend {
 		div.ExDate = exDate.Unix() * 1000
 		div.PaymentDate = paymentDate.Unix() * 1000
 		div.Currency = rawDividend[i].Currency
+
+		if div.Currency == "CAD" {
+			cadusd := util.Get(`https://www.bankofcanada.ca/valet/observations/FXCADUSD/json?recent=1`, httpTimeout)
+			rate := CurrencyRate{}
+			err := json.Unmarshal(cadusd, &rate)
+			if err != nil {
+				log.Println("err", err)
+				return nil
+			}
+			if f, err := strconv.ParseFloat(rate.Observations[0].FXCADUSD.Value, 64); err == nil {
+				fmt.Println("value cadusd", f)
+				div.CurrencyRate = f
+			}
+		}
+
 		dividends = append(dividends, div)
 	}
 	return dividends
@@ -151,12 +168,13 @@ type rawDividend struct {
 }
 
 type Dividend struct {
-	Symbol      string  `json:"symbol"`
-	ExDate      int64   `json:"exDate"`
-	PaymentDate int64   `json:"paymentDate"`
-	Amount      float64 `json:"amount"`
-	Type        string  `json:"type"`
-	Currency    string  `json:"currency"`
+	Symbol       string  `json:"symbol"`
+	ExDate       int64   `json:"exDate"`
+	PaymentDate  int64   `json:"paymentDate"`
+	Amount       float64 `json:"amount"`
+	Type         string  `json:"type"`
+	Currency     string  `json:"currency"`
+	CurrencyRate float64 `json:"currencyRate"`
 }
 
 type rawClosePrice struct {
@@ -170,4 +188,17 @@ type ClosePrice struct {
 	ClosePriceDate string  `sql:"closePriceDate" json:"closePriceDate"`
 	Epoch          int64   `sql:"epoch" json:"epoch"`
 	ClosePrice     float64 `sql:"closePrice" json:"closePrice"`
+}
+
+type CurrencyRate struct {
+	Symbol       string `json:"symbol"`
+	Observations []Rate `json:"observations"`
+}
+
+type Rate struct {
+	FXCADUSD FXCADUSD `json:"FXCADUSD"`
+}
+
+type FXCADUSD struct {
+	Value string `json:"v"`
 }

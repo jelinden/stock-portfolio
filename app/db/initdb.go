@@ -84,7 +84,8 @@ CREATE TABLE IF NOT EXISTS dividend (
 	paymentDate int64,
 	amount float64,
 	type string,
-	currency string
+	currency string,
+	currencyrate float64
 );
 CREATE INDEX IF NOT EXISTS divSymbolIndex ON dividend (symbol);
 CREATE UNIQUE INDEX IF NOT EXISTS divSymbolPaymentIndex ON dividend (paymentDate, symbol, type);
@@ -100,10 +101,13 @@ CREATE INDEX IF NOT EXISTS histSymbolIndex ON history (symbol);
 CREATE INDEX IF NOT EXISTS histEpochIndex ON history (epoch);
 CREATE INDEX IF NOT EXISTS histSymbolEpochIndex ON history (symbol, epoch);
 `
+
 const changesToDB = `
-	ALTER TABLE dividend ADD currency string;
+	ALTER TABLE dividend ADD currencyrate float64;
 `
 
+// ALTER TABLE dividend ADD currencyrate float64;
+// ALTER TABLE dividend ADD currency string;
 // ALTER TABLE history ADD epoch int64;
 // ALTER TABLE portfoliostocks ADD transactionid string;
 
@@ -113,7 +117,10 @@ func initFileDB() {
 	if err != nil {
 		log.Fatal("fatal ", err)
 	}
-	tx, _ := db.Begin()
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer recoverFrom(tx)
 	_, err = tx.Exec(createTables)
 	if err != nil {

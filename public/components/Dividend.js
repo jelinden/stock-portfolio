@@ -44,6 +44,9 @@ class Dividend extends React.Component {
                     var monthlyTotal = 0;
                     var data = result.data;
                     data.forEach((element, index) => {
+                        if (element.currency === 'CAD' && element.currencyRate != null && element.currencyRate !== 0) {
+                            element.amount = element.currencyRate*element.amount;
+                        }
                         if (month === -1) {
                             month = (new Date(element.paymentDate)).getMonth();
                         }
