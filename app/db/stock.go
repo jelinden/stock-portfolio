@@ -54,7 +54,7 @@ func isQuote(symbol string) bool {
 
 func SaveQuotes(quotes []service.Quote) {
 	for _, q := range quotes {
-		if isQuote(q.Symbol) {
+		if q.Symbol != "" && isQuote(q.Symbol) {
 			err := exec(`UPDATE quotes SET 
 					latestPrice = $1,
 					latestUpdate = $2,
@@ -75,7 +75,7 @@ func SaveQuotes(quotes []service.Quote) {
 			if err != nil {
 				log.Printf("failed with '%s' %s\n", err.Error(), q.Symbol)
 			}
-		} else {
+		} else if q.Symbol != "" {
 			err := exec(`INSERT INTO quotes (symbol,companyName,sector,latestPrice,latestUpdate,close,closeTime,change,changePercent,PERatio) 
 				VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);`,
 				q.Symbol,
