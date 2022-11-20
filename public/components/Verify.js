@@ -7,9 +7,9 @@ class Verify extends React.Component {
 
     render() {
         return (
-            <div class="pure-g">
-                <div class="login">
-                    <div class="register">
+            <div className="pure-g">
+                <div className="login">
+                    <div className="register">
                         <h1>Verifying your email address</h1>
                         <p>Please verify your email by clicking the link in the email that was sent to you.</p>
                     </div>

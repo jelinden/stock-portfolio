@@ -47,6 +47,7 @@ class Header extends React.Component {
             })
             .catch(function(error) {
                 if (window.location.pathname !== "/login" && window.location.pathname !== "/signup") {
+                    console.log("redirecting now");
                     location.href = "/login";
                 }
                 _this.setState({
@@ -85,7 +86,7 @@ class Header extends React.Component {
                                 ""
                             )}
                             <li className="pure-menu-item">
-                                <div class="floatright"> {this.state.loggedin ? "Welcome, " + this.state.user.username : "Your personal stock portfolio"} </div>
+                                <div className="floatright"> {this.state.loggedin ? "Welcome, " + this.state.user.username : "Your personal stock portfolio"} </div>
                             </li>
                         </ul>
                     </div>

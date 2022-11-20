@@ -29,6 +29,8 @@ module.exports = {
         "semi": [
             "error",
             "always"
-        ]
+        ],
+        "import/no-named-as-default": 0,
+        "import/prefer-default-export": "off"
     }
 };

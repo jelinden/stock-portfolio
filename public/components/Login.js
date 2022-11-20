@@ -19,11 +19,15 @@ class Login extends React.Component {
             .then(function(result) {
                 _this.setState({
                     user: result.data
-                });
+                }, err => console.log(err));
+            })
+            .catch(err => {
+                console.log("error", err);
             });
     }
 
     getUrlParameter(name) {
+        console.log("getUrlParameter", name);
         name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
         let regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
         let results = regex.exec(window.location.search);
@@ -31,6 +35,9 @@ class Login extends React.Component {
     }
 
     render() {
+        console.log("here");
+        var verified = this.getUrlParameter("verified") === "true" ? "Verification succeeded, please login" : "";
+        var login = this.getUrlParameter("login") === "failed" ? "Login failed" : "";
         return (
             <div className="pure-g">
                 <div className="loginPage">
@@ -46,12 +53,10 @@ class Login extends React.Component {
                         </form>
                         <div>
                             New user? Please
-                            <a className="a-link" href="/signup">
-                                {` signup`}
-                            </a>.
+                            <a className="a-link" href="/signup"> signup</a>.
                         </div>
-                        <div className="alert"> {this.getUrlParameter("login") === "failed" ? "Login failed" : ""} </div>
-                        <div className="success"> {this.getUrlParameter("verified") === "true" ? "Verification succeeded, please login" : ""} </div>
+                        <div className="alert"> {login} </div>
+                        <div className="success"> {verified} </div>
                     </div>
                     <div className="exampleImg">
                         <img src="/img/portfolio-example.png" alt="Portfolio example view" />

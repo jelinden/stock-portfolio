@@ -7,6 +7,7 @@ class Signup extends React.Component {
     }
 
     getUrlParameter(name) {
+        console.log("here1");
         name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
         let regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
         let results = regex.exec(window.location.search);
@@ -14,11 +15,15 @@ class Signup extends React.Component {
     }
 
     render() {
+        console.log("here2");
+        var emailUsed = this.getUrlParameter("emailused") === "true" ? "Email address already used" : "";
+        var credValidation = this.getUrlParameter("validation") === "credentials" ? "Password should be over 8 characters long" : "";
+        var emailValidation = this.getUrlParameter("validation") === "email" ? "Check the email" : "";
         return (
-            <div class="pure-g">
+            <div className="pure-g">
                 <div className="loginPage">
-                    <div class="login">
-                        <div class="register">
+                    <div className="login">
+                        <div className="register">
                             <h1>Signup</h1>
                             <form id="signup" method="post" action="/signup" className="pure-form pure-form-stacked">
                                 <label for="username">Username</label>
@@ -32,9 +37,9 @@ class Signup extends React.Component {
                                 </button>
                             </form>
                             <div className="alert">
-                                {this.getUrlParameter("emailused") === "true" ? "Email address already used" : ""}
-                                {this.getUrlParameter("validation") === "credentials" ? "Password should be over 8 characters long" : ""}
-                                {this.getUrlParameter("validation") === "email" ? "Check the email" : ""}
+                                {emailUsed}
+                                {credValidation}
+                                {emailValidation}
                             </div>
                         </div>
                     </div>

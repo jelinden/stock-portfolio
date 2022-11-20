@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Home from "./Home";
 import Signup from "./Signup";
 import Login from "./Login";
@@ -9,17 +9,15 @@ import Transactions from "./Transactions";
 import Health from "./Health";
 
 const Main = () => (
-    <main>
-        <Switch>
-            <Route exact path="/" component={Home} />
-            <Route path="/portfolio/:id" component={Portfolio} />
-            <Route exact path="/signup" component={Signup} />
-            <Route exact path="/login" component={Login} />
-            <Route exact path="/verify" component={Verify} />
-            <Route exact path="/transactions/:id" component={Transactions} />
-            <Route exact path="/health" component={Health} />
-        </Switch>
-    </main>
+    <Routes>
+        <Route exact path="/" element={<Home/>} />
+        <Route path="/portfolio/:portfolioId" element={<Portfolio/>} />
+        <Route exact path="/signup" element={<Signup/>} />
+        <Route exact path="/login" element={<Login/>} />
+        <Route exact path="/verify" element={<Verify/>} />
+        <Route exact path="/transactions/:portfolioId" element={<Transactions/>} />
+        <Route exact path="/health" element={<Health/>} />
+    </Routes>
 );
 
 export default Main;

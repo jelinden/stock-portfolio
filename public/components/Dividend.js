@@ -35,7 +35,6 @@ class Dividend extends React.Component {
 
     dividends(symbols) {
         var _this = this;
-        console.log("getting dividends")
         if (symbols) {
             axios.get("/api/dividends?symbols=" + symbols, { timeout: 6000 }).then(function(result) {
                 if (result.data) {
@@ -50,10 +49,14 @@ class Dividend extends React.Component {
                         if (month === -1) {
                             month = (new Date(element.paymentDate)).getMonth();
                         }
-                        if (month !== (new Date(element.paymentDate)).getMonth()) {
+                        if (month !== (new Date(element.paymentDate)).getMonth() && (data.length !== index+1)) {
                             month = (new Date(element.paymentDate)).getMonth();
                             data[index-1].total = monthlyTotal;
                             monthlyTotal = _this.props.stockMap[element.symbol] * element.amount;
+                        } else if (data.length === index+1) {
+                            data[index-1].total = monthlyTotal;
+                            monthlyTotal = _this.props.stockMap[element.symbol] * element.amount;
+                            data[index].total = monthlyTotal;
                         } else {
                             monthlyTotal += _this.props.stockMap[element.symbol] * element.amount;
                         }
@@ -81,7 +84,7 @@ class Dividend extends React.Component {
         <div id="dividends">
         <h2>Latest dividend</h2>
         <div>
-            <table class="pure-table">
+            <table className="pure-table">
                 <thead>
                     <tr>
                         <th>Symbol</th>
@@ -95,7 +98,7 @@ class Dividend extends React.Component {
                 <tbody>
                     {this.state.dividendData
                         ? this.state.dividendData.map((item, index) => (
-                              <tr>
+                              <tr key={"tr"+index}>
                                   <td>{item.symbol}</td>
                                   <td className="right">{this.convertTimestamp(item.exDate, true)}</td>
                                   <td className="right">{this.convertTimestamp(item.paymentDate, true)}</td>
@@ -108,6 +111,7 @@ class Dividend extends React.Component {
                 </tbody>
                 <tfoot>
                     <tr>
+                        <th />
                         <th />
                         <th />
                         <th />
