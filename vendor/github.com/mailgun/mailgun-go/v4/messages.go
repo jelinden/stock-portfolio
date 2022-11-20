@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -526,11 +527,34 @@ var ErrInvalidMessage = errors.New("message not valid")
 
 // Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
 // It returns the Mailgun server response, which consists of two components:
-// a human-readable status message, and a message ID.  The status and message ID are set only
-// if no error occurred.
+// * A human-readable status message, typically "Queued. Thank you."
+// * A Message ID, which is the id used to track the queued message. The message id is useful
+//   when contacting support to report an issue with a specific message or to relate a
+//   delivered, accepted or failed event back to specific message.
+//
+// The status and message ID are only returned if no error occurred.
+//
+// Error returns can be of type `error.Error` which wrap internal and standard
+// golang errors like `url.Error`. The error can also be of type
+// mailgun.UnexpectedResponseError which contains the error returned by the mailgun API.
+//
+//  mailgun.UnexpectedResponseError {
+//    URL:      "https://api.mailgun.com/v3/messages",
+//    Expected: 200,
+//    Actual:   400,
+//    Data:     "Domain not found: example.com",
+//  }
+//
+//  See the public mailgun documentation for all possible return codes and error messages
 func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, id string, err error) {
 	if mg.domain == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
+		return
+	}
+
+	invalidChars := ":&'@(),!?#;%+=<>"
+	if i := strings.ContainsAny(mg.domain, invalidChars); i {
+		err = fmt.Errorf("you called Send() with a domain that contains invalid characters")
 		return
 	}
 
@@ -648,12 +672,20 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, message.specific.endpoint(), message.domain))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	// Override any HTTP headers if provided
+	for k, v := range mg.overrideHeaders {
+		r.addHeader(k, v)
+	}
 
 	var response sendMessageResponse
 	err = postResponseFromJSON(ctx, r, payload, &response)
 	if err == nil {
 		mes = response.Message
 		id = response.Id
+	}
+
+	if r.capturedCurlOutput != "" {
+		mg.capturedCurlOutput = r.capturedCurlOutput
 	}
 
 	return
