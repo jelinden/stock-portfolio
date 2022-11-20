@@ -35,7 +35,6 @@ func GetDividend(symbols string) []service.Dividend {
 			if dividends[i]["currency"] != nil {
 				div.Currency = dividends[i]["currency"].(string)
 			}
-			log.Println(dividends[i])
 			if dividends[i]["currencyrate"] != nil {
 				div.CurrencyRate = dividends[i]["currencyrate"].(float64)
 				log.Println("currencyrate", div.CurrencyRate)

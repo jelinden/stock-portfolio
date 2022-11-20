@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ventu-io/go-shortid"
+	"github.com/teris-io/shortid"
 	"golang.org/x/crypto/pbkdf2"
 )
 

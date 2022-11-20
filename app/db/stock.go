@@ -186,7 +186,6 @@ func GetPortfolio(portfolioid string) domain.PortfolioStocks {
 }
 
 func GetTransactions(portfolioid string) domain.PortfolioStocks {
-	log.Println("portfolioid", portfolioid)
 	rows, err := db.Query(`SELECT
 			p.transactionid,
 			p.portfolioid,
