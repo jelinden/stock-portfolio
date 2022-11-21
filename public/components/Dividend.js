@@ -51,14 +51,14 @@ class Dividend extends React.Component {
                         
                         if (month === -1) { month = paymentMonth; }
 
-                        if (month !== paymentMonth) {
+                        if (month !== paymentMonth) { // month changed
                             month = paymentMonth;
                             data[index-1].total = monthlyTotal;
                             monthlyTotal = _this.props.stockMap[element.symbol] * element.amount;
-                            data[index].total = monthlyTotal;
-                        } else if (month === paymentMonth) {
+                        } else if (month === paymentMonth) { // same month as last one
                             monthlyTotal += _this.props.stockMap[element.symbol] * element.amount;
-                        } else if (data.length === index+1) { // the last line
+                        }
+                        if (data.length === index+1) { // the last line
                             monthlyTotal += _this.props.stockMap[element.symbol] * element.amount;
                             data[index].total = monthlyTotal;    
                         }
