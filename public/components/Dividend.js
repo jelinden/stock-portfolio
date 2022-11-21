@@ -43,22 +43,24 @@ class Dividend extends React.Component {
                     var monthlyTotal = 0;
                     var data = result.data;
                     data.forEach((element, index) => {
+                        const paymentMonth = (new Date(element.paymentDate)).getMonth();
+
                         if (element.currency === 'CAD' && element.currencyRate != null && element.currencyRate !== 0) {
                             element.amount = element.currencyRate*element.amount;
                         }
-                        if (month === -1) {
-                            month = (new Date(element.paymentDate)).getMonth();
-                        }
-                        if (month !== (new Date(element.paymentDate)).getMonth() && (data.length !== index+1)) {
-                            month = (new Date(element.paymentDate)).getMonth();
-                            data[index-1].total = monthlyTotal;
-                            monthlyTotal = _this.props.stockMap[element.symbol] * element.amount;
-                        } else if (data.length === index+1) {
+                        
+                        if (month === -1) { month = paymentMonth; }
+
+                        if (month !== paymentMonth) {
+                            month = paymentMonth;
                             data[index-1].total = monthlyTotal;
                             monthlyTotal = _this.props.stockMap[element.symbol] * element.amount;
                             data[index].total = monthlyTotal;
-                        } else {
+                        } else if (month === paymentMonth) {
                             monthlyTotal += _this.props.stockMap[element.symbol] * element.amount;
+                        } else if (data.length === index+1) { // the last line
+                            monthlyTotal += _this.props.stockMap[element.symbol] * element.amount;
+                            data[index].total = monthlyTotal;    
                         }
                     });
                     _this.setState({ dividendData: data });
