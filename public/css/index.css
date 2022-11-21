@@ -242,7 +242,8 @@ a {
 }
 
 .pure-table th {
-    padding: 0.3em !important;
+    padding-left: 0.2em !important;
+    padding-right: 0.2em !important;
     padding-top: 0.4em !important;
     padding-bottom: 0.4em !important;
 }
