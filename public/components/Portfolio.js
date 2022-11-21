@@ -257,7 +257,6 @@ function Portfolio() {
                                     </th>
                                     <th />
                                     <th />
-                                    <th />
                                 </tr>
                             </tfoot>
                         </table>
