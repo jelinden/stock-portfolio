@@ -87,12 +87,12 @@ function Portfolio() {
     }
 
     useEffect(() => {
-        portfolio();
+        const cleanup = portfolio();
         const interval = setInterval(portfolio, 20000);
-        return function cleanup() {
+        return () => {
             clearInterval(interval);
         };
-    });
+    }, []);
 
     const convertTimestamp = (timestamp, full) => {
         //console.log(timestamp, new Date(timestamp));
