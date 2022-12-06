@@ -170,6 +170,9 @@ a {
 .pure-g {
     letter-spacing: 0em !important;
     margin: 0 auto;
+    font-family: Tahoma, Geneva, sans-serif !important;
+    color: #2d2d2d !important;
+    font-weight: 100 !important;
 }
 
 .content {
