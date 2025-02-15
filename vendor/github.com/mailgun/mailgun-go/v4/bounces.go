@@ -76,10 +76,8 @@ func (ci *BouncesIterator) Next(ctx context.Context, items *[]Bounce) bool {
 	cpy := make([]Bounce, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
-	if len(ci.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ci.Items) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
@@ -134,10 +132,8 @@ func (ci *BouncesIterator) Previous(ctx context.Context, items *[]Bounce) bool {
 	cpy := make([]Bounce, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
-	if len(ci.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ci.Items) != 0
 }
 
 func (ci *BouncesIterator) fetch(ctx context.Context, url string) error {
@@ -163,20 +159,20 @@ func (mg *MailgunImpl) GetBounce(ctx context.Context, address string) (Bounce, e
 // AddBounce files a bounce report.
 // Address identifies the intended recipient of the message that bounced.
 // Code corresponds to the numeric response given by the e-mail server which rejected the message.
-// Error provides the corresponding human readable reason for the problem.
+// Error provides the corresponding human-readable reason for the problem.
 // For example,
 // here's how the these two fields relate.
 // Suppose the SMTP server responds with an error, as below.
-// Then, . . .
+// Then, ...
 //
-//      550  Requested action not taken: mailbox unavailable
-//     \___/\_______________________________________________/
-//       |                         |
-//       `-- Code                  `-- Error
+//	 550  Requested action not taken: mailbox unavailable
+//	\___/\_______________________________________________/
+//	  |                         |
+//	  `-- Code                  `-- Error
 //
 // Note that both code and error exist as strings, even though
 // code will report as a number.
-func (mg *MailgunImpl) AddBounce(ctx context.Context, address, code, error string) error {
+func (mg *MailgunImpl) AddBounce(ctx context.Context, address, code, bounceError string) error {
 	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -186,9 +182,21 @@ func (mg *MailgunImpl) AddBounce(ctx context.Context, address, code, error strin
 	if code != "" {
 		payload.addValue("code", code)
 	}
-	if error != "" {
-		payload.addValue("error", error)
+	if bounceError != "" {
+		payload.addValue("error", bounceError)
 	}
+	_, err := makePostRequest(ctx, r, payload)
+	return err
+}
+
+// Add Bounces adds a list of bounces to the bounce list
+func (mg *MailgunImpl) AddBounces(ctx context.Context, bounces []Bounce) error {
+	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newJSONEncodedPayload(bounces)
+
 	_, err := makePostRequest(ctx, r, payload)
 	return err
 }

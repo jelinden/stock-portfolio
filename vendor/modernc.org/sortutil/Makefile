@@ -54,7 +54,7 @@ cpu: clean
 
 edit:
 	touch log
-	gvim -p Makefile *.go &
+	gvim -p Makefile go.mod builder.json *.go &
 
 editor:
 	gofmt -l -s -w *.go

@@ -29,7 +29,7 @@ cpu: clean
 	go tool pprof -lines *.test cpu.out
 
 edit:
-	gvim -p Makefile *.go &
+	gvim -p Makefile go.mod builder.json *.go &
 
 editor:
 	date 2>&1 | tee log

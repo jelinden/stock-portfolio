@@ -79,7 +79,7 @@ func (ri *CredentialsIterator) Next(ctx context.Context, items *[]Credential) bo
 	if len(ri.Items) == 0 {
 		return false
 	}
-	ri.offset = ri.offset + len(ri.Items)
+	ri.offset += len(ri.Items)
 	return true
 }
 
@@ -141,7 +141,7 @@ func (ri *CredentialsIterator) Previous(ctx context.Context, items *[]Credential
 		return false
 	}
 
-	ri.offset = ri.offset - (ri.limit * 2)
+	ri.offset -= ri.limit * 2
 	if ri.offset < 0 {
 		ri.offset = 0
 	}
@@ -153,10 +153,8 @@ func (ri *CredentialsIterator) Previous(ctx context.Context, items *[]Credential
 	cpy := make([]Credential, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
-	if len(ri.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ri.Items) != 0
 }
 
 func (ri *CredentialsIterator) fetch(ctx context.Context, skip, limit int) error {

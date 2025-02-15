@@ -3,6 +3,7 @@ package mailgun
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
@@ -89,7 +90,7 @@ func (ei *EventIterator) Err() error {
 // Next retrieves the next page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
+func (ei *EventIterator) Next(ctx context.Context, ee *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
@@ -97,7 +98,7 @@ func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = ParseEvents(ei.Items)
+	*ee, ei.err = ParseEvents(ei.Items)
 	if ei.err != nil {
 		return false
 	}
@@ -110,7 +111,7 @@ func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
 // First retrieves the first page of events from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (ei *EventIterator) First(ctx context.Context, events *[]Event) bool {
+func (ei *EventIterator) First(ctx context.Context, ee *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
@@ -118,7 +119,7 @@ func (ei *EventIterator) First(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = ParseEvents(ei.Items)
+	*ee, ei.err = ParseEvents(ei.Items)
 	return true
 }
 
@@ -126,7 +127,7 @@ func (ei *EventIterator) First(ctx context.Context, events *[]Event) bool {
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (ei *EventIterator) Last(ctx context.Context, events *[]Event) bool {
+func (ei *EventIterator) Last(ctx context.Context, ee *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
@@ -134,14 +135,14 @@ func (ei *EventIterator) Last(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = ParseEvents(ei.Items)
+	*ee, ei.err = ParseEvents(ei.Items)
 	return true
 }
 
 // Previous retrieves the previous page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (ei *EventIterator) Previous(ctx context.Context, events *[]Event) bool {
+func (ei *EventIterator) Previous(ctx context.Context, ee *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
@@ -152,11 +153,9 @@ func (ei *EventIterator) Previous(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = ParseEvents(ei.Items)
-	if len(ei.Items) == 0 {
-		return false
-	}
-	return true
+	*ee, ei.err = ParseEvents(ei.Items)
+
+	return len(ei.Items) != 0
 }
 
 func (ei *EventIterator) fetch(ctx context.Context, url string) error {
@@ -165,7 +164,7 @@ func (ei *EventIterator) fetch(ctx context.Context, url string) error {
 	r.setClient(ei.mg.Client())
 	r.setBasicAuth(basicAuthUser, ei.mg.APIKey())
 
-	resp, err := makeRequest(ctx, r, "GET", nil)
+	resp, err := makeRequest(ctx, r, http.MethodGet, nil)
 	if err != nil {
 		return err
 	}
@@ -187,26 +186,27 @@ type EventPoller struct {
 	err           error
 }
 
-// Poll the events api and return new events as they occur
-//  it = mg.PollEvents(&ListEventOptions{
-//    // Only events with a timestamp after this date/time will be returned
-//    Begin:        time.Now().Add(time.Second * -3),
-//    // How often we poll the api for new events
-//    PollInterval: time.Second * 4
-//  })
+// PollEvents polls the events api and return new events as they occur
 //
-//  var events []Event
-//  ctx, cancel := context.WithCancel(context.Background())
+//	it = mg.PollEvents(&ListEventOptions{
+//		// Only events with a timestamp after this date/time will be returned
+//		Begin:        time.Now().Add(time.Second * -3),
+//		// How often we poll the api for new events
+//		PollInterval: time.Second * 4
+//	})
 //
-//  // Blocks until new events appear or context is cancelled
-//  for it.Poll(ctx, &events) {
-//    for _, event := range(events) {
-//      fmt.Printf("Event %+v\n", event)
-//    }
-//  }
-//  if it.Err() != nil {
-//    log.Fatal(it.Err())
-//  }
+//	var events []Event
+//	ctx, cancel := context.WithCancel(context.Background())
+//
+//	// Blocks until new events appear or context is cancelled
+//	for it.Poll(ctx, &events) {
+//		for _, event := range(events) {
+//			fmt.Printf("Event %+v\n", event)
+//		}
+//	}
+//	if it.Err() != nil {
+//		log.Fatal(it.Err())
+//	}
 func (mg *MailgunImpl) PollEvents(opts *ListEventOptions) *EventPoller {
 	now := time.Now()
 	// ForceAscending must be set
@@ -234,7 +234,7 @@ func (ep *EventPoller) Err() error {
 	return ep.err
 }
 
-func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
+func (ep *EventPoller) Poll(ctx context.Context, ee *[]Event) bool {
 	var currentPage string
 	var results []Event
 
@@ -248,7 +248,7 @@ func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
 
 		// Attempt to get a page of events
 		var page []Event
-		if ep.it.Next(ctx, &page) == false {
+		if !ep.it.Next(ctx, &page) {
 			if ep.it.Err() == nil && len(page) == 0 {
 				// No events, sleep for our poll interval
 				goto SLEEP
@@ -266,8 +266,7 @@ func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
 
 		// If we have events to return
 		if len(results) != 0 {
-			*events = results
-			results = nil
+			*ee = results
 			return true
 		}
 
@@ -277,15 +276,14 @@ func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
 		ep.it.Paging.Next = currentPage
 
 		// Sleep the rest of our duration
-		tick := time.NewTicker(ep.opts.PollInterval)
+		timer := time.NewTimer(ep.opts.PollInterval)
 		select {
 		case <-ctx.Done():
+			timer.Stop()
 			return false
-		case <-tick.C:
-			tick.Stop()
+		case <-timer.C:
 		}
 	}
-
 }
 
 // Given time.Time{} return a float64 as given in mailgun event timestamps

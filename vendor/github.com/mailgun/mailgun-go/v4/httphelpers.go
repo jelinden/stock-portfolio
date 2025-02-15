@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -14,19 +13,22 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"sync"
 
-	"github.com/pkg/errors"
+	"github.com/mailgun/errors"
 )
 
-var validURL = regexp.MustCompile(`/v[2-4].*`)
+var validURL = regexp.MustCompile(`/v[1-5].*`)
 
 type httpRequest struct {
-	URL                string
-	Parameters         map[string][]string
-	Headers            map[string]string
-	BasicAuthUser      string
-	BasicAuthPassword  string
-	Client             *http.Client
+	URL               string
+	Parameters        map[string][]string
+	Headers           map[string]string
+	BasicAuthUser     string
+	BasicAuthPassword string
+	Client            *http.Client
+
+	mu                 sync.RWMutex
 	capturedCurlOutput string
 }
 
@@ -37,7 +39,7 @@ type httpResponse struct {
 
 type payload interface {
 	getPayloadBuffer() (*bytes.Buffer, error)
-	getContentType() string
+	getContentType() (string, error)
 	getValues() []keyValuePair
 }
 
@@ -58,7 +60,7 @@ type keyNameBuff struct {
 	value []byte
 }
 
-type formDataPayload struct {
+type FormDataPayload struct {
 	contentType string
 	Values      []keyValuePair
 	Files       []keyValuePair
@@ -71,11 +73,11 @@ type urlEncodedPayload struct {
 }
 
 type jsonEncodedPayload struct {
-	payload interface{}
+	payload any
 }
 
-func newHTTPRequest(url string) *httpRequest {
-	return &httpRequest{URL: url, Client: http.DefaultClient}
+func newHTTPRequest(uri string) *httpRequest {
+	return &httpRequest{URL: uri, Client: http.DefaultClient}
 }
 
 func (r *httpRequest) addParameter(name, value string) {
@@ -94,7 +96,7 @@ func (r *httpRequest) setBasicAuth(user, password string) {
 	r.BasicAuthPassword = password
 }
 
-func newJSONEncodedPayload(payload interface{}) *jsonEncodedPayload {
+func newJSONEncodedPayload(payload any) *jsonEncodedPayload {
 	return &jsonEncodedPayload{payload: payload}
 }
 
@@ -107,11 +109,11 @@ func (j *jsonEncodedPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	return bytes.NewBuffer(b), nil
 }
 
-func (j *jsonEncodedPayload) getContentType() string {
-	return "application/json"
+func (*jsonEncodedPayload) getContentType() (string, error) {
+	return "application/json", nil
 }
 
-func (j *jsonEncodedPayload) getValues() []keyValuePair {
+func (*jsonEncodedPayload) getValues() []keyValuePair {
 	return nil
 }
 
@@ -128,99 +130,138 @@ func (f *urlEncodedPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	for _, keyVal := range f.Values {
 		data.Add(keyVal.key, keyVal.value)
 	}
+
 	return bytes.NewBufferString(data.Encode()), nil
 }
 
-func (f *urlEncodedPayload) getContentType() string {
-	return "application/x-www-form-urlencoded"
+func (*urlEncodedPayload) getContentType() (string, error) {
+	return "application/x-www-form-urlencoded", nil
 }
 
 func (f *urlEncodedPayload) getValues() []keyValuePair {
 	return f.Values
 }
 
-func (r *httpResponse) parseFromJSON(v interface{}) error {
+func (r *httpResponse) parseFromJSON(v any) error {
 	return json.Unmarshal(r.Data, v)
 }
 
-func newFormDataPayload() *formDataPayload {
-	return &formDataPayload{}
+func NewFormDataPayload() *FormDataPayload {
+	return &FormDataPayload{}
 }
 
-func (f *formDataPayload) getValues() []keyValuePair {
+func (f *FormDataPayload) getValues() []keyValuePair {
 	return f.Values
 }
 
-func (f *formDataPayload) addValue(key, value string) {
+func (f *FormDataPayload) addValue(key, value string) {
 	f.Values = append(f.Values, keyValuePair{key: key, value: value})
 }
 
-func (f *formDataPayload) addFile(key, file string) {
+func (f *FormDataPayload) addFile(key, file string) {
 	f.Files = append(f.Files, keyValuePair{key: key, value: file})
 }
 
-func (f *formDataPayload) addBuffer(key, file string, buff []byte) {
+func (f *FormDataPayload) addBuffer(key, file string, buff []byte) {
 	f.Buffers = append(f.Buffers, keyNameBuff{key: key, name: file, value: buff})
 }
 
-func (f *formDataPayload) addReadCloser(key, name string, rc io.ReadCloser) {
+func (f *FormDataPayload) addReadCloser(key, name string, rc io.ReadCloser) {
 	f.ReadClosers = append(f.ReadClosers, keyNameRC{key: key, name: name, value: rc})
 }
 
-func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
+func (f *FormDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	data := &bytes.Buffer{}
 	writer := multipart.NewWriter(data)
 	defer writer.Close()
 
 	for _, keyVal := range f.Values {
-		if tmp, err := writer.CreateFormField(keyVal.key); err == nil {
-			tmp.Write([]byte(keyVal.value))
-		} else {
+		tmp, err := writer.CreateFormField(keyVal.key)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = tmp.Write([]byte(keyVal.value))
+		if err != nil {
 			return nil, err
 		}
 	}
 
 	for _, file := range f.Files {
-		if tmp, err := writer.CreateFormFile(file.key, path.Base(file.value)); err == nil {
-			if fp, err := os.Open(file.value); err == nil {
-				defer fp.Close()
-				io.Copy(tmp, fp)
-			} else {
-				return nil, err
+		err := func() error {
+			tmp, err := writer.CreateFormFile(file.key, path.Base(file.value))
+			if err != nil {
+				return err
 			}
-		} else {
+
+			fp, err := os.Open(file.value)
+			if err != nil {
+				return err
+			}
+
+			defer fp.Close()
+
+			_, err = io.Copy(tmp, fp)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}()
+		if err != nil {
 			return nil, err
 		}
 	}
 
 	for _, file := range f.ReadClosers {
-		if tmp, err := writer.CreateFormFile(file.key, file.name); err == nil {
+		err := func() error {
+			tmp, err := writer.CreateFormFile(file.key, file.name)
+			if err != nil {
+				return err
+			}
+
 			defer file.value.Close()
-			io.Copy(tmp, file.value)
-		} else {
+
+			_, err = io.Copy(tmp, file.value)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}()
+		if err != nil {
 			return nil, err
 		}
 	}
 
 	for _, buff := range f.Buffers {
-		if tmp, err := writer.CreateFormFile(buff.key, buff.name); err == nil {
-			r := bytes.NewReader(buff.value)
-			io.Copy(tmp, r)
-		} else {
+		tmp, err := writer.CreateFormFile(buff.key, buff.name)
+		if err != nil {
+			return nil, err
+		}
+
+		r := bytes.NewReader(buff.value)
+		_, err = io.Copy(tmp, r)
+		if err != nil {
 			return nil, err
 		}
 	}
 
+	// TODO(vtopc): getPayloadBuffer is not just a getter, it also sets the content type
 	f.contentType = writer.FormDataContentType()
 
 	return data, nil
 }
 
-func (f *formDataPayload) getContentType() string {
+func (f *FormDataPayload) getContentType() (string, error) {
 	if f.contentType == "" {
-		f.getPayloadBuffer()
+		_, err := f.getPayloadBuffer()
+		if err != nil {
+			return "", err
+		}
 	}
-	return f.contentType
+
+	return f.contentType, nil
 }
 
 func (r *httpRequest) addHeader(name, value string) {
@@ -231,23 +272,23 @@ func (r *httpRequest) addHeader(name, value string) {
 }
 
 func (r *httpRequest) makeGetRequest(ctx context.Context) (*httpResponse, error) {
-	return r.makeRequest(ctx, "GET", nil)
+	return r.makeRequest(ctx, http.MethodGet, nil)
 }
 
 func (r *httpRequest) makePostRequest(ctx context.Context, payload payload) (*httpResponse, error) {
-	return r.makeRequest(ctx, "POST", payload)
+	return r.makeRequest(ctx, http.MethodPost, payload)
 }
 
 func (r *httpRequest) makePutRequest(ctx context.Context, payload payload) (*httpResponse, error) {
-	return r.makeRequest(ctx, "PUT", payload)
+	return r.makeRequest(ctx, http.MethodPut, payload)
 }
 
 func (r *httpRequest) makeDeleteRequest(ctx context.Context) (*httpResponse, error) {
-	return r.makeRequest(ctx, "DELETE", nil)
+	return r.makeRequest(ctx, http.MethodDelete, nil)
 }
 
 func (r *httpRequest) NewRequest(ctx context.Context, method string, payload payload) (*http.Request, error) {
-	url, err := r.generateUrlWithParameters()
+	uri, err := r.generateUrlWithParameters()
 	if err != nil {
 		return nil, err
 	}
@@ -260,15 +301,19 @@ func (r *httpRequest) NewRequest(ctx context.Context, method string, payload pay
 	} else {
 		body = nil
 	}
-	req, err := http.NewRequest(method, url, body)
+
+	req, err := http.NewRequestWithContext(ctx, method, uri, body)
 	if err != nil {
 		return nil, err
 	}
 
-	req = req.WithContext(ctx)
+	if payload != nil {
+		contentType, err := payload.getContentType()
+		if err != nil {
+			return nil, err
+		}
 
-	if payload != nil && payload.getContentType() != "" {
-		req.Header.Add("Content-Type", payload.getContentType())
+		req.Header.Add("Content-Type", contentType)
 	}
 
 	if r.BasicAuthUser != "" && r.BasicAuthPassword != "" {
@@ -283,6 +328,7 @@ func (r *httpRequest) NewRequest(ctx context.Context, method string, payload pay
 		}
 		req.Header.Add(header, value)
 	}
+
 	return req, nil
 }
 
@@ -294,62 +340,64 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 
 	if Debug {
 		if CaptureCurlOutput {
-			r.capturedCurlOutput = r.curlString(req, payload)
+			r.mu.Lock()
+			r.capturedCurlOutput = curlString(req, payload)
+			r.mu.Unlock()
 		} else {
-			fmt.Println(r.curlString(req, payload))
+			fmt.Println(curlString(req, payload))
 		}
 	}
-
-	response := httpResponse{}
 
 	resp, err := r.Client.Do(req)
-	if resp != nil {
-		response.Code = resp.StatusCode
-	}
 	if err != nil {
-		if urlErr, ok := err.(*url.Error); ok {
-			if urlErr.Err == io.EOF {
-				return nil, errors.Wrap(err, "remote server prematurely closed connection")
-			}
+		var urlErr *url.Error
+		if errors.As(err, &urlErr) && urlErr != nil && errors.Is(urlErr.Err, io.EOF) {
+			return nil, errors.Wrap(err, "remote server prematurely closed connection")
 		}
+
 		return nil, errors.Wrap(err, "while making http request")
 	}
 
 	defer resp.Body.Close()
-	responseBody, err := ioutil.ReadAll(resp.Body)
+
+	response := httpResponse{
+		Code: resp.StatusCode,
+	}
+
+	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, "while reading response body")
 	}
 
 	response.Data = responseBody
+
 	return &response, nil
 }
 
 func (r *httpRequest) generateUrlWithParameters() (string, error) {
-	url, err := url.Parse(r.URL)
+	uri, err := url.Parse(r.URL)
 	if err != nil {
 		return "", err
 	}
 
-	if !validURL.MatchString(url.Path) {
-		return "", errors.New(`BaseAPI must end with a /v2, /v3 or /v4; setBaseAPI("https://host/v3")`)
+	if !validURL.MatchString(uri.Path) {
+		return "", errors.New(`APIBase must end with a /v1, /v2, /v3 or /v4; SetAPIBase("https://host/v3")`)
 	}
 
-	q := url.Query()
-	if r.Parameters != nil && len(r.Parameters) > 0 {
+	q := uri.Query()
+	if len(r.Parameters) > 0 {
 		for name, values := range r.Parameters {
 			for _, value := range values {
 				q.Add(name, value)
 			}
 		}
 	}
-	url.RawQuery = q.Encode()
+	uri.RawQuery = q.Encode()
 
-	return url.String(), nil
+	return uri.String(), nil
 }
 
-func (r *httpRequest) curlString(req *http.Request, p payload) string {
-
+func curlString(req *http.Request, p payload) string {
 	parts := []string{"curl", "-i", "-X", req.Method, req.URL.String()}
 	for key, value := range req.Header {
 		if key == "Authorization" {
@@ -364,10 +412,9 @@ func (r *httpRequest) curlString(req *http.Request, p payload) string {
 		parts = append(parts, fmt.Sprintf("-H \"Host: %s\"", req.Host))
 	}
 
-	//parts = append(parts, fmt.Sprintf(" --user '%s:%s'", r.BasicAuthUser, r.BasicAuthPassword))
-
 	if p != nil {
-		if p.getContentType() == "application/json" {
+		contentType, _ := p.getContentType()
+		if contentType == "application/json" {
 			b, err := p.getPayloadBuffer()
 			if err != nil {
 				return "Unable to get payload buffer: " + err.Error()
@@ -379,5 +426,6 @@ func (r *httpRequest) curlString(req *http.Request, p payload) string {
 			}
 		}
 	}
+
 	return strings.Join(parts, " ")
 }

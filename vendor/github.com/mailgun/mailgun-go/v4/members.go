@@ -13,26 +13,26 @@ import (
 // if nil, the relevant data type remains unspecified.
 // Otherwise, its value is either true or false.
 var (
-	yes bool = true
-	no  bool = false
+	yes = true
+	no  = false
 )
 
 // Mailing list members have an attribute that determines if they've subscribed to the mailing list or not.
 // This attribute may be used to filter the results returned by GetSubscribers().
 // All, Subscribed, and Unsubscribed provides a convenient and readable syntax for specifying the scope of the search.
 var (
-	All          *bool = nil
-	Subscribed   *bool = &yes
-	Unsubscribed *bool = &no
+	All          *bool
+	Subscribed   = &yes
+	Unsubscribed = &no
 )
 
 // A Member structure represents a member of the mailing list.
 // The Vars field can represent any JSON-encodable data.
 type Member struct {
-	Address    string                 `json:"address,omitempty"`
-	Name       string                 `json:"name,omitempty"`
-	Subscribed *bool                  `json:"subscribed,omitempty"`
-	Vars       map[string]interface{} `json:"vars,omitempty"`
+	Address    string         `json:"address,omitempty"`
+	Name       string         `json:"name,omitempty"`
+	Subscribed *bool          `json:"subscribed,omitempty"`
+	Vars       map[string]any `json:"vars,omitempty"`
 }
 
 type memberListResponse struct {
@@ -89,10 +89,8 @@ func (li *MemberListIterator) Next(ctx context.Context, items *[]Member) bool {
 		return false
 	}
 	*items = li.Lists
-	if len(li.Lists) == 0 {
-		return false
-	}
-	return true
+
+	return len(li.Lists) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
@@ -141,10 +139,8 @@ func (li *MemberListIterator) Previous(ctx context.Context, items *[]Member) boo
 		return false
 	}
 	*items = li.Lists
-	if len(li.Lists) == 0 {
-		return false
-	}
-	return true
+
+	return len(li.Lists) != 0
 }
 
 func (li *MemberListIterator) fetch(ctx context.Context, url string) error {
@@ -183,7 +179,7 @@ func (mg *MailgunImpl) CreateMember(ctx context.Context, merge bool, addr string
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	p := newFormDataPayload()
+	p := NewFormDataPayload()
 	p.addValue("upsert", yesNo(merge))
 	p.addValue("address", prototype.Address)
 	p.addValue("name", prototype.Name)
@@ -201,7 +197,7 @@ func (mg *MailgunImpl) UpdateMember(ctx context.Context, s, l string, prototype 
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	p := newFormDataPayload()
+	p := NewFormDataPayload()
 	if prototype.Address != "" {
 		p.addValue("address", prototype.Address)
 	}
@@ -247,11 +243,11 @@ func (mg *MailgunImpl) DeleteMember(ctx context.Context, member, addr string) er
 // If a simple slice of strings is passed, each string refers to the member's e-mail address.
 // Otherwise, each Member needs to have at least the Address field filled out.
 // Other fields are optional, but may be set according to your needs.
-func (mg *MailgunImpl) CreateMemberList(ctx context.Context, u *bool, addr string, newMembers []interface{}) error {
+func (mg *MailgunImpl) CreateMemberList(ctx context.Context, u *bool, addr string, newMembers []any) error {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + ".json")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	p := newFormDataPayload()
+	p := NewFormDataPayload()
 	if u != nil {
 		p.addValue("upsert", yesNo(*u))
 	}

@@ -67,7 +67,7 @@ func (mg *MailgunImpl) GetExportLink(ctx context.Context, id string) (string, er
 	c := mg.Client()
 
 	// Ensure the client doesn't attempt to retry
-	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+	c.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
 		return errors.New("redirect")
 	}
 
@@ -76,29 +76,40 @@ func (mg *MailgunImpl) GetExportLink(ctx context.Context, id string) (string, er
 
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 
-	req, err := r.NewRequest(ctx, "GET", nil)
+	req, err := r.NewRequest(ctx, http.MethodGet, nil)
 	if err != nil {
 		return "", err
 	}
 
 	if Debug {
 		if CaptureCurlOutput {
-			r.capturedCurlOutput = r.curlString(req, nil)
+			r.mu.Lock()
+			r.capturedCurlOutput = curlString(req, nil)
+			r.mu.Unlock()
 		} else {
-			fmt.Println(r.curlString(req, nil))
+			fmt.Println(curlString(req, nil))
 		}
 	}
 
 	resp, err := r.Client.Do(req)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusFound {
-			url, err := resp.Location()
-			if err != nil {
-				return "", fmt.Errorf("while parsing 302 redirect url: %s", err)
+		if resp != nil { // TODO(vtopc): not nil err and resp at the same time, is that possible at all?
+			defer resp.Body.Close()
+
+			if resp.StatusCode == http.StatusFound {
+				url, err := resp.Location()
+				if err != nil {
+					return "", fmt.Errorf("while parsing 302 redirect url: %s", err)
+				}
+
+				return url.String(), nil
 			}
-			return url.String(), nil
 		}
+
 		return "", err
 	}
+
+	defer resp.Body.Close()
+
 	return "", fmt.Errorf("expected a 302 response, API returned a '%d' instead", resp.StatusCode)
 }

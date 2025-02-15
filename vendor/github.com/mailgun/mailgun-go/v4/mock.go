@@ -12,11 +12,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
 type MockServer interface {
 	Stop()
+	URL1() string
 	URL4() string
 	URL() string
 	DomainIPS() []string
@@ -27,6 +28,7 @@ type MockServer interface {
 	Events() []Event
 	Webhooks() WebHooksListResponse
 	Templates() []Template
+	SubaccountList() []Subaccount
 }
 
 // A mailgun api mock suitable for testing
@@ -47,6 +49,7 @@ type mockServer struct {
 	credentials      []Credential
 	stats            []Stats
 	tags             []Tag
+	subaccountList   []Subaccount
 	webhooks         WebHooksListResponse
 	mutex            sync.Mutex
 }
@@ -105,14 +108,20 @@ func (ms *mockServer) Unsubscribes() []Unsubscribe {
 	return ms.unsubscribes
 }
 
+func (ms *mockServer) SubaccountList() []Subaccount {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+	return ms.subaccountList
+}
+
 // Create a new instance of the mailgun API mock server
 func NewMockServer() MockServer {
 	ms := mockServer{}
 
 	// Add all our handlers
-	r := mux.NewRouter()
+	r := chi.NewRouter()
 
-	func(r *mux.Router) {
+	r.Route("/v3", func(r chi.Router) {
 		ms.addIPRoutes(r)
 		ms.addExportRoutes(r)
 		ms.addDomainRoutes(r)
@@ -129,8 +138,10 @@ func NewMockServer() MockServer {
 		ms.addCredentialsRoutes(r)
 		ms.addStatsRoutes(r)
 		ms.addTagsRoutes(r)
-	}(r.PathPrefix("/v3").Subrouter())
+		ms.addSubaccountRoutes(r)
+	})
 	ms.addValidationRoutes(r)
+	ms.addAnalyticsRoutes(r)
 
 	// Start the server
 	ms.srv = httptest.NewServer(r)
@@ -142,6 +153,10 @@ func (ms *mockServer) Stop() {
 	ms.srv.Close()
 }
 
+func (ms *mockServer) URL1() string {
+	return ms.srv.URL + "/v1"
+}
+
 func (ms *mockServer) URL4() string {
 	return ms.srv.URL + "/v4"
 }
@@ -151,7 +166,7 @@ func (ms *mockServer) URL() string {
 	return ms.srv.URL + "/v3"
 }
 
-func toJSON(w http.ResponseWriter, obj interface{}) {
+func toJSON(w http.ResponseWriter, obj any) {
 	if err := json.NewEncoder(w).Encode(obj); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -187,12 +202,12 @@ func stringToInt(v string) int {
 	return int(result)
 }
 
-func stringToMap(v string) map[string]interface{} {
+func stringToMap(v string) map[string]any {
 	if v == "" {
 		return nil
 	}
 
-	result := make(map[string]interface{})
+	result := make(map[string]any)
 	err := json.Unmarshal([]byte(v), &result)
 	if err != nil {
 		panic(err)

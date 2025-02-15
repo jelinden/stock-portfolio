@@ -49,14 +49,15 @@ type ForwardedMessage struct {
 
 // ExtractForwardedMessage extracts the forward route payload values from a parsed PostForm
 // Example usage:
-// func Handler(w http.ResponseWriter, r *http.Request) {
+//
+//	func Handler(w http.ResponseWriter, r *http.Request) {
 //	err := r.ParseForm()
 //	if err != nil {
 //		log.Fatal(err)
 //	}
 //	forwardRoute := mailgun.ExtractForwardedMessage(r.PostForm)
 //	fmt.Printf("Forwarded message: %#v", forwardRoute)
-//}
+//	}
 func ExtractForwardedMessage(formValues url.Values) ForwardedMessage {
 	forwardedMessage := ForwardedMessage{}
 	forwardedMessage.BodyPlain = formValues.Get("body-plain")
@@ -162,7 +163,7 @@ func (ri *RoutesIterator) Next(ctx context.Context, items *[]Route) bool {
 	if len(ri.Items) == 0 {
 		return false
 	}
-	ri.offset = ri.offset + len(ri.Items)
+	ri.offset += len(ri.Items)
 	return true
 }
 
@@ -224,7 +225,7 @@ func (ri *RoutesIterator) Previous(ctx context.Context, items *[]Route) bool {
 		return false
 	}
 
-	ri.offset = ri.offset - (ri.limit * 2)
+	ri.offset -= ri.limit * 2
 	if ri.offset < 0 {
 		ri.offset = 0
 	}
@@ -236,10 +237,8 @@ func (ri *RoutesIterator) Previous(ctx context.Context, items *[]Route) bool {
 	cpy := make([]Route, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
-	if len(ri.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ri.Items) != 0
 }
 
 func (ri *RoutesIterator) fetch(ctx context.Context, skip, limit int) error {
@@ -274,10 +273,11 @@ func (mg *MailgunImpl) CreateRoute(ctx context.Context, prototype Route) (_ignor
 		p.addValue("action", action)
 	}
 	var resp createRouteResp
-	if err = postResponseFromJSON(ctx, r, p, &resp); err != nil {
+	if err := postResponseFromJSON(ctx, r, p, &resp); err != nil {
 		return _ignored, err
 	}
-	return resp.Route, err
+
+	return resp.Route, nil
 }
 
 // DeleteRoute removes the specified route from your domain's configuration.
@@ -304,8 +304,8 @@ func (mg *MailgunImpl) GetRoute(ctx context.Context, id string) (Route, error) {
 	if err != nil {
 		return Route{}, err
 	}
-	return *envelope.Route, err
 
+	return *envelope.Route, err
 }
 
 // UpdateRoute provides an "in-place" update of the specified route.

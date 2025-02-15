@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
-func (ms *mockServer) addCredentialsRoutes(r *mux.Router) {
-	r.HandleFunc("/domains/{domain}/credentials", ms.listCredentials).Methods(http.MethodGet)
-	r.HandleFunc("/domains/{domain}/credentials/{login}", ms.updateCredential).Methods(http.MethodPut)
-	r.HandleFunc("/domains/{domain}/credentials/{login}", ms.deleteCredential).Methods(http.MethodDelete)
-	r.HandleFunc("/domains/{domain}/credentials", ms.createCredential).Methods(http.MethodPost)
+func (ms *mockServer) addCredentialsRoutes(r chi.Router) {
+	r.Get("/domains/{domain}/credentials", ms.listCredentials)
+	r.Put("/domains/{domain}/credentials/{login}", ms.updateCredential)
+	r.Delete("/domains/{domain}/credentials/{login}", ms.deleteCredential)
+	r.Post("/domains/{domain}/credentials", ms.createCredential)
 
 	ms.credentials = append(ms.credentials, Credential{
 		CreatedAt: RFC2822Time(time.Now()),
@@ -94,7 +94,7 @@ func (ms *mockServer) createCredential(w http.ResponseWriter, r *http.Request) {
 
 	ms.credentials = append(ms.credentials, Credential{Login: login, Password: password, CreatedAt: RFC2822Time(time.Now())})
 
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "Credentials created",
 	})
 }
@@ -103,8 +103,8 @@ func (ms *mockServer) deleteCredential(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	login := mux.Vars(r)["login"]
-	domain := mux.Vars(r)["domain"]
+	login := chi.URLParam(r, "login")
+	domain := chi.URLParam(r, "domain")
 
 	for i, credential := range ms.credentials {
 		if credential.Login == login || credential.Login == login+"@"+domain {
@@ -112,7 +112,7 @@ func (ms *mockServer) deleteCredential(w http.ResponseWriter, r *http.Request) {
 		}
 
 		ms.credentials = append(ms.credentials[:i], ms.credentials[i+1:]...)
-		toJSON(w, map[string]interface{}{
+		toJSON(w, map[string]any{
 			"message": "Credentials have been deleted",
 			"spec":    login,
 		})
@@ -127,8 +127,8 @@ func (ms *mockServer) updateCredential(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	domain := mux.Vars(r)["domain"]
-	login := mux.Vars(r)["login"]
+	domain := chi.URLParam(r, "domain")
+	login := chi.URLParam(r, "login")
 	if err := r.ParseForm(); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -145,7 +145,7 @@ func (ms *mockServer) updateCredential(w http.ResponseWriter, r *http.Request) {
 	for i, credential := range ms.credentials {
 		if credential.Login == login || credential.Login == login+"@"+domain {
 			ms.credentials[i].Password = password
-			toJSON(w, map[string]interface{}{
+			toJSON(w, map[string]any{
 				"message": "Password changed",
 			})
 			return

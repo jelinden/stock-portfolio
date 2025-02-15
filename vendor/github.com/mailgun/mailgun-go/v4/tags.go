@@ -41,10 +41,12 @@ func (mg *MailgunImpl) GetTag(ctx context.Context, tag string) (Tag, error) {
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var tagItem Tag
-	return tagItem, getResponseFromJSON(ctx, r, &tagItem)
+	err := getResponseFromJSON(ctx, r, &tagItem)
+	return tagItem, err
 }
 
 // ListTags returns a cursor used to iterate through a list of tags
+//
 //	it := mg.ListTags(nil)
 //	var page []mailgun.Tag
 //	for it.Next(&page) {
@@ -66,9 +68,9 @@ func (mg *MailgunImpl) ListTags(opts *ListTagOptions) *TagIterator {
 		}
 	}
 
-	url, err := req.generateUrlWithParameters()
+	uri, err := req.generateUrlWithParameters()
 	return &TagIterator{
-		tagsResponse: tagsResponse{Paging: Paging{Next: url, First: url}},
+		tagsResponse: tagsResponse{Paging: Paging{Next: uri, First: uri}},
 		err:          err,
 		mg:           mg,
 	}
@@ -95,10 +97,8 @@ func (ti *TagIterator) Next(ctx context.Context, items *[]Tag) bool {
 		return false
 	}
 	*items = ti.Items
-	if len(ti.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ti.Items) != 0
 }
 
 // Previous returns the previous page in the list of tags
@@ -120,10 +120,8 @@ func (ti *TagIterator) Previous(ctx context.Context, items *[]Tag) bool {
 		return false
 	}
 	*items = ti.Items
-	if len(ti.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ti.Items) != 0
 }
 
 // First returns the first page in the list of tags
@@ -157,9 +155,9 @@ func (ti *TagIterator) Err() error {
 	return ti.err
 }
 
-func (ti *TagIterator) fetch(ctx context.Context, url string) error {
+func (ti *TagIterator) fetch(ctx context.Context, uri string) error {
 	ti.Items = nil
-	req := newHTTPRequest(url)
+	req := newHTTPRequest(uri)
 	req.setClient(ti.mg.Client())
 	req.setBasicAuth(basicAuthUser, ti.mg.APIKey())
 	return getResponseFromJSON(ctx, req, &ti.tagsResponse)
@@ -170,7 +168,7 @@ func canFetchPage(slug string) bool {
 	if err != nil {
 		return false
 	}
-	params, _ := url.ParseQuery(parts.RawQuery)
+	params, err := url.ParseQuery(parts.RawQuery)
 	if err != nil {
 		return false
 	}

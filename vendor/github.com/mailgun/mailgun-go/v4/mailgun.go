@@ -6,11 +6,11 @@
 // For further information please see the Mailgun documentation at
 // http://documentation.mailgun.com/
 //
-//  Original Author: Michael Banzon
-//  Contributions:   Samuel A. Falvo II <sam.falvo %at% rackspace.com>
-//                   Derrick J. Wippler <thrawn01 %at% gmail.com>
+//	Original Author: Michael Banzon
+//	Contributions:   Samuel A. Falvo II <sam.falvo %at% rackspace.com>
+//	                 Derrick J. Wippler <thrawn01 %at% gmail.com>
 //
-// Examples
+// # Examples
 //
 // All functions and method have a corresponding test, so if you don't find an
 // example for a function you'd like to know more about, please check for a
@@ -18,7 +18,7 @@
 // welcome as well. Feel free to submit a pull request or open a Github issue
 // if you cannot find an example to suit your needs.
 //
-// List iterators
+// # List iterators
 //
 // Most methods that begin with `List` return an iterator which simplfies
 // paging through large result sets returned by the mailgun API. Most `List`
@@ -28,23 +28,22 @@
 //
 // For example, the following iterates over all pages of events 100 items at a time
 //
-//  mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
-//  it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
+//	mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
+//	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
 //
-//  // The entire operation should not take longer than 30 seconds
-//  ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-//  defer cancel()
+//	// The entire operation should not take longer than 30 seconds
+//	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+//	defer cancel()
 //
-//  // For each page of 100 events
-//  var page []mailgun.Event
-//  for it.Next(ctx, &page) {
-//    for _, e := range page {
-//      // Do something with 'e'
-//    }
-//  }
+//	// For each page of 100 events
+//	var page []mailgun.Event
+//	for it.Next(ctx, &page) {
+//	  for _, e := range page {
+//	    // Do something with 'e'
+//	  }
+//	}
 //
-//
-// License
+// # License
 //
 // Copyright (c) 2013-2019, Michael Banzon.
 // All rights reserved.
@@ -82,6 +81,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -105,6 +105,7 @@ const (
 	mimeMessagesEndpoint = "messages.mime"
 	bouncesEndpoint      = "bounces"
 	statsTotalEndpoint   = "stats/total"
+	metricsEndpoint      = "analytics/metrics"
 	domainsEndpoint      = "domains"
 	tagsEndpoint         = "tags"
 	eventsEndpoint       = "events"
@@ -116,6 +117,9 @@ const (
 	listsEndpoint        = "lists"
 	basicAuthUser        = "api"
 	templatesEndpoint    = "templates"
+	accountsEndpoint     = "accounts"
+	subaccountsEndpoint  = "subaccounts"
+	OnBehalfOfHeader     = "X-Mailgun-On-Behalf-Of"
 )
 
 // Mailgun defines the supported subset of the Mailgun API.
@@ -136,9 +140,13 @@ type Mailgun interface {
 	AddOverrideHeader(k string, v string)
 	GetCurlOutput() string
 
-	Send(ctx context.Context, m *Message) (string, string, error)
+	// Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
+	// TODO(v5): switch m to SendableMessage interface
+	Send(ctx context.Context, m *Message) (mes string, id string, err error)
 	ReSend(ctx context.Context, id string, recipients ...string) (string, string, error)
+	// Deprecated: use func NewMessage instead of method.
 	NewMessage(from, subject, text string, to ...string) *Message
+	// Deprecated: use func NewMIMEMessage instead of method.
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 
 	ListBounces(opts *ListOptions) *BouncesIterator
@@ -147,6 +155,9 @@ type Mailgun interface {
 	DeleteBounce(ctx context.Context, address string) error
 	DeleteBounceList(ctx context.Context) error
 
+	ListMetrics(opts MetricsOptions) (*MetricsIterator, error)
+
+	// Deprecated: Use ListMetrics instead.
 	GetStats(ctx context.Context, events []string, opts *GetStatOptions) ([]Stats, error)
 	GetTag(ctx context.Context, tag string) (Tag, error)
 	DeleteTag(ctx context.Context, tag string) error
@@ -214,7 +225,7 @@ type Mailgun interface {
 	ListMembers(address string, opts *ListOptions) *MemberListIterator
 	GetMember(ctx context.Context, MemberAddr, listAddr string) (Member, error)
 	CreateMember(ctx context.Context, merge bool, addr string, prototype Member) error
-	CreateMemberList(ctx context.Context, subscribed *bool, addr string, newMembers []interface{}) error
+	CreateMemberList(ctx context.Context, subscribed *bool, addr string, newMembers []any) error
 	UpdateMember(ctx context.Context, Member, list string, prototype Member) (Member, error)
 	DeleteMember(ctx context.Context, Member, list string) error
 
@@ -246,17 +257,29 @@ type Mailgun interface {
 	UpdateTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error
 	DeleteTemplateVersion(ctx context.Context, templateName, tag string) error
 	ListTemplateVersions(templateName string, opts *ListOptions) *TemplateVersionsIterator
+
+	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
+	CreateSubaccount(ctx context.Context, subaccountName string) (SubaccountResponse, error)
+	SubaccountDetails(ctx context.Context, subaccountId string) (SubaccountResponse, error)
+	EnableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
+	DisableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
+
+	SetOnBehalfOfSubaccount(subaccountId string)
+	RemoveOnBehalfOfSubaccount()
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
 // Colloquially, we refer to instances of this structure as "clients."
 type MailgunImpl struct {
-	apiBase            string
-	domain             string
-	apiKey             string
-	client             *http.Client
-	baseURL            string
-	overrideHeaders    map[string]string
+	apiBase           string
+	domain            string
+	apiKey            string
+	webhookSigningKey string
+	client            *http.Client
+	baseURL           string
+	overrideHeaders   map[string]string
+
+	mu                 sync.RWMutex
 	capturedCurlOutput string
 }
 
@@ -271,7 +294,7 @@ func NewMailgun(domain, apiKey string) *MailgunImpl {
 }
 
 // NewMailgunFromEnv returns a new Mailgun client using the environment variables
-// MG_API_KEY, MG_DOMAIN, and MG_URL
+// MG_API_KEY, MG_DOMAIN, MG_URL, and MG_WEBHOOK_SIGNING_KEY
 func NewMailgunFromEnv() (*MailgunImpl, error) {
 	apiKey := os.Getenv("MG_API_KEY")
 	if apiKey == "" {
@@ -287,6 +310,11 @@ func NewMailgunFromEnv() (*MailgunImpl, error) {
 	url := os.Getenv("MG_URL")
 	if url != "" {
 		mg.SetAPIBase(url)
+	}
+
+	webhookSigningKey := os.Getenv("MG_WEBHOOK_SIGNING_KEY")
+	if webhookSigningKey != "" {
+		mg.SetWebhookSigningKey(webhookSigningKey)
 	}
 
 	return mg, nil
@@ -317,22 +345,48 @@ func (mg *MailgunImpl) SetClient(c *http.Client) {
 	mg.client = c
 }
 
+// WebhookSigningKey returns the webhook signing key configured for this client
+func (mg *MailgunImpl) WebhookSigningKey() string {
+	key := mg.webhookSigningKey
+	if key == "" {
+		return mg.APIKey()
+	}
+	return key
+}
+
+// SetWebhookSigningKey updates the webhook signing key for this client
+func (mg *MailgunImpl) SetWebhookSigningKey(webhookSigningKey string) {
+	mg.webhookSigningKey = webhookSigningKey
+}
+
+// SetOnBehalfOfSubaccount sets X-Mailgun-On-Behalf-Of header to SUBACCOUNT_ACCOUNT_ID in order to perform API request
+// on behalf of subaccount.
+func (mg *MailgunImpl) SetOnBehalfOfSubaccount(subaccountId string) {
+	mg.AddOverrideHeader(OnBehalfOfHeader, subaccountId)
+}
+
+// RemoveOnBehalfOfSubaccount remove X-Mailgun-On-Behalf-Of header for primary usage.
+func (mg *MailgunImpl) RemoveOnBehalfOfSubaccount() {
+	delete(mg.overrideHeaders, OnBehalfOfHeader)
+}
+
 // SetAPIBase updates the API Base URL for this client.
-//  // For EU Customers
-//  mg.SetAPIBase(mailgun.APIBaseEU)
 //
-//  // For US Customers
-//  mg.SetAPIBase(mailgun.APIBaseUS)
+//	// For EU Customers
+//	mg.SetAPIBase(mailgun.APIBaseEU)
 //
-//  // Set a custom base API
-//  mg.SetAPIBase("https://localhost/v3")
+//	// For US Customers
+//	mg.SetAPIBase(mailgun.APIBaseUS)
+//
+//	// Set a custom base API
+//	mg.SetAPIBase("https://localhost/v3")
 func (mg *MailgunImpl) SetAPIBase(address string) {
 	mg.apiBase = address
 }
 
 // AddOverrideHeader allows the user to specify additional headers that will be included in the HTTP request
 // This is mostly useful for testing the Mailgun API hosted at a different endpoint.
-func (mg *MailgunImpl) AddOverrideHeader(k string, v string) {
+func (mg *MailgunImpl) AddOverrideHeader(k, v string) {
 	if mg.overrideHeaders == nil {
 		mg.overrideHeaders = make(map[string]string)
 	}
@@ -343,6 +397,9 @@ func (mg *MailgunImpl) AddOverrideHeader(k string, v string) {
 // mailgun.CaptureCurlOutput must be set to true
 // This is mostly useful for testing the Mailgun API hosted at a different endpoint.
 func (mg *MailgunImpl) GetCurlOutput() string {
+	mg.mu.RLock()
+	defer mg.mu.RUnlock()
+
 	return mg.capturedCurlOutput
 }
 
@@ -388,13 +445,6 @@ func generateCredentialsUrl(m Mailgun, login string) string {
 		tail = fmt.Sprintf("/%s", login)
 	}
 	return generateDomainApiUrl(m, fmt.Sprintf("credentials%s", tail))
-	// return fmt.Sprintf("%s/domains/%s/credentials%s", apiBase, m.Domain(), tail)
-}
-
-// generateStoredMessageUrl generates the URL needed to acquire a copy of a stored message.
-func generateStoredMessageUrl(m Mailgun, endpoint, id string) string {
-	return generateDomainApiUrl(m, fmt.Sprintf("%s/%s", endpoint, id))
-	// return fmt.Sprintf("%s/domains/%s/%s/%s", apiBase, m.Domain(), endpoint, id)
 }
 
 // generatePublicApiUrl works as generateApiUrl, except that generatePublicApiUrl has no need for the domain.
@@ -402,23 +452,11 @@ func generatePublicApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s", m.APIBase(), endpoint)
 }
 
-// generateParameterizedUrl works as generateApiUrl, but supports query parameters.
-func generateParameterizedUrl(m Mailgun, endpoint string, payload payload) (string, error) {
-	paramBuffer, err := payload.getPayloadBuffer()
-	if err != nil {
-		return "", err
-	}
-	params := string(paramBuffer.Bytes())
-	return fmt.Sprintf("%s?%s", generateApiUrl(m, eventsEndpoint), params), nil
-}
-
-// parseMailgunTime translates a timestamp as returned by Mailgun into a Go standard timestamp.
-func parseMailgunTime(ts string) (t time.Time, err error) {
-	t, err = time.Parse("Mon, 2 Jan 2006 15:04:05 MST", ts)
-	return
-}
-
 // formatMailgunTime translates a timestamp into a human-readable form.
 func formatMailgunTime(t time.Time) string {
 	return t.Format("Mon, 2 Jan 2006 15:04:05 -0700")
+}
+
+func ptr[T any](v T) *T {
+	return &v
 }

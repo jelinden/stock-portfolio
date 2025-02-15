@@ -5,15 +5,15 @@ import (
 	"net/mail"
 	"strings"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
-func (ms *mockServer) addValidationRoutes(r *mux.Router) {
-	r.HandleFunc("/v3/address/validate", ms.validateEmail).Methods(http.MethodGet)
-	r.HandleFunc("/v3/address/parse", ms.parseEmail).Methods(http.MethodGet)
-	r.HandleFunc("/v3/address/private/validate", ms.validateEmail).Methods(http.MethodGet)
-	r.HandleFunc("/v3/address/private/parse", ms.parseEmail).Methods(http.MethodGet)
-	r.HandleFunc("/v4/address/validate", ms.validateEmailV4).Methods(http.MethodGet)
+func (ms *mockServer) addValidationRoutes(r chi.Router) {
+	r.Get("/v3/address/validate", ms.validateEmail)
+	r.Get("/v3/address/parse", ms.parseEmail)
+	r.Get("/v3/address/private/validate", ms.validateEmail)
+	r.Get("/v3/address/private/parse", ms.parseEmail)
+	r.Get("/v4/address/validate", ms.validateEmailV4)
 }
 
 func (ms *mockServer) validateEmailV4(w http.ResponseWriter, r *http.Request) {
@@ -24,16 +24,21 @@ func (ms *mockServer) validateEmailV4(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var results v4EmailValidationResp
+	results.Risk = "unknown"
 	parts, err := mail.ParseAddress(r.FormValue("address"))
 	if err == nil {
-		results.IsValid = true
+		results.Risk = "low"
 		results.Parts.Domain = strings.Split(parts.Address, "@")[1]
 		results.Parts.LocalPart = strings.Split(parts.Address, "@")[0]
 		results.Parts.DisplayName = parts.Name
 	}
 	results.Reason = []string{"no-reason"}
-	results.Risk = "unknown"
 	results.Result = "deliverable"
+	results.Engagement = &EngagementData{
+		Engaging: false,
+		Behavior: "disengaged",
+		IsBot:    false,
+	}
 	toJSON(w, results)
 }
 

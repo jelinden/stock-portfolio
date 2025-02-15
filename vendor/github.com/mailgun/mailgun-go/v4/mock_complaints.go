@@ -8,14 +8,14 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
-func (ms *mockServer) addComplaintsRoutes(r *mux.Router) {
-	r.HandleFunc("/{domain}/complaints", ms.listComplaints).Methods(http.MethodGet)
-	r.HandleFunc("/{domain}/complaints/{address}", ms.getComplaint).Methods(http.MethodGet)
-	r.HandleFunc("/{domain}/complaints/{address}", ms.deleteComplaint).Methods(http.MethodDelete)
-	r.HandleFunc("/{domain}/complaints", ms.createComplaint).Methods(http.MethodPost)
+func (ms *mockServer) addComplaintsRoutes(r chi.Router) {
+	r.Get("/{domain}/complaints", ms.listComplaints)
+	r.Get("/{domain}/complaints/{address}", ms.getComplaint)
+	r.Delete("/{domain}/complaints/{address}", ms.deleteComplaint)
+	r.Post("/{domain}/complaints", ms.createComplaint)
 
 	ms.complaints = append(ms.complaints, Complaint{
 		CreatedAt: RFC2822Time(time.Now()),
@@ -92,7 +92,7 @@ func (ms *mockServer) getComplaint(w http.ResponseWriter, r *http.Request) {
 	ms.mutex.Lock()
 
 	for _, complaint := range ms.complaints {
-		if complaint.Address == mux.Vars(r)["address"] {
+		if complaint.Address == chi.URLParam(r, "address") {
 			toJSON(w, complaint)
 			return
 		}
@@ -151,7 +151,7 @@ func (ms *mockServer) createComplaint(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "Address has been added to the complaints table",
 		"address": fmt.Sprint(complaints),
 	})
@@ -162,17 +162,17 @@ func (ms *mockServer) deleteComplaint(w http.ResponseWriter, r *http.Request) {
 	ms.mutex.Lock()
 
 	for i, complaint := range ms.complaints {
-		if complaint.Address == mux.Vars(r)["address"] {
+		if complaint.Address == chi.URLParam(r, "address") {
 			ms.complaints = append(ms.complaints[:i], ms.complaints[i+1:len(ms.complaints)]...)
 
-			toJSON(w, map[string]interface{}{
+			toJSON(w, map[string]any{
 				"message": "Complaint has been removed",
 			})
 			return
 		}
 	}
 
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "Address not found in complaints table",
 	})
 	return

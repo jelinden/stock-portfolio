@@ -67,10 +67,8 @@ func (ci *ComplaintsIterator) Next(ctx context.Context, items *[]Complaint) bool
 	cpy := make([]Complaint, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
-	if len(ci.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ci.Items) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
@@ -125,10 +123,8 @@ func (ci *ComplaintsIterator) Previous(ctx context.Context, items *[]Complaint) 
 	cpy := make([]Complaint, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
-	if len(ci.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ci.Items) != 0
 }
 
 func (ci *ComplaintsIterator) fetch(ctx context.Context, url string) error {
@@ -161,6 +157,22 @@ func (mg *MailgunImpl) CreateComplaint(ctx context.Context, address string) erro
 	p := newUrlEncodedPayload()
 	p.addValue("address", address)
 	_, err := makePostRequest(ctx, r, p)
+	return err
+}
+
+func (mg *MailgunImpl) CreateComplaints(ctx context.Context, addresses []string) error {
+	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	body := make([]map[string]string, len(addresses))
+	for i, addr := range addresses {
+		body[i] = map[string]string{"address": addr}
+	}
+
+	payload := newJSONEncodedPayload(body)
+
+	_, err := makePostRequest(ctx, r, payload)
 	return err
 }
 

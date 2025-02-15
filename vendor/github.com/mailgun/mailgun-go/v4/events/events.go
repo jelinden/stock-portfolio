@@ -30,8 +30,6 @@ func (g *Generic) GetTimestamp() time.Time {
 }
 
 func (g *Generic) SetTimestamp(t time.Time) {
-	// convert := fmt.Sprintf("%d.%06d", t.Unix(), t.Nanosecond()/int(time.Microsecond))
-	// ts, err := strconv.ParseFloat(convert, 64)
 	g.Timestamp = float64(t.Unix()) + (float64(t.Nanosecond()/int(time.Microsecond)) / float64(1000000))
 }
 
@@ -54,14 +52,14 @@ type Accepted struct {
 	Message  Message  `json:"message"`
 	Flags    Flags    `json:"flags"`
 
-	Recipient       string      `json:"recipient"`
-	RecipientDomain string      `json:"recipient-domain"`
-	Method          string      `json:"method"`
-	OriginatingIP   string      `json:"originating-ip"`
-	Tags            []string    `json:"tags"`
-	Campaigns       []Campaign  `json:"campaigns"`
-	UserVariables   interface{} `json:"user-variables"`
-	Storage         Storage     `json:"storage"`
+	Recipient       string     `json:"recipient"`
+	RecipientDomain string     `json:"recipient-domain"`
+	Method          string     `json:"method"`
+	OriginatingIP   string     `json:"originating-ip"`
+	Tags            []string   `json:"tags"`
+	Campaigns       []Campaign `json:"campaigns"`
+	UserVariables   any        `json:"user-variables"`
+	Storage         Storage    `json:"storage"`
 }
 
 type Rejected struct {
@@ -76,9 +74,9 @@ type Rejected struct {
 	Storage Storage `json:"storage"`
 	Flags   Flags   `json:"flags"`
 
-	Tags          []string    `json:"tags"`
-	Campaigns     []Campaign  `json:"campaigns"`
-	UserVariables interface{} `json:"user-variables"`
+	Tags          []string   `json:"tags"`
+	Campaigns     []Campaign `json:"campaigns"`
+	UserVariables any        `json:"user-variables"`
 }
 
 type Delivered struct {
@@ -96,9 +94,11 @@ type Delivered struct {
 	Storage         Storage    `json:"storage"`
 
 	DeliveryStatus DeliveryStatus `json:"delivery-status"`
-	UserVariables  interface{}    `json:"user-variables"`
+	UserVariables  any            `json:"user-variables"`
 }
 
+// Failed - Mailgun could not deliver the email to the recipient email server.
+// Use for permanent_fail and temporary_fail webhooks.
 type Failed struct {
 	Generic
 
@@ -114,9 +114,15 @@ type Failed struct {
 	Storage         Storage    `json:"storage"`
 
 	DeliveryStatus DeliveryStatus `json:"delivery-status"`
-	Severity       string         `json:"severity"`
-	Reason         string         `json:"reason"`
-	UserVariables  interface{}    `json:"user-variables"`
+
+	// Severity:
+	//
+	// - permanent when a message is not delivered;
+	//
+	// - temporary when a message is temporarily rejected by an ESP.
+	Severity      string `json:"severity"`
+	Reason        string `json:"reason"`
+	UserVariables any    `json:"user-variables"`
 }
 
 type Stored struct {
@@ -126,9 +132,9 @@ type Stored struct {
 	Storage Storage `json:"storage"`
 	Flags   Flags   `json:"flags"`
 
-	Tags          []string    `json:"tags"`
-	Campaigns     []Campaign  `json:"campaigns"`
-	UserVariables interface{} `json:"user-variables"`
+	Tags          []string   `json:"tags"`
+	Campaigns     []Campaign `json:"campaigns"`
+	UserVariables any        `json:"user-variables"`
 }
 
 //
@@ -150,7 +156,7 @@ type Opened struct {
 	ClientInfo  ClientInfo  `json:"client-info"`
 	GeoLocation GeoLocation `json:"geolocation"`
 
-	UserVariables interface{} `json:"user-variables"`
+	UserVariables any `json:"user-variables"`
 }
 
 type Clicked struct {
@@ -170,7 +176,7 @@ type Clicked struct {
 	ClientInfo  ClientInfo  `json:"client-info"`
 	GeoLocation GeoLocation `json:"geolocation"`
 
-	UserVariables interface{} `json:"user-variables"`
+	UserVariables any `json:"user-variables"`
 }
 
 type Unsubscribed struct {
@@ -188,7 +194,7 @@ type Unsubscribed struct {
 	ClientInfo  ClientInfo  `json:"client-info"`
 	GeoLocation GeoLocation `json:"geolocation"`
 
-	UserVariables interface{} `json:"user-variables"`
+	UserVariables any `json:"user-variables"`
 }
 
 type Complained struct {
@@ -197,9 +203,9 @@ type Complained struct {
 	Message   Message    `json:"message"`
 	Campaigns []Campaign `json:"campaigns"`
 
-	Recipient     string      `json:"recipient"`
-	Tags          []string    `json:"tags"`
-	UserVariables interface{} `json:"user-variables"`
+	Recipient     string   `json:"recipient"`
+	Tags          []string `json:"tags"`
+	UserVariables any      `json:"user-variables"`
 }
 
 //

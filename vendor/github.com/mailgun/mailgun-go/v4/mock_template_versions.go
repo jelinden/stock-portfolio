@@ -7,22 +7,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
-func (ms *mockServer) addTemplateVersionRoutes(r *mux.Router) {
-	r.HandleFunc("/{domain}/templates/{template}/versions", ms.listTemplateVersions).Methods(http.MethodGet)
-	r.HandleFunc("/{domain}/templates/{template}/versions/{tag}", ms.getTemplateVersion).Methods(http.MethodGet)
-	r.HandleFunc("/{domain}/templates/{template}/versions", ms.createTemplateVersion).Methods(http.MethodPost)
-	r.HandleFunc("/{domain}/templates/{template}/versions/{tag}", ms.updateTemplateVersion).Methods(http.MethodPut)
-	r.HandleFunc("/{domain}/templates/{template}/versions/{tag}", ms.deleteTemplateVersion).Methods(http.MethodDelete)
+func (ms *mockServer) addTemplateVersionRoutes(r chi.Router) {
+	r.Get("/{domain}/templates/{template}/versions", ms.listTemplateVersions)
+	r.Get("/{domain}/templates/{template}/versions/{tag}", ms.getTemplateVersion)
+	r.Post("/{domain}/templates/{template}/versions", ms.createTemplateVersion)
+	r.Put("/{domain}/templates/{template}/versions/{tag}", ms.updateTemplateVersion)
+	r.Delete("/{domain}/templates/{template}/versions/{tag}", ms.deleteTemplateVersion)
 }
 
 func (ms *mockServer) listTemplateVersions(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	templateName := mux.Vars(r)["template"]
+	templateName := chi.URLParam(r, "template")
 	template, found := ms.fetchTemplate(templateName)
 	if !found {
 		w.WriteHeader(http.StatusNotFound)
@@ -97,9 +97,9 @@ func (ms *mockServer) getTemplateVersion(w http.ResponseWriter, r *http.Request)
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	templateName := mux.Vars(r)["template"]
+	templateName := chi.URLParam(r, "template")
 	templateName = strings.ToLower(templateName)
-	templateVersionName := mux.Vars(r)["tag"]
+	templateVersionName := chi.URLParam(r, "tag")
 	templateVersionName = strings.ToLower(templateVersionName)
 
 	template, templateFound := ms.fetchTemplate(templateName)
@@ -127,7 +127,7 @@ func (ms *mockServer) createTemplateVersion(w http.ResponseWriter, r *http.Reque
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	templateName := mux.Vars(r)["template"]
+	templateName := chi.URLParam(r, "template")
 	templateName = strings.ToLower(templateName)
 
 	r.ParseForm()
@@ -189,7 +189,7 @@ func (ms *mockServer) createTemplateVersion(w http.ResponseWriter, r *http.Reque
 
 	ms.templateVersions[templateName] = append(ms.templateVersions[templateName], newTemplateVersion)
 	template.Version = newTemplateVersion
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message":  "new version of the template has been stored",
 		"template": template,
 	})
@@ -199,9 +199,9 @@ func (ms *mockServer) updateTemplateVersion(w http.ResponseWriter, r *http.Reque
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	templateName := mux.Vars(r)["template"]
+	templateName := chi.URLParam(r, "template")
 	templateName = strings.ToLower(templateName)
-	templateVersionName := mux.Vars(r)["tag"]
+	templateVersionName := chi.URLParam(r, "tag")
 	templateVersionName = strings.ToLower(templateVersionName)
 
 	_, templateFound := ms.fetchTemplate(templateName)
@@ -246,7 +246,7 @@ func (ms *mockServer) updateTemplateVersion(w http.ResponseWriter, r *http.Reque
 	if len(active) != 0 {
 		if active == "yes" {
 			templateVersion.Active = true
-			for i := range ms.templateVersions[templateName] { //every other template version become not active
+			for i := range ms.templateVersions[templateName] { // every other template version become not active
 				if i == templateVersionIndex {
 					continue
 				}
@@ -263,9 +263,9 @@ func (ms *mockServer) updateTemplateVersion(w http.ResponseWriter, r *http.Reque
 	}
 
 	ms.templateVersions[templateName][templateVersionIndex] = templateVersion
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "version has been updated",
-		"template": map[string]interface{}{
+		"template": map[string]any{
 			"name": templateName,
 			"version": map[string]string{
 				"tag": templateVersionName,
@@ -278,9 +278,9 @@ func (ms *mockServer) deleteTemplateVersion(w http.ResponseWriter, r *http.Reque
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	templateName := mux.Vars(r)["template"]
+	templateName := chi.URLParam(r, "template")
 	templateName = strings.ToLower(templateName)
-	templateVersionName := mux.Vars(r)["tag"]
+	templateVersionName := chi.URLParam(r, "tag")
 	templateVersionName = strings.ToLower(templateVersionName)
 
 	_, templateFound := ms.fetchTemplate(templateName)
@@ -297,9 +297,9 @@ func (ms *mockServer) deleteTemplateVersion(w http.ResponseWriter, r *http.Reque
 	}
 
 	w.WriteHeader(http.StatusOK)
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "version has been deleted",
-		"template": map[string]interface{}{
+		"template": map[string]any{
 			"name": templateName,
 			"version": map[string]string{
 				"tag": templateVersionName,

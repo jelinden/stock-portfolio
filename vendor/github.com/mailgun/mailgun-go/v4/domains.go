@@ -27,6 +27,7 @@ type Domain struct {
 	Wildcard     bool        `json:"wildcard"`
 	SpamAction   SpamAction  `json:"spam_action"`
 	State        string      `json:"state"`
+	WebScheme    string      `json:"web_scheme"`
 }
 
 // DNSRecord structures describe intended records to properly configure your domain for use with Mailgun.
@@ -136,7 +137,7 @@ func (ri *DomainsIterator) Next(ctx context.Context, items *[]Domain) bool {
 	if len(ri.Items) == 0 {
 		return false
 	}
-	ri.offset = ri.offset + len(ri.Items)
+	ri.offset += len(ri.Items)
 	return true
 }
 
@@ -198,7 +199,7 @@ func (ri *DomainsIterator) Previous(ctx context.Context, items *[]Domain) bool {
 		return false
 	}
 
-	ri.offset = ri.offset - (ri.limit * 2)
+	ri.offset -= ri.limit * 2
 	if ri.offset < 0 {
 		ri.offset = 0
 	}
@@ -210,10 +211,8 @@ func (ri *DomainsIterator) Previous(ctx context.Context, items *[]Domain) bool {
 	cpy := make([]Domain, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
-	if len(ri.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ri.Items) != 0
 }
 
 func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
@@ -273,6 +272,7 @@ type CreateDomainOptions struct {
 	ForceDKIMAuthority bool
 	DKIMKeySize        int
 	IPS                []string
+	WebScheme          string
 }
 
 // CreateDomain instructs Mailgun to create a new domain for your account.
@@ -305,8 +305,11 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *Crea
 		if len(opts.IPS) != 0 {
 			payload.addValue("ips", strings.Join(opts.IPS, ","))
 		}
-		if len(opts.Password) != 0 {
+		if opts.Password != "" {
 			payload.addValue("smtp_password", opts.Password)
+		}
+		if opts.WebScheme != "" {
+			payload.addValue("web_scheme", string(opts.WebScheme))
 		}
 	}
 	var resp DomainResponse
@@ -412,6 +415,31 @@ func (mg *MailgunImpl) UpdateDomainTrackingWebPrefix(ctx context.Context, domain
 	payload := newUrlEncodedPayload()
 	payload.addValue("web_prefix", webPrefix)
 	_, err := makePutRequest(ctx, r, payload)
+	return err
+}
+
+// UpdateDomainOptions options for updating a domain
+type UpdateDomainOptions struct {
+	WebScheme string
+}
+
+// UpdateDomain updates a domain's attributes.
+// Currently only the web_scheme update is supported, spam_action and wildcard are to be added.
+func (mg *MailgunImpl) UpdateDomain(ctx context.Context, name string, opts *UpdateDomainOptions) error {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + name)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newUrlEncodedPayload()
+
+	if opts != nil {
+		if opts.WebScheme != "" {
+			payload.addValue("web_scheme", string(opts.WebScheme))
+		}
+	}
+
+	_, err := makePutRequest(ctx, r, payload)
+
 	return err
 }
 

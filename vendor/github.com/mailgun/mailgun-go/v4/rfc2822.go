@@ -2,12 +2,14 @@ package mailgun
 
 import (
 	"strconv"
-	"strings"
 	"time"
+
+	"github.com/mailgun/errors"
 )
 
-// Mailgun uses RFC2822 format for timestamps everywhere ('Thu, 13 Oct 2011 18:02:00 GMT'), but
+// RFC2822Time Mailgun uses RFC2822 format for timestamps everywhere ('Thu, 13 Oct 2011 18:02:00 +0000'), but
 // by default Go's JSON package uses another format when decoding/encoding timestamps.
+// https://documentation.mailgun.com/docs/mailgun/user-manual/get-started/#date-format
 type RFC2822Time time.Time
 
 func NewRFC2822Time(str string) (RFC2822Time, error) {
@@ -27,7 +29,7 @@ func (t RFC2822Time) IsZero() bool {
 }
 
 func (t RFC2822Time) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.Quote(time.Time(t).Format(time.RFC1123))), nil
+	return []byte(strconv.Quote(time.Time(t).Format(time.RFC1123Z))), nil
 }
 
 func (t *RFC2822Time) UnmarshalJSON(s []byte) error {
@@ -35,15 +37,18 @@ func (t *RFC2822Time) UnmarshalJSON(s []byte) error {
 	if err != nil {
 		return err
 	}
-	if *(*time.Time)(t), err = time.Parse(time.RFC1123, q); err != nil {
-		if strings.Contains(err.Error(), "extra text") {
-			if *(*time.Time)(t), err = time.Parse(time.RFC1123Z, q); err != nil {
-				return err
-			}
-			return nil
+
+	var err1 error
+	*(*time.Time)(t), err1 = time.Parse(time.RFC1123, q)
+	if err1 != nil {
+		var err2 error
+		*(*time.Time)(t), err2 = time.Parse(time.RFC1123Z, q)
+		if err2 != nil {
+			// TODO(go1.20): use errors.Join:
+			return errors.Errorf("%s; %s", err1, err2)
 		}
-		return err
 	}
+
 	return nil
 }
 
